@@ -1,30 +1,29 @@
-# Proyecto Liam – Docker Setup
+# Live Ambience Weather - LIAM
 
-## Levantar el entorno
+## History
+#### August
+08 Volver a levantar el entorno de desarrollo en un nuevo repo, todo listo para desarrollar. Api & Database connection works.
 
-1. **Clonar el repositorio y posicionarse en la raíz.**
 
-2. **Crear un archivo `.env` con las siguientes variables:**
-
-```env
-MYSQL_DATABASE=
-MYSQL_USER=
-MYSQL_PASSWORD=
-MYSQL_ROOT_PASSWORD=
-```
-
-3. **Lanzar la app**
-
-- Si es la primera vez
-
+## Comandos
+Docker build
 ```sh
 docker compose up --build -d
 ```
 
-- Si ya se ha lanzado antes
-
+Levantar Contenedores
 ```sh
 docker compose up -d
+```
+
+Detener Contenedores
+```sh
+docker compose down
+```
+
+Ver Contenedores
+```sh
+docker compose ps
 ```
 
 ## URLs accesibles
@@ -32,14 +31,11 @@ docker compose up -d
 | **Servicio**    | **URL**                                        | **Descripción**                    |
 | --------------- | ---------------------------------------------- | ---------------------------------- |
 | Laravel Backend | [http://localhost:8000](http://localhost:8000) | API y aplicación backend (Laravel) |
-| Vue Frontend    | [http://localhost:5173](http://localhost:5173) | Interfaz frontend (Vite + Vue)     |
+| Vue Frontend    | [http://localhost:3000](http://localhost:3000) | Interfaz frontend (Vite + Vue)     |
 | phpMyAdmin      | [http://localhost:8080](http://localhost:8080) | Admin web para MySQL               |
 
-## Health checks
-
-> Nota: Solo funcionan cuando el entorno esta configurado en modo desarrollo
+## Health checks -solo dev mode-
 > APP_ENV=local
-
 - [/api/check/health](http://localhost:8000/api/check/health) -> Devuelve si la API esta levantada
 - [/api/check/db](http://localhost:8000/api/check/db) -> Devuelve si la base de datos esta conectada correctamente
 
