@@ -1,0 +1,56 @@
+# ========================================
+# General
+# ========================================
+.env
+*.env.*
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# ========================================
+# Laravel (Backend)
+# ========================================
+/vendor/
+/node_modules/
+composer.lock
+/public/storage
+/storage/*.key
+/storage/app/*
+!/storage/app/public
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+.env.testing
+.env.backup
+
+# ========================================
+# Laravel Sail / Docker
+# ========================================
+docker-compose.yml
+docker-compose.override.yml
+.env.docker
+
+# ========================================
+# Nuxt (Frontend)
+# ========================================
+/frontend/node_modules/
+/frontend/.nuxt/
+/frontend/.output/
+/frontend/.cache/
+/frontend/.env
+/frontend/dist
+/frontend/.eslintcache
+/frontend/.coverage/
+
+# Lock files (optional, depends on workflow)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
