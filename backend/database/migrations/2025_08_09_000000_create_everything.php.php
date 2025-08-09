@@ -137,7 +137,7 @@ return new class extends Migration
         Schema::create('tokens', function (Blueprint $table) {
             $table->id();
             $table->text('api_desc');
-            $table->string('token');
+            $table->text('token');
             $table->string('placeholder_key');
         });
 

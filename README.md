@@ -2,20 +2,22 @@
 
 ## History
 
-#### August
-> semana 32
-- vie 08 Volver a levantar el entorno de desarrollo en un nuevo repo, todo listo para desarrollar. Api & Database connection works.
-- sab 09 Creación de la base de datos mediante migración Laravel. 
+### August
+#### semana 32
+##### vie 08 
+  - Volver a levantar el entorno de desarrollo en un nuevo repo, todo listo para desarrollar. 
+  - Api & Database connection works.
+##### sab 09
+  - Creación de la base de datos mediante migración Laravel. 
+  - Crear seeders para todas las tablas. 
+  - Revisar y cambiar datos fake a datos reales en los seeders.
+  - Aplicar los seeders.
 
 
 
 
 ### próximos objetivos
-    - comandos personalizados??? dcu dcd dps
-    - meter datos que sirvan en la base de datos, para poder hacer pruebas, preguntar en que orden los meto por las FKs
-    - generar endpoints excepto los que dependen de las APIS
-    - verificar que la API devuelve los datos adecuados
-
+    - abre chat gpt, ahi los tienes
 
 ## Comandos
 Docker build
