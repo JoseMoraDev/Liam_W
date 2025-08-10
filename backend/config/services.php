@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    // API TOMTOM token
+    'tomtom' => [
+        'api_key' => env('TOMTOM_API_KEY'),
+    ],
+
 ];

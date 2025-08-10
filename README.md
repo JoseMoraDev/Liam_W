@@ -4,20 +4,25 @@
 
 ### August
 #### semana 32
-##### vie 08 
-  - Volver a levantar el entorno de desarrollo en un nuevo repo, todo listo para desarrollar. 
-  - Api & Database connection works.
+##### dom 10
+  - Endpoints TrafficFlow y TrafficFlow funcionando
+  - 
 ##### sab 09
   - Creación de la base de datos mediante migración Laravel. 
   - Crear seeders para todas las tablas. 
   - Revisar y cambiar datos fake a datos reales en los seeders.
   - Aplicar los seeders.
+##### vie 08 
+  - Volver a levantar el entorno de desarrollo en un nuevo repo, todo listo para desarrollar. 
+  - Api & Database connection works.
 
 
 
 
 ### próximos objetivos
-    - abre chat gpt, ahi los tienes
+    - hacer api aqicn
+    - ip/geo loc, implementar en aemet y aqicn
+    - hacer aemet con autogeo
 
 ## Comandos
 Docker build
