@@ -573,65 +573,9 @@ class AemetController extends Controller
         return response()->json($parteUtil, 200);
     }
 
-
-
-
-    // public function prediccionHorariaMunicipio($municipioId = '03065')
-    // {
-    //     $token = $this->getToken();
-    //     if (!$token) {
-    //         return response()->json(['error' => 'Token AEMET no encontrado'], 500);
-    //     }
-
-    //     $baseUrl = 'https://opendata.aemet.es/opendata/api';
-    //     $endpoint = "/prediccion/especifica/municipio/horaria/{$municipioId}";
-
-    //     // 1ª llamada: Obtener el enlace a los datos
-    //     $response = Http::get($baseUrl . $endpoint, [
-    //         'api_key' => $token
-    //     ]);
-
-    //     if ($response->failed() || !isset($response->json()['datos'])) {
-    //         return response()->json([
-    //             'error' => 'Error en llamada inicial AEMET o respuesta inesperada.',
-    //             'details' => $response->body()
-    //         ], 500);
-    //     }
-
-    //     // 2ª llamada: Obtener los datos reales
-    //     $dataUrl = $response->json()['datos'];
-    //     $dataResponse = Http::get($dataUrl);
-
-    //     if ($dataResponse->failed()) {
-    //         return response()->json([
-    //             'error' => 'Error al obtener datos reales de AEMET.',
-    //             'details' => $dataResponse->body()
-    //         ], 500);
-    //     }
-
-    //     // Convertir a UTF-8 y decodificar el JSON
-    //     $jsonString = mb_convert_encoding($dataResponse->body(), 'UTF-8', 'ISO-8859-1');
-    //     $prediccion = json_decode($jsonString, true);
-
-    //     if (json_last_error() !== JSON_ERROR_NONE) {
-    //         return response()->json([
-    //             'error' => 'No se pudo decodificar el JSON.',
-    //             'json_error' => json_last_error_msg(),
-    //             'raw_response' => $jsonString
-    //         ], 500);
-    //     }
-
-    //     // Comprobación de la estructura esperada antes de acceder a las claves
-    //     if (!is_array($prediccion) || !isset($prediccion[0]['prediccion']['dia'])) {
-    //         return response()->json([
-    //             'error' => 'La estructura de la respuesta de AEMET no es la esperada.',
-    //             'response' => $prediccion
-    //         ], 500);
-    //     }
-
-    //     // Extraer y devolver la parte útil de la predicción horaria
-    //     $parteUtil = $prediccion[0]['prediccion']['dia'] ?? [];
-
-    //     return response()->json($parteUtil, 200);
-    // }
+    public function getMunicipiosByProvincia($provincia)
+    {
+        $municipios = \App\Models\Municipio::where('cpro', $provincia)->get();
+        return response()->json($municipios);
+    }
 }
