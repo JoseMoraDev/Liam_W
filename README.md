@@ -2,11 +2,22 @@
 
 ## History
 
+### próximos objetivos
+    - Enpoint últimas alertas - Por Comunidad Autónoma -
+    - Endpoints municipio horaria y diaria
+    - hacer autogeo: tener en cuenta, favorito, por defecto y otras ubicaciones
+
 ### August
-#### semana 32
+#### ===> semana 33
+##### mar 12
+  - Endpoints predicción municipio diaria, y predicción municipio horaria de AEMET funcionando
+##### lun 11
+  - Endpoint últimas alertas de AEMET funcionando
+#### ===> semana 32
 ##### dom 10
-  - Endpoints TrafficFlow y TrafficFlow funcionando
-  - 
+  - Endpoints TrafficFlow y TrafficFlow de TomTom funcionando
+  - Enpoints AirQualityIP y AirQualityGeolocalization de AQICN funcionando
+  - Enpoints PrevisiónNivológica, PrevisiónPlaya, ListadoPlayas, DetallePlaya, PrevisiónMontaña, y TemperaturaMar de AEMET funcionando
 ##### sab 09
   - Creación de la base de datos mediante migración Laravel. 
   - Crear seeders para todas las tablas. 
@@ -15,14 +26,6 @@
 ##### vie 08 
   - Volver a levantar el entorno de desarrollo en un nuevo repo, todo listo para desarrollar. 
   - Api & Database connection works.
-
-
-
-
-### próximos objetivos
-    - hacer api aqicn
-    - ip/geo loc, implementar en aemet y aqicn
-    - hacer aemet con autogeo
 
 ## Comandos
 Docker build

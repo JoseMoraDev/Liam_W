@@ -35,9 +35,13 @@ return [
         ],
     ],
 
-    // API TOMTOM token
     'tomtom' => [
         'api_key' => env('TOMTOM_API_KEY'),
+    ],
+
+    'aemet' => [
+        'base_url' => env('AEMET_BASE_URL', 'https://opendata.aemet.es/opendata/api'),
+        'api_key'  => env('AEMET_API_KEY'),
     ],
 
 ];
