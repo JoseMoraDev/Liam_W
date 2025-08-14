@@ -4,15 +4,23 @@
 
 ### próximos objetivos
     - Enpoint últimas alertas - Por Comunidad Autónoma -
-    - Endpoints municipio horaria y diaria
     - hacer autogeo: tener en cuenta, favorito, por defecto y otras ubicaciones
 
 ### August
+
 #### ===> semana 33
+##### jue 14
+  - 
+##### mie 13
+  - Listado autonomías y provincias en base de datos, fix y funcionando todos los endpoints
 ##### mar 12
   - Endpoints predicción municipio diaria, y predicción municipio horaria de AEMET funcionando
+  - Listado de > 8.000 municipios en base de datos
+  - Listado autonomías y provincias en base de datos
 ##### lun 11
   - Endpoint últimas alertas de AEMET funcionando
+
+
 #### ===> semana 32
 ##### dom 10
   - Endpoints TrafficFlow y TrafficFlow de TomTom funcionando

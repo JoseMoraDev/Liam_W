@@ -32,9 +32,9 @@
 09,Cataluña,17,Girona
 09,Cataluña,25,Lleida
 09,Cataluña,43,Tarragona
-10,Comunidad Valenciana	03,Alicante
-10,Comunidad Valenciana	12,Castellón
-10,Comunidad Valenciana	46,Valencia
+10,Comunidad Valenciana,03,Alicante
+10,Comunidad Valenciana,12,Castellón
+10,Comunidad Valenciana,46,Valencia
 11,Extremadura,06,Badajoz
 11,Extremadura,10,Cáceres
 12,Galicia,15,Lugo

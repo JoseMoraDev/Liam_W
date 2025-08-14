@@ -16,15 +16,14 @@ class ComunidadesProvinciasSeeder extends Seeder
             return;
         }
 
+        // Vaciar la tabla antes de insertar
+        DB::table('comunidades_provincias')->truncate();
 
         $handle = fopen($file, 'r');
         if ($handle === false) {
             $this->command->error("No se pudo abrir el archivo {$file}");
             return;
         }
-
-        // Saltar cabecera
-        // fgetcsv($handle, 1000, ',');
 
         while (($data = fgetcsv($handle, 1000, ',')) !== false) {
             if (count($data) < 4) {

@@ -3,15 +3,13 @@
 use Illuminate\Support\Facades\Route;
 
 // Api controllers
-use App\Http\Controllers\ComunidadProvinciaController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\TomTomController;
 use App\Http\Controllers\AQICNController;
 use App\Http\Controllers\AemetController;
 use App\Http\Controllers\PlayaController;
 use App\Http\Controllers\AemetCapController;
-use App\Http\Controllers\Api\ComunidadesProvinciasController;
-
+use App\Http\Controllers\ComunidadesProvinciasController;
 
 Route::middleware('local-only')->prefix('check')->group(function () {
   Route::get('/health', [HealthController::class, 'checkAPI']);
@@ -51,6 +49,7 @@ Route::get('playa/{id}', [PlayaController::class, 'show']);
 // Listado de autonomías y provincias
 Route::get('/comunidades-provincias', [ComunidadesProvinciasController::class, 'index']);
 
+
 // Listar municipios por provincia
 Route::get('municipios/{provincia}', [AemetController::class, 'getMunicipiosByProvincia']);
 
@@ -72,10 +71,10 @@ Route::get('/aemet/sst', [AemetController::class, 'temperaturaSuperficieMar']);
 // alertas
 Route::get('/avisos_cap/{tipo}/{codigo?}', [AemetCapController::class, 'mostrarAviso']);
 
-//!    Avisos CAP AEMET - borrar?
+//?    Avisos CAP AEMET - borrar?
 Route::get('/aemet/avisos_cap/meteoalerta/{region}', [AemetController::class, 'avisosCapMeteoalerta']);
 
-//!    Avisos CAP AEMET - borrar?
+//?    Avisos CAP AEMET - borrar?
 Route::get('/aemet/avisos_cap/avisos_cap_es', [AemetController::class, 'avisosCapEspaña']);
 
 // Avisos CAP AEMET
