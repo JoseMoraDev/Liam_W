@@ -1,30 +1,25 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use App\Models\ComunidadProvincia;
-use App\Http\Controllers\Controller;
-
-class ComunidadesProvinciasController extends Controller
+class CreateComunidadesProvinciasTable extends Migration
 {
-    public function index()
+    public function up()
     {
-        // Agrupamos las provincias por comunidad
-        $datos = ComunidadProvincia::all()
-            ->groupBy('nomauto')
-            ->map(function ($provincias, $comunidad) {
-                return [
-                    'codauto' => $provincias->first()->codauto,
-                    'nomauto' => $comunidad,
-                    'provincias' => $provincias->map(function ($prov) {
-                        return [
-                            'cpro' => $prov->cpro,
-                            'nompro' => $prov->nompro,
-                        ];
-                    })->values(),
-                ];
-            })->values();
+        Schema::create('comunidades_provincias', function (Blueprint $table) {
+            $table->id();
+            $table->string('codauto');
+            $table->string('nomauto');
+            $table->string('cpro');
+            $table->string('nompro');
+            $table->timestamps();
+        });
+    }
 
-        return response()->json($datos);
+    public function down()
+    {
+        Schema::dropIfExists('comunidades_provincias');
     }
 }

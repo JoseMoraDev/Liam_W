@@ -10,13 +10,18 @@ use App\Http\Controllers\AemetController;
 use App\Http\Controllers\PlayaController;
 use App\Http\Controllers\AemetCapController;
 use App\Http\Controllers\ComunidadesProvinciasController;
+use App\Http\Controllers\UbicacionEndpointUsuarioController;
 
 Route::middleware('local-only')->prefix('check')->group(function () {
   Route::get('/health', [HealthController::class, 'checkAPI']);
   Route::get('/db', [HealthController::class, 'checkDB']);
 });
 
-
+Route::middleware('auth:sanctum')->group(function () {
+  Route::post('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'storeOrUpdate']);
+  Route::get('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'index']);
+  Route::post('/ubicaciones/{id}/predeterminada', [UbicacionEndpointUsuarioController::class, 'setPredeterminada']);
+});
 
 //! Tráfico API TomTom
 

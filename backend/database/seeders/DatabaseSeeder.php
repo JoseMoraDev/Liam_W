@@ -12,6 +12,9 @@ use Database\Seeders\TokensTableSeeder;
 use Database\Seeders\ApiCallsDefinitionsTableSeeder;
 use Database\Seeders\WeatherDataTableSeeder;
 use Database\Seeders\ApiCallsTableSeeder;
+use Database\Seeders\ComunidadesProvinciasSeeder;
+use Database\Seeders\MunicipiosTableSeeder;
+use Database\Seeders\PlayasTableSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -26,6 +29,10 @@ class DatabaseSeeder extends Seeder
             ApiCallsDefinitionsTableSeeder::class,
             WeatherDataTableSeeder::class,
             ApiCallsTableSeeder::class,
+            ComunidadesProvinciasSeeder::class,
+            MunicipiosTableSeeder::class,
+            PlayasTableSeeder::class,
+            EndpointsTableSeeder::class,
         ]);
     }
 }

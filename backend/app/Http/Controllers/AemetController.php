@@ -195,7 +195,7 @@ class AemetController extends Controller
     /**
      * Predicción temperatura nivel del mar en .png
      */
-    public function temperaturaSuperficieMar()
+    public function temperaturaSuperficieMar(Request $request)
     {
         $token = $this->getToken();
         if (!$token) {
@@ -205,8 +205,8 @@ class AemetController extends Controller
         $base_url = 'https://opendata.aemet.es/opendata/api';
         $endpoint = '/satelites/producto/sst';
 
-        // 1ª llamada
-        $response = Http::get($base_url . $endpoint, [
+        // 1ª llamada para obtener la URL firmada
+        $response = Http::timeout(10)->get($base_url . $endpoint, [
             'api_key' => $token,
         ]);
 
@@ -221,14 +221,15 @@ class AemetController extends Controller
 
         if (!isset($body['datos'])) {
             return response()->json([
-                'error' => 'Respuesta inesperada de AEMET, falta "datos"'
+                'error' => 'Respuesta inesperada de AEMET, falta "datos"',
+                'raw' => $body
             ], 500);
         }
 
         $imageUrl = $body['datos'];
 
         // 2ª llamada para obtener el PNG real
-        $imageResponse = Http::get($imageUrl);
+        $imageResponse = Http::timeout(15)->get($imageUrl);
         if ($imageResponse->failed()) {
             return response()->json([
                 'error' => 'Error al obtener imagen SST',
@@ -236,14 +237,30 @@ class AemetController extends Controller
             ], 500);
         }
 
-        // Convertir a base64 opcionalmente
-        $base64 = 'data:image/png;base64,' . base64_encode($imageResponse->body());
+        // Validar que realmente devuelve una imagen
+        $contentType = $imageResponse->header('Content-Type');
+        if (!str_starts_with($contentType, 'image/')) {
+            return response()->json([
+                'error' => 'Respuesta inesperada al obtener la imagen',
+                'content_type' => $contentType,
+                'body' => $imageResponse->body(),
+            ], 500);
+        }
 
-        return response()->json([
-            'url' => $imageUrl,   // Enlace directo (recomendado para <img src="">)
-            'base64' => $base64,  // Opción inline (evita caducidad del enlace)
-        ]);
+        // ¿Quiere inline base64?
+        $inline = $request->query('inline', false);
+
+        $result = [
+            'url' => $imageUrl,   // enlace directo para usar en <img src="">
+        ];
+
+        if ($inline) {
+            $result['base64'] = 'data:image/png;base64,' . base64_encode($imageResponse->body());
+        }
+
+        return response()->json($result);
     }
+
 
     public function avisosCapUltimoElaborado($area, $format = 'xml')
     {

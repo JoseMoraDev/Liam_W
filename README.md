@@ -2,38 +2,69 @@
 
 ## History
 
+
+## ESTOY PERDIDO
+  - en el gpt tengo una migración para solucionar lo de los enpoints metiendole un middleware
+  - pero a la vez le he preguntado por como borrar restos de codigo que no me sirven para nada
+    - en lugar de borrar alegremente, que verificar esos restos de codigo si sirven para algo o no
+
+
+
 ### próximos objetivos
     - Enpoint últimas alertas - Por Comunidad Autónoma -
     - hacer autogeo: tener en cuenta, favorito, por defecto y otras ubicaciones
 
 ### August
 
-#### ===> semana 33
-##### jue 14
+#### ===> semana 34
+##### dom 24
   - 
-##### mie 13
-  - Listado autonomías y provincias en base de datos, fix y funcionando todos los endpoints
-##### mar 12
-  - Endpoints predicción municipio diaria, y predicción municipio horaria de AEMET funcionando
-  - Listado de > 8.000 municipios en base de datos
-  - Listado autonomías y provincias en base de datos
-##### lun 11
-  - Endpoint últimas alertas de AEMET funcionando
+##### sab 23
+  - 
+##### vie 22
+  - 
+##### jue 21
+  - 
+##### mie 20
+  - 
+##### mar 19
+  - 
+##### lun 18
+  -  Ubicarme donde lo dejé el sábado porque no apunté nada :D
 
+
+#### ===> semana 33
+  ##### dom 17
+    - Descanso
+  ##### sab 16
+    - 
+  ##### vie 15
+    - 
+  ##### jue 14
+    - Listado de > 8.000 municipios en base de datos, esta vez con seeder
+    - Listado autonomías y provincias en base de datos, esta vez con seeder
+  ##### mie 13
+    - Listado autonomías y provincias en base de datos, fix y funcionando todos los endpoints
+  ##### mar 12
+    - Endpoints predicción municipio diaria, y predicción municipio horaria de AEMET funcionando
+    - Listado de > 8.000 municipios en base de datos
+    - Listado autonomías y provincias en base de datos
+  ##### lun 11
+    - Endpoint últimas alertas de AEMET funcionando
 
 #### ===> semana 32
-##### dom 10
-  - Endpoints TrafficFlow y TrafficFlow de TomTom funcionando
-  - Enpoints AirQualityIP y AirQualityGeolocalization de AQICN funcionando
-  - Enpoints PrevisiónNivológica, PrevisiónPlaya, ListadoPlayas, DetallePlaya, PrevisiónMontaña, y TemperaturaMar de AEMET funcionando
-##### sab 09
-  - Creación de la base de datos mediante migración Laravel. 
-  - Crear seeders para todas las tablas. 
-  - Revisar y cambiar datos fake a datos reales en los seeders.
-  - Aplicar los seeders.
-##### vie 08 
-  - Volver a levantar el entorno de desarrollo en un nuevo repo, todo listo para desarrollar. 
-  - Api & Database connection works.
+  ##### dom 10
+    - Endpoints TrafficFlow y TrafficFlow de TomTom funcionando
+    - Enpoints AirQualityIP y AirQualityGeolocalization de AQICN funcionando
+    - Enpoints PrevisiónNivológica, PrevisiónPlaya, ListadoPlayas, DetallePlaya, PrevisiónMontaña, y TemperaturaMar de AEMET funcionando
+  ##### sab 09
+    - Creación de la base de datos mediante migración Laravel. 
+    - Crear seeders para todas las tablas. 
+    - Revisar y cambiar datos fake a datos reales en los seeders.
+    - Aplicar los seeders.
+  ##### vie 08 
+    - Volver a levantar el entorno de desarrollo en un nuevo repo, todo listo para desarrollar. 
+    - Api & Database connection works.
 
 ## Comandos
 Docker build
@@ -55,6 +86,9 @@ Ver Contenedores
 ```sh
 docker compose ps
 ```
+
+## Endpoints
+- 
 
 ## URLs accesibles
 
