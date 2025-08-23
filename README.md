@@ -14,32 +14,55 @@
     - Enpoint últimas alertas - Por Comunidad Autónoma -
     - hacer autogeo: tener en cuenta, favorito, por defecto y otras ubicaciones
 
+
+### LO QUE ESTOY HACIENDO
+
+  - Autenticación de usuarios
+    - API Tokens con Sanctum
+    - Endpoints REST para gestionar el flujo
+
+    - PROBLEMAS
+      - font_id y color_id tienen que funcionar cuando se crea el usuario y valen NULL, o al crear el user establecerse como 1
+
+  - Plan básico de Auth en tu API (Laravel 11 + Sanctum)
+            Registrar usuario → POST /api/register
+            Campos: name, email, password, password_confirmation.
+            Devuelve: datos del usuario + token.
+
+            Login → POST /api/login
+            Campos: email, password.
+            Devuelve: datos del usuario + token.
+
+            Logout → POST /api/logout
+            Requiere token válido.
+            Borra el token actual.
+
+            Perfil del usuario autenticado → GET /api/user
+            Devuelve los datos del usuario según el token.
+
+            Forgot password → POST /api/forgot-password
+            Envía un mail con un link/token para resetear contraseña.
+
+            Reset password → POST /api/reset-password
+            Cambia la contraseña usando el token enviado al correo.
+
 ### August
 
 #### ===> semana 34
 ##### dom 24
   - 
 ##### sab 23
+  - Endpoint nuevo usuario
   - 
 ##### vie 22
-  - 
+  - registrar endpoints y coordenadas - fallido 
 ##### jue 21
-  - 
-##### mie 20
-  - 
-##### mar 19
-  - 
+  - registrar endpoints y coordenadas - fallido
 ##### lun 18
-  -  Ubicarme donde lo dejé el sábado porque no apunté nada :D
+  -  Ubicarme donde lo dejé el sábado porque no apunté nada
 
 
 #### ===> semana 33
-  ##### dom 17
-    - Descanso
-  ##### sab 16
-    - 
-  ##### vie 15
-    - 
   ##### jue 14
     - Listado de > 8.000 municipios en base de datos, esta vez con seeder
     - Listado autonomías y provincias en base de datos, esta vez con seeder
