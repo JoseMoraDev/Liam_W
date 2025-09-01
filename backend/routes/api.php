@@ -1,39 +1,42 @@
 <?php
 
+// TODO: quitar username de la tabla de usuarios
+
+use App\Http\Controllers\AemetCapController;
+use App\Http\Controllers\AemetController;
 use Illuminate\Support\Facades\Route;
+
+// Api controllers
+use App\Http\Controllers\AQICNController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ComunidadesProvinciasController;
+use App\Http\Controllers\HealthController;
+use App\Http\Controllers\PlayaController;
+use App\Http\Controllers\TomTomController;
+use App\Http\Controllers\UbicacionEndpointUsuarioController;
+
 
 // Auth
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
-  Route::get('/user', [AuthController::class, 'me']);
-  Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'me']);
 });
 
-
-// Api controllers
-use App\Http\Controllers\HealthController;
-use App\Http\Controllers\TomTomController;
-use App\Http\Controllers\AQICNController;
-use App\Http\Controllers\AemetController;
-use App\Http\Controllers\PlayaController;
-use App\Http\Controllers\AemetCapController;
-use App\Http\Controllers\ComunidadesProvinciasController;
-use App\Http\Controllers\UbicacionEndpointUsuarioController;
 
 Route::middleware('local-only')->prefix('check')->group(function () {
-  Route::get('/health', [HealthController::class, 'checkAPI']);
-  Route::get('/db', [HealthController::class, 'checkDB']);
+    Route::get('/health', [HealthController::class, 'checkAPI']);
+    Route::get('/db', [HealthController::class, 'checkDB']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
-  Route::post('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'storeOrUpdate']);
-  Route::get('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'index']);
-  Route::post('/ubicaciones/{id}/predeterminada', [UbicacionEndpointUsuarioController::class, 'setPredeterminada']);
+    Route::post('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'storeOrUpdate']);
+    Route::get('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'index']);
+    Route::post('/ubicaciones/{id}/predeterminada', [UbicacionEndpointUsuarioController::class, 'setPredeterminada']);
 });
 
 //! Tráfico API TomTom
@@ -44,8 +47,6 @@ Route::get('/tomtom/traffic-flow', [TomTomController::class, 'trafficFlow']);
 // accidentes
 Route::get('/tomtom/traffic-incidents', [TomTomController::class, 'trafficIncidents']);
 
-
-
 //! Calidad del aire API AQICN
 
 // por IP
@@ -54,23 +55,19 @@ Route::get('/aqicn/feed-here', [AQICNController::class, 'feedHere']);
 // por geolocalización
 Route::get('/aqicn/feed-geo', [AQICNController::class, 'feedGeo']);
 
-
-
 //! información local guardada en base de datos
 
 // listado de playas
-Route::get('playas', [PlayaController::class, 'index']);
+Route::get('/playas', [PlayaController::class, 'index']);
 
 // infomación de playa
-Route::get('playa/{id}', [PlayaController::class, 'show']);
+Route::get('/playa/{id}', [PlayaController::class, 'show']);
 
 // Listado de autonomías y provincias
 Route::get('/comunidades-provincias', [ComunidadesProvinciasController::class, 'index']);
 
-
 // Listar municipios por provincia
-Route::get('municipios/{provincia}', [AemetController::class, 'getMunicipiosByProvincia']);
-
+Route::get('/municipios/{provincia}', [AemetController::class, 'getMunicipiosByProvincia']);
 
 //! Condiciones meteorológicas API AEMET
 
@@ -78,7 +75,7 @@ Route::get('municipios/{provincia}', [AemetController::class, 'getMunicipiosByPr
 Route::get('/aemet/nivologica/{area_nivologica}', [AemetController::class, 'prediccionNivologica']);
 
 // montaña
-Route::get('aemet/montana/{area_montana}/{dia_montana}', [AemetController::class, 'prediccionMontana']);
+Route::get('/aemet/montana/{area_montana}/{dia_montana}', [AemetController::class, 'prediccionMontana']);
 
 // playa
 Route::get('/aemet/playa/{id_playa}', [AemetController::class, 'prediccionPlaya']);

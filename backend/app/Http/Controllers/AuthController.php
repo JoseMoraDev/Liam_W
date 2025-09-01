@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Auth\Events\PasswordReset;
 
 class AuthController extends Controller
 {
-    // Registro
+    // 🔹 Registro
     public function register(Request $request)
     {
         $request->validate([
@@ -31,29 +34,7 @@ class AuthController extends Controller
         ], 201);
     }
 
-    // Login
-    // public function login(Request $request)
-    // {
-    //     $request->validate([
-    //         'email'    => 'required|email',
-    //         'password' => 'required|string'
-    //     ]);
-
-    //     $user = User::where('email', $request->email)->first();
-
-    //     if (!$user || !Hash::check($request->password, $user->password)) {
-    //         return response()->json(['message' => 'Credenciales incorrectas'], 401);
-    //     }
-
-    //     $token = $user->createToken('api-token')->plainTextToken;
-
-    //     return response()->json([
-    //         'message' => 'Login correcto',
-    //         'token'   => $token,
-    //         'user'    => $user
-    //     ]);
-    // }
-
+    // 🔹 Login
     public function login(Request $request)
     {
         try {
@@ -83,8 +64,7 @@ class AuthController extends Controller
         }
     }
 
-
-    // Logout
+    // 🔹 Logout
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -92,22 +72,49 @@ class AuthController extends Controller
         return response()->json(['message' => 'Logout correcto']);
     }
 
-    // User Info
+    // 🔹 Perfil usuario
     public function me(Request $request)
     {
         return response()->json($request->user());
     }
 
-    // Recuperar contraseña (simulación)
+    // 🔹 Recuperar contraseña (forgot password)
     public function forgotPassword(Request $request)
     {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+            ? response()->json(['message' => 'Link de reseteo enviado'])
+            : response()->json(['message' => 'No se pudo enviar el link'], 400);
+    }
+
+    // 🔹 Resetear contraseña
+    public function resetPassword(Request $request)
+    {
         $request->validate([
-            'email' => 'required|email|exists:users,email'
+            'token'    => 'required',
+            'email'    => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
-        // Aquí normalmente generarías token y enviarías correo
-        return response()->json([
-            'message' => 'Se ha enviado un correo para restablecer la contraseña'
-        ]);
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? response()->json(['message' => 'Contraseña cambiada correctamente'])
+            : response()->json(['message' => 'Token inválido o expirado'], 400);
     }
 }

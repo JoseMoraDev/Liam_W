@@ -14,7 +14,7 @@ class UsersTableSeeder extends Seeder
             [
                 'email' => 'nett@nett.es',
                 'username' => 'nett',
-                'hashed_passwd' => Hash::make('nett'), // esta contraseña será hasheada
+                'password' => Hash::make('nett'), // esta contraseña será hasheada
                 'font_id' => 1,
                 'color_id' => null,
                 'last_location_latlon' => null,

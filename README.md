@@ -25,13 +25,6 @@
       - font_id y color_id tienen que funcionar cuando se crea el usuario y valen NULL, o al crear el user establecerse como 1
 
   - Plan básico de Auth en tu API (Laravel 11 + Sanctum)
-            Registrar usuario → POST /api/register
-            Campos: name, email, password, password_confirmation.
-            Devuelve: datos del usuario + token.
-
-            Login → POST /api/login
-            Campos: email, password.
-            Devuelve: datos del usuario + token.
 
             Logout → POST /api/logout
             Requiere token válido.
@@ -46,14 +39,35 @@
             Reset password → POST /api/reset-password
             Cambia la contraseña usando el token enviado al correo.
 
+
+
+
+
+
+# LOG DIARIO DE TRABAJO
+
+LOGIN FUNCIONA
+LOGOUT Y RESET-PASSWORD NO
+
 ### August
+#### ===> semana 35
+##### sab 30
+  - Levantar toda la base de datos e insertar los seeders con un solo comando
+  - Verificar que los seeders han insertado correctamente en las tablas
+  - Verificar que todos los endpoints están funcionando
+##### vie 29
+  - Copia de seguridad del volumen mysql del proyecto
+##### jue 28
+  - Investigar por qué no puedo enviar correos desde gmail
+  - Error en Docker, pierdo mis volúmenes, reinstalo
 
 #### ===> semana 34
 ##### dom 24
-  - 
+  - instalar certificados CA
 ##### sab 23
-  - Endpoint nuevo usuario
-  - 
+  - /register works
+  - /login works
+  - /logout works
 ##### vie 22
   - registrar endpoints y coordenadas - fallido 
 ##### jue 21

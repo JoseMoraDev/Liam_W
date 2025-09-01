@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Install system dependencies
+# Instalar dependencias del sistema y certificados SSL
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -8,38 +8,41 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    ca-certificates \
     zip \
-    unzip
+    unzip \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-ca-certificates
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install PHP extensions
+# Instalar extensiones PHP necesarias
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Enable mod_rewrite for Laravel's pretty URLs
+# Habilitar mod_rewrite para URLs “bonitas” de Laravel
 RUN a2enmod rewrite
 
-# Install Composer
+# Configurar PHP para que reconozca certificados SSL (si tienes ajustes extra)
+COPY docker/openssl.ini /usr/local/etc/php/conf.d/
+
+# Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install PHP_CodeSniffer globally
+# Instalar PHP_CodeSniffer globalmente
 RUN composer global require squizlabs/php_codesniffer
 
-# Add Composer global bin to PATH
+# Añadir bin global de Composer al PATH
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
-# Set working directory
+# Establecer directorio de trabajo
 WORKDIR /var/www/html
 
-# Copy existing application directory contents
+# Copiar la aplicación Laravel
 COPY . /var/www/html
 
-# Ensure proper permissions for storage and bootstrap/cache
+# Permisos para storage y bootstrap/cache
 RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache || true
 
-# Expose port 80
+# Exponer puerto 80
 EXPOSE 80
 
-# Set the entrypoint
+# Arrancar Apache
 CMD ["apache2-foreground"]

@@ -525,6 +525,7 @@ class ComposerStaticInit88970a0117c062eed55fa8728fc43833
         'App\\Http\\Controllers\\AQICNController' => __DIR__ . '/../..' . '/app/Http/Controllers/AQICNController.php',
         'App\\Http\\Controllers\\AemetCapController' => __DIR__ . '/../..' . '/app/Http/Controllers/AemetCapController.php',
         'App\\Http\\Controllers\\AemetController' => __DIR__ . '/../..' . '/app/Http/Controllers/AemetController.php',
+        'App\\Http\\Controllers\\AuthController' => __DIR__ . '/../..' . '/app/Http/Controllers/AuthController.php',
         'App\\Http\\Controllers\\ComunidadesProvinciasController' => __DIR__ . '/../..' . '/app/Http/Controllers/ComunidadesProvinciasController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Http\\Controllers\\HealthController' => __DIR__ . '/../..' . '/app/Http/Controllers/HealthController.php',

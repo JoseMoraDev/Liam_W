@@ -27,7 +27,6 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();      // password estándar
-            $table->string('hashed_passwd')->nullable(); // si tu app usa este campo
             $table->rememberToken();
             $table->timestamps();
 

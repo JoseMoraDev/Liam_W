@@ -10,6 +10,7 @@ return array(
     'App\\Http\\Controllers\\AQICNController' => $baseDir . '/app/Http/Controllers/AQICNController.php',
     'App\\Http\\Controllers\\AemetCapController' => $baseDir . '/app/Http/Controllers/AemetCapController.php',
     'App\\Http\\Controllers\\AemetController' => $baseDir . '/app/Http/Controllers/AemetController.php',
+    'App\\Http\\Controllers\\AuthController' => $baseDir . '/app/Http/Controllers/AuthController.php',
     'App\\Http\\Controllers\\ComunidadesProvinciasController' => $baseDir . '/app/Http/Controllers/ComunidadesProvinciasController.php',
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
     'App\\Http\\Controllers\\HealthController' => $baseDir . '/app/Http/Controllers/HealthController.php',
