@@ -8,7 +8,7 @@
   - pero a la vez le he preguntado por como borrar restos de codigo que no me sirven para nada
     - en lugar de borrar alegremente, que verificar esos restos de codigo si sirven para algo o no
 
-
+# LA API DE AEMET FALLA MAS QUE UNA ESCOPETA DE FERIA, HABRA QUE HACER RETRYS
 
 ### próximos objetivos
     - Enpoint últimas alertas - Por Comunidad Autónoma -
@@ -46,8 +46,7 @@
 
 # LOG DIARIO DE TRABAJO
 
-LOGIN FUNCIONA
-LOGOUT Y RESET-PASSWORD NO
+de login todo va menos el reset pass y user profile
 
 ### August
 #### ===> semana 35
