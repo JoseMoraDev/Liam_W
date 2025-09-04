@@ -20,33 +20,33 @@
         </h1>
       </div>
 
-      <div class="flex items-end justify-center w-2/3 h-2/10">
-        <p class="text-sm text-center text-gray-200 md:text-base">
+      <div class="flex items-start justify-center w-2/3 mt-10 h-3/10">
+        <p class="text-xl text-center text-gray-200 md:text-base">
           Haz tu día más claro y tus viajes más fáciles 🌍
         </p>
       </div>
 
       <div class="flex items-end justify-center w-2/3 h-2/10">
-        <p class="font-medium text-center text-white">¿Ya tienes cuenta?</p>
+        <p class="font-medium text-white text-end">¿Ya tienes cuenta?</p>
       </div>
 
-      <div class="flex items-center justify-center w-full space-x-10 h-1/5">
+      <div class="flex items-start justify-center w-full mt-8 space-x-10 h-1/5">
         <div class="flex flex-col items-center">
           <button
-            class="flex items-center justify-center text-base font-bold text-white bg-green-500 rounded-full w-14 h-14 hover:bg-green-600"
+            class="flex flex-col items-center justify-center w-20 text-base font-bold text-white rounded-full bg-amber-600 h-14 hover:bg-green-800"
           >
-            SI
+            <span class="text-lg">SI</span>
+            <span class="pb-1 text-xs font-thin text-gray-200">Login</span>
           </button>
-          <span class="mt-1 text-xs text-gray-200">Login</span>
         </div>
 
         <div class="flex flex-col items-center">
           <button
-            class="flex items-center justify-center text-base font-bold text-white bg-green-700 rounded-full w-14 h-14 hover:bg-green-800"
+            class="flex flex-col items-center justify-center w-20 text-base font-bold text-white rounded-full bg-amber-600 h-14 hover:bg-green-800"
           >
-            NO
+            <span class="text-lg">NO</span>
+            <span class="pb-1 text-xs font-thin text-gray-200">Sign up</span>
           </button>
-          <span class="mt-1 text-xs text-gray-200">Sign up</span>
         </div>
       </div>
 
