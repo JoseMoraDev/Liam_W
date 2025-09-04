@@ -1,5 +1,9 @@
 # Live Ambience Weather - LIAM
 
+
+# PROBLEM SOLVER
+- si mysql no va: win + R services.msc buscar mysql80 e iniciar
+
 ## History
 
 
@@ -49,6 +53,13 @@
 de login todo va menos el reset pass y user profile
 
 ### August
+#### ===> semana 36
+##### mar 02
+  - Maquetar frontal
+##### mar 02
+  - Esqueleto del frontal
+##### lun 01
+  - Desdockerizar todo el proyecto
 #### ===> semana 35
 ##### sab 30
   - Levantar toda la base de datos e insertar los seeders con un solo comando
