@@ -1,5 +1,8 @@
 # Live Ambience Weather - LIAM
 
+# COMMANDS
+  - GIT > remoto sobre local > git pull origin main
+
 
 # PROBLEM SOLVER
 - si mysql no va: win + R services.msc buscar mysql80 e iniciar
