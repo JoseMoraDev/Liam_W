@@ -1,18 +1,15 @@
 <template>
   <div
-    class="relative w-full h-screen"
-    style="
-      background-image: url('/img/menu.jpg');
-      background-size: cover;
-      background-position: center;
-    "
+    class="absolute inset-0 w-full h-screen bg-center bg-cover"
+    style="background-image: url('/img/menu.jpg')"
   >
     <div class="absolute inset-0 bg-black/40"></div>
 
+    <!-- Contenido principal -->
     <div
-      class="relative z-10 flex flex-col items-center w-full h-full p-4 md:p-8"
+      :class="mounted ? 'opacity-100' : 'opacity-0'"
+      class="relative z-10 flex flex-col items-center w-full h-screen p-4 transition-opacity duration-300 md:p-8"
     >
-      <!-- Contenido principal -->
       <div class="flex items-end justify-center w-3/4 h-2/10">
         <h1
           class="text-3xl font-bold leading-snug text-center text-white md:text-4xl"
@@ -28,39 +25,13 @@
           Haz tu día más claro y tus viajes más fáciles
         </p>
 
-        <p
-          class="flex items-center justify-center p-2 pt-1 space-x-3 text-xl text-gray-200 rounded-xl md:text-base bg-slate-700/80 hover:bg-slate-900"
-        >
-          <span
-            class="flex items-center justify-center transition-transform duration-300 cursor-pointer ease-bounce hover:scale-150"
-          >
-            🌞
-          </span>
-          <span
-            class="flex items-center justify-center transition-transform duration-300 cursor-pointer ease-bounce hover:scale-150"
-          >
-            ⛱️
-          </span>
-          <span
-            class="flex items-center justify-center transition-transform duration-300 cursor-pointer ease-bounce hover:scale-150"
-          >
-            🚗
-          </span>
-          <span
-            class="flex items-center justify-center transition-transform duration-300 cursor-pointer ease-bounce hover:scale-150"
-          >
-            ❄️
-          </span>
-          <span
-            class="flex items-center justify-center transition-transform duration-300 cursor-pointer ease-bounce hover:scale-150"
-          >
-            🌾
-          </span>
-          <span
-            class="flex items-center justify-center transition-transform duration-300 cursor-pointer ease-bounce hover:scale-150"
-          >
-            🐝
-          </span>
+        <p class="flex justify-center space-x-3 text-xl text-white">
+          <font-awesome-icon icon="fa-solid fa-sun" />
+          <font-awesome-icon icon="fa-solid fa-umbrella-beach" />
+          <font-awesome-icon icon="fa-solid fa-person-walking" />
+          <font-awesome-icon icon="fa-brands fa-pagelines" />
+          <font-awesome-icon icon="fa-solid fa-car-rear" />
+          <font-awesome-icon icon="fa-solid fa-snowflake" />
         </p>
       </div>
 
@@ -108,3 +79,13 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted } from "vue";
+
+const mounted = ref(false);
+
+onMounted(() => {
+  mounted.value = true;
+});
+</script>

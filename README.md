@@ -57,6 +57,8 @@ de login todo va menos el reset pass y user profile
 
 ### August
 #### ===> semana 36
+##### dom 07
+  - maquetando login
 ##### mar 02
   - Maquetar frontal
 ##### mar 02
