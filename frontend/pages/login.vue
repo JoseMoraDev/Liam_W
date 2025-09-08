@@ -61,6 +61,7 @@ function submitLogin() {
           Live Ambience <br />Weather & Traffic
         </h1>
       </div>
+
       <!-- sección -->
       <div
         class="flex flex-col items-center justify-center w-2/3 mt-10 space-y-6 h-1/10"
@@ -69,8 +70,9 @@ function submitLogin() {
           Iniciar sesión
         </p>
       </div>
+
       <!-- formulario -->
-      <div class="flex items-end justify-center w-10/12 h-2/10">
+      <div class="flex items-end justify-center w-10/12 mt-10 h-2/10">
         <form
           @submit.prevent="submitLogin"
           class="flex flex-col w-full max-w-sm space-y-4"
@@ -90,7 +92,7 @@ function submitLogin() {
               type="email"
               required
               placeholder="Correo"
-              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 bg-transparent border border-gray-400 rounded-md focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
+              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
             />
           </div>
 
@@ -109,19 +111,23 @@ function submitLogin() {
               type="password"
               required
               placeholder="Contraseña"
-              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 bg-transparent border border-gray-400 rounded-md focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
+              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
             />
           </div>
+
           <div>
-            <p class="ml-3 -mt-4 text-sm italic text-white">
-              He olvidado mi contraseña
-            </p>
+            <NuxtLink
+              to="/forgotpassword"
+              class="ml-3 -mt-4 text-sm italic text-white"
+            >
+              No recuerdo mi contraseña
+            </NuxtLink>
           </div>
 
           <div>
             <button
               type="submit"
-              class="w-3/4 py-2 font-bold text-white transition-colors rounded-md bg-slate-700 hover:bg-slate-900"
+              class="w-3/4 py-2 font-bold text-gray-200 transition-colors border border-gray-400 rounded-md bg-white/40 hover:bg-gray-400 hover:text-white"
             >
               Entrar
             </button>
