@@ -75,7 +75,7 @@
           <div class="flex justify-center !mt-8">
             <button
               type="submit"
-              class="w-1/2 py-2 font-bold text-gray-200 transition-colors border border-gray-400 rounded-md bg-white/40 hover:bg-gray-400 hover:text-white"
+              class="w-1/2 py-2 font-bold text-gray-200 transition-colors border border-gray-400 rounded-md bg-white/30 hover:bg-gray-400 hover:text-white"
             >
               Entrar
             </button>

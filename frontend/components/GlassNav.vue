@@ -4,9 +4,7 @@
     class="fixed inset-x-0 top-0 z-[9999] h-16 flex items-center bg-black/40 backdrop-blur-md border-b"
   >
     <div class="w-full px-3 mx-auto max-w-7xl sm:px-6">
-      <div
-        class="flex items-center gap-3 px-3 py-2 border border-gray-400/50 rounded-2xl"
-      >
+      <div class="flex items-center gap-3 px-3 py-2 rounded-2xl">
         <!-- Botón menú -->
         <button
           @click="open = !open"
@@ -33,7 +31,7 @@
             <input
               v-model="q"
               type="search"
-              placeholder="write here!"
+              placeholder="Escribe aquí lo que quieres encontrar"
               class="w-full pl-4 text-gray-100 border rounded-full h-11 pr-11 border-gray-400/60 bg-white/10 placeholder:italic placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300/70 focus:border-gray-300/70"
             />
             <button
