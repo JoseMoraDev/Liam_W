@@ -110,17 +110,17 @@
               Registrarse
             </button>
           </div>
-
-          <!-- Botón de acceso a login -->
-          <div class="flex justify-center w-full !mt-20">
-            <NuxtLink
-              to="/login"
-              class="w-full py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
-            >
-              ¿Ya tienes cuenta? <br />Inicia sesión aquí
-            </NuxtLink>
-          </div>
         </form>
+      </div>
+
+      <!-- Botón de acceso a login -->
+      <div class="flex justify-center w-full !mt-20">
+        <NuxtLink
+          to="/login"
+          class="w-full py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
+        >
+          ¿Ya tienes cuenta? <br />Inicia sesión aquí
+        </NuxtLink>
       </div>
 
       <!-- Spacer flexible -->
