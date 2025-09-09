@@ -10,7 +10,7 @@
       :class="mounted ? 'opacity-100' : 'opacity-0'"
       class="relative z-10 flex flex-col items-center w-full h-screen p-4 transition-opacity duration-300 md:p-8"
     >
-      <!-- Titulo -->
+      <!-- Título -->
       <div class="flex items-end justify-center w-3/4 h-2/10">
         <h1
           class="text-3xl font-bold leading-snug text-center text-white md:text-4xl"
@@ -24,102 +24,63 @@
         class="flex flex-col items-center justify-center w-2/3 mt-10 space-y-6 h-1/10"
       >
         <p class="mt-2 text-xl text-center text-gray-200 md:text-2xl">
-          Crear cuenta
+          Recuperar contraseña
         </p>
       </div>
 
       <!-- formulario -->
-      <div class="flex items-start justify-center w-10/12 mt-4 h-4/10">
+      <div class="flex items-start justify-center w-10/12 mt-4 h-3/10">
         <form
-          @submit.prevent="submitRegister"
+          @submit.prevent="sendResetEmail"
           class="flex flex-col w-full max-w-sm space-y-4"
         >
-          <!-- Nombre -->
-          <div class="relative w-full">
-            <font-awesome-icon
-              icon="fa-solid fa-user"
-              class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none"
-            />
-            <input
-              id="name"
-              v-model="name"
-              type="text"
-              required
-              placeholder="Nombre"
-              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
-            />
-          </div>
-
           <!-- Correo -->
           <div class="relative w-full">
             <font-awesome-icon
-              icon="fa-solid fa-envelope"
+              icon="fa-regular fa-envelope"
               class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none"
             />
             <input
               id="email"
-              v-model="email"
               type="email"
+              v-model="email"
               required
-              placeholder="Correo"
+              placeholder="Escribe aquí tu correo electrónico"
               class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
             />
           </div>
-
-          <!-- Contraseña -->
-          <div class="relative w-full">
-            <font-awesome-icon
-              icon="fa-solid fa-lock"
-              class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none"
-            />
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              placeholder="Contraseña"
-              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
-            />
-          </div>
-
-          <!-- Repetir contraseña -->
-          <div class="relative w-full">
-            <font-awesome-icon
-              icon="fa-solid fa-unlock"
-              class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none"
-            />
-            <input
-              id="confirmPassword"
-              v-model="confirmPassword"
-              type="password"
-              required
-              placeholder="Repetir contraseña"
-              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
-            />
-          </div>
-
-          <!-- Error si no coinciden -->
-          <p v-if="error" class="text-sm text-red-400">{{ error }}</p>
 
           <!-- Botón principal -->
-          <div class="flex justify-center !mt-8">
+          <div class="relative w-full">
+            <font-awesome-icon
+              icon="fa-solid fa-paper-plane"
+              class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none"
+            />
             <button
               type="submit"
-              class="w-1/2 py-2 font-bold text-gray-200 transition-colors border border-gray-400 rounded-md bg-white/40 hover:bg-gray-400 hover:text-white"
+              class="w-full py-2 font-bold text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
             >
-              Registrarse
+              Enviar enlace de recuperación
             </button>
           </div>
 
-          <!-- Botón de acceso a login -->
+          <!-- Enlace a registro -->
           <div class="flex justify-center w-full !mt-20">
             <NuxtLink
-              to="/login"
+              to="/register"
               class="w-full py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
             >
-              ¿Ya tienes cuenta? <br />Inicia sesión aquí
+              ¿No tienes cuenta? <br />Crear cuenta
             </NuxtLink>
           </div>
+
+          <!-- Mensajes -->
+          <p v-if="message" class="font-semibold text-center text-green-400">
+            {{ message }}
+          </p>
+          <p v-if="error" class="font-semibold text-center text-red-500">
+            {{ error }}
+          </p>
         </form>
       </div>
 
@@ -146,21 +107,21 @@
 import { ref, onMounted } from "vue";
 
 const mounted = ref(false);
-const name = ref("");
 const email = ref("");
-const password = ref("");
-const confirmPassword = ref("");
+const message = ref("");
 const error = ref("");
 
-function submitRegister() {
-  if (password.value !== confirmPassword.value) {
-    error.value = "Las contraseñas no coinciden";
-    return;
-  }
+const sendResetEmail = () => {
+  message.value = "";
   error.value = "";
-  console.log("Registro con:", name.value, email.value, password.value);
-  // Aquí iría tu llamada a la API
-}
+
+  // Simulación de envío de correo
+  if (email.value.includes("@")) {
+    message.value = `Simulación: se ha enviado un enlace a ${email.value}.`;
+  } else {
+    error.value = "Por favor, introduce un correo válido.";
+  }
+};
 
 onMounted(() => {
   mounted.value = true;

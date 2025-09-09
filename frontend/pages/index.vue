@@ -43,7 +43,7 @@
         <div class="flex flex-col items-center">
           <NuxtLink
             to="/login"
-            class="flex flex-col items-center justify-center w-20 text-base font-bold text-white transition-transform duration-300 transform rounded-full h-14 bg-slate-700 hover:bg-slate-900 hover:scale-125"
+            class="flex flex-col items-center justify-center w-20 text-base font-bold text-gray-200 placeholder-gray-300 transition-colors duration-300 transform border border-gray-400 rounded-full h-14 focus:ring-2 focus:ring-gray-400 focus:border-gray-400 focus:outline-none bg-white/20 hover:bg-gray-500 hover:text-white"
           >
             <span class="text-lg">SI</span>
             <span class="pb-1 text-xs font-thin text-gray-200">Login</span>
@@ -53,7 +53,7 @@
         <div class="flex flex-col items-center">
           <NuxtLink
             to="/register"
-            class="flex flex-col items-center justify-center w-20 text-base font-bold text-white transition-transform duration-300 transform rounded-full h-14 bg-slate-700 hover:bg-slate-900 hover:scale-125"
+            class="flex flex-col items-center justify-center w-20 text-base font-bold text-gray-200 placeholder-gray-300 transition-colors duration-300 transform border border-gray-400 rounded-full h-14 focus:ring-2 focus:ring-gray-400 focus:border-gray-400 focus:outline-none bg-white/20 hover:bg-gray-500 hover:text-white"
           >
             <span class="text-lg">NO</span>
             <span class="pb-1 text-xs font-thin text-gray-200">Sign up</span>
