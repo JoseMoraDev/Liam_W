@@ -1,15 +1,13 @@
 <template>
-  <div class="flex flex-col w-screen h-screen">
+  <div class="flex flex-col w-full h-full">
     <!-- Cabecera -->
     <div
-      class="flex flex-col items-start justify-between gap-4 p-4 md:flex-row md:items-center"
+      class="flex flex-col items-start justify-between gap-4 mb-4 md:flex-row md:items-center"
     >
-      <h2 class="text-2xl font-semibold text-white">
-        Selecciona una Comunidad Autónoma
-      </h2>
+      <h2 class="text-2xl font-semibold">Selecciona una Comunidad Autónoma</h2>
 
       <div class="flex items-center gap-2 mt-2 md:mt-0">
-        <label for="ccaa" class="text-sm text-gray-300">Búsqueda rápida</label>
+        <label for="ccaa" class="text-sm text-gray-600">Búsqueda rápida</label>
         <select
           id="ccaa"
           class="px-2 py-1 text-sm border rounded"
@@ -24,17 +22,18 @@
       </div>
     </div>
 
-    <!-- Mapa ocupa 100% -->
-    <div class="relative flex-1 mt-20">
+    <!-- Mapa ocupa todo el ancho -->
+    <div class="flex w-full">
       <svg
         :viewBox="spainMap.viewBox"
         xmlns="http://www.w3.org/2000/svg"
-        class="absolute inset-0 w-full h-full select-none"
-        preserveAspectRatio="xMidYMid slice"
+        class="w-full select-none"
+        preserveAspectRatio="xMidYMid meet"
         role="img"
+        aria-label="Mapa de España por Comunidades Autónomas con Canarias en inset"
       >
         <!-- Mapa principal (todas menos Islas Canarias) -->
-        <g :transform="'scale(0.75) translate(-40, 0)'">
+        <g>
           <template v-for="loc in mainlandLocations" :key="loc.id">
             <path
               class="region"
@@ -66,7 +65,7 @@
             :x="insetRect.x + insetRect.width / 2"
             :y="insetRect.y - 6"
             text-anchor="middle"
-            class="text-xs fill-gray-300"
+            class="text-xs fill-gray-600"
           >
             Islas Canarias
           </text>
@@ -119,7 +118,7 @@
             :x="(ceutaPos.x + melillaPos.x) / 2"
             :y="Math.min(ceutaPos.y, melillaPos.y) - 10"
             text-anchor="middle"
-            class="text-xs fill-gray-300"
+            class="text-xs fill-gray-600"
           >
             Ceuta / Melilla
           </text>
@@ -127,8 +126,7 @@
       </svg>
     </div>
 
-    <!-- Footer fijo -->
-    <div class="p-3 text-sm text-gray-200 bg-gray-900">
+    <div class="p-3 mt-4 text-sm text-gray-700 rounded-lg bg-gray-50">
       <strong>Seleccionado:</strong>
       <span v-if="selectedName">{{ selectedName }}</span>
       <span v-else>Ninguno</span>
@@ -173,16 +171,16 @@ const spainMap = {
 /* --- Separar Canarias --- */
 const canary =
   spainMap.locations.find((l) => {
-    const nid = normalizeId(l.id ?? l.name);
-    const nname = normalizeId(l.name);
-    return /canar/.test(nid) || /canar/.test(nname);
+    const nid = normalizeId(l.id ?? l.name); // p.ej. "es-cn" o "canary-islands" o "islas-canarias"
+    const nname = normalizeId(l.name); // normalizado
+    return /canar/.test(nid) || /canar/.test(nname); // coincide "canar" => "canary" / "canarias"
   }) || null;
 
 const mainlandLocations = spainMap.locations.filter(
   (l) => !canary || l.id !== canary.id
 );
 
-/* --- Select con Ceuta/Melilla --- */
+/* --- Select (añadimos Ceuta/Melilla) --- */
 const ccaaList = spainMap.locations
   .map((l) => ({ id: l.id, name: l.name }))
   .concat([
@@ -222,11 +220,12 @@ function sel(id) {
 
 /* --- ViewBox / inset Canarias --- */
 const viewBox = parseViewBox(spainMap.viewBox);
+// Cuadro del inset (a la derecha-bajo)
 const insetRect = {
-  x: viewBox.minX + viewBox.width * 0.82,
-  y: viewBox.minY + viewBox.height * 0.4,
-  width: viewBox.width * 0.15,
-  height: viewBox.height * 0.15,
+  x: viewBox.minX + viewBox.width * 0.82, // más a la derecha
+  y: viewBox.minY + viewBox.height * 0.4, // más arriba
+  width: viewBox.width * 0.15, // más estrecho
+  height: viewBox.height * 0.15, // más bajo
 };
 
 const canaryPath = ref(null);
@@ -251,13 +250,13 @@ onMounted(() => {
   }
 });
 
-/* --- Ceuta / Melilla --- */
+/* --- Marcadores aproximados de Ceuta/Melilla (ajustables) --- */
 const ceutaPos = {
-  x: viewBox.minX + viewBox.width * 0.49,
+  x: viewBox.minX + viewBox.width * 0.49, // más centrado bajo Andalucía
   y: viewBox.minY + viewBox.height * 0.54,
 };
 const melillaPos = {
-  x: viewBox.minX + viewBox.width * 0.535,
+  x: viewBox.minX + viewBox.width * 0.535, // un poco a la derecha de Ceuta
   y: viewBox.minY + viewBox.height * 0.56,
 };
 </script>
@@ -288,7 +287,7 @@ text {
 .text-xs {
   font-size: 11px;
 }
-.fill-gray-300 {
-  fill: #d1d5db;
+.fill-gray-600 {
+  fill: #4b5563;
 }
 </style>
