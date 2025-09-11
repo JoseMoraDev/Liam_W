@@ -2,9 +2,9 @@
   <div class="flex flex-col w-screen h-screen">
     <!-- Cabecera -->
     <div
-      class="flex flex-col items-start justify-between gap-4 p-4 md:flex-row md:items-center"
+      class="flex flex-col items-start justify-between mt-12 -translate-y-6 md:flex-row md:items-center"
     >
-      <h2 class="text-2xl font-semibold text-white">
+      <h2 class="text-2xl font-semibold text-black">
         Selecciona una Comunidad Autónoma
       </h2>
 
@@ -25,7 +25,7 @@
     </div>
 
     <!-- Mapa ocupa 100% -->
-    <div class="relative flex-1 mt-20">
+    <div class="relative flex-1">
       <svg
         :viewBox="spainMap.viewBox"
         xmlns="http://www.w3.org/2000/svg"
@@ -33,8 +33,8 @@
         preserveAspectRatio="xMidYMid slice"
         role="img"
       >
-        <!-- Mapa principal (todas menos Islas Canarias) -->
-        <g :transform="'scale(0.75) translate(-40, 0)'">
+        <!-- Mapa principal España -->
+        <g :transform="computedTransform">
           <template v-for="loc in mainlandLocations" :key="loc.id">
             <path
               class="region"
@@ -50,7 +50,7 @@
         </g>
 
         <!-- Inset de Canarias -->
-        <g>
+        <g :transform="'translate(-160, -60)'">
           <rect
             :x="insetRect.x"
             :y="insetRect.y"
@@ -88,7 +88,7 @@
         </g>
 
         <!-- Marcadores de Ceuta y Melilla -->
-        <g>
+        <g :transform="'translate(-77, -70)'">
           <circle
             :cx="ceutaPos.x"
             :cy="ceutaPos.y"
@@ -128,8 +128,10 @@
     </div>
 
     <!-- Footer fijo -->
-    <div class="p-3 text-sm text-gray-200 bg-gray-900">
-      <strong>Seleccionado:</strong>
+    <div
+      class="w-3/4 p-3 ml-6 text-sm text-center text-gray-200 bg-gray-900 flitems-center -translate-y-80"
+    >
+      <strong>Seleccionado: </strong>
       <span v-if="selectedName">{{ selectedName }}</span>
       <span v-else>Ninguno</span>
     </div>
@@ -137,9 +139,24 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { watch } from "vue";
 import spainMapRaw from "@svg-maps/spain";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 
+const mainlandLocations = computed(() =>
+  spainMap.locations.filter((l) => {
+    const nid = normalizeId(l.id ?? l.name);
+    const nname = normalizeId(l.name);
+    return !/canar/.test(nid) && !/canar/.test(nname);
+  })
+);
+
+const vw = ref(typeof window !== "undefined" ? window.innerWidth : 390);
+
+// Actualiza vw al redimensionar
+const handleResize = () => {
+  vw.value = window.innerWidth;
+};
 /* --- Utilidades --- */
 function normalizeId(id) {
   return String(id)
@@ -178,9 +195,9 @@ const canary =
     return /canar/.test(nid) || /canar/.test(nname);
   }) || null;
 
-const mainlandLocations = spainMap.locations.filter(
-  (l) => !canary || l.id !== canary.id
-);
+// const mainlandLocations = spainMap.locations.filter(
+//   (l) => !canary || l.id !== canary.id
+// );
 
 /* --- Select con Ceuta/Melilla --- */
 const ccaaList = spainMap.locations
@@ -232,7 +249,19 @@ const insetRect = {
 const canaryPath = ref(null);
 const canaryTransform = ref("");
 
+// Escala y traslación relativas al ancho de pantalla
+const computedTransform = computed(() => {
+  const baseWidth = 390;
+  const s = (vw.value / baseWidth) * 0.7; // MAPAESP TAMAÑO
+  const tx = (vw.value / baseWidth) * -41; // MAPAESP POS(X)
+  return `scale(${s}) translate(${tx}, 0)`;
+});
+
 onMounted(() => {
+  if (typeof window !== "undefined") {
+    window.addEventListener("resize", handleResize);
+  }
+
   if (canaryPath.value) {
     const bbox = canaryPath.value.getBBox();
     const padding = 6;
@@ -248,6 +277,12 @@ onMounted(() => {
     const dy = insetRect.y + (insetRect.height - placedHeight) / 2;
 
     canaryTransform.value = `translate(${dx},${dy}) scale(${scale}) translate(${tx0},${ty0})`;
+  }
+});
+
+onUnmounted(() => {
+  if (typeof window !== "undefined") {
+    window.removeEventListener("resize", handleResize);
   }
 });
 
