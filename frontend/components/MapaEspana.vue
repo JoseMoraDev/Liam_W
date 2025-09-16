@@ -7,7 +7,6 @@
       <h2 class="text-2xl font-semibold text-black">
         Selecciona una Comunidad Autónoma
       </h2>
-
       <div class="flex items-center gap-2 mt-2 md:mt-0">
         <label for="ccaa" class="text-sm text-gray-300">Búsqueda rápida</label>
         <select
@@ -23,7 +22,6 @@
         </select>
       </div>
     </div>
-
     <!-- Mapa ocupa 100% -->
     <div class="relative flex-1">
       <svg
@@ -48,7 +46,6 @@
             />
           </template>
         </g>
-
         <!-- Inset de Canarias -->
         <g :transform="'translate(-160, -60)'">
           <rect
@@ -70,7 +67,6 @@
           >
             Islas Canarias
           </text>
-
           <g :transform="canaryTransform">
             <path
               v-if="canary"
@@ -86,7 +82,6 @@
             />
           </g>
         </g>
-
         <!-- Marcadores de Ceuta y Melilla -->
         <g :transform="'translate(-77, -70)'">
           <circle
@@ -126,7 +121,6 @@
         </g>
       </svg>
     </div>
-
     <!-- Footer fijo -->
     <div
       class="w-3/4 p-3 ml-6 text-sm text-center text-gray-200 bg-gray-900 flitems-center -translate-y-80"
@@ -137,12 +131,10 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { watch } from "vue";
 import spainMapRaw from "@svg-maps/spain";
 import { ref, computed, onMounted, onUnmounted } from "vue";
-
 const mainlandLocations = computed(() =>
   spainMap.locations.filter((l) => {
     const nid = normalizeId(l.id ?? l.name);
@@ -150,15 +142,13 @@ const mainlandLocations = computed(() =>
     return !/canar/.test(nid) && !/canar/.test(nname);
   })
 );
-
 const vw = ref(typeof window !== "undefined" ? window.innerWidth : 390);
 
 // Actualiza vw al redimensionar
 const handleResize = () => {
   vw.value = window.innerWidth;
 };
-/* --- Utilidades --- */
-function normalizeId(id) {
+/* --- Utilidades --- */ function normalizeId(id) {
   return String(id)
     .toLowerCase()
     .replace(/[\s_]+/g, "-")
@@ -176,9 +166,7 @@ function parseViewBox(vb) {
   );
   return { minX, minY, width: width || 1000, height: height || 1000 };
 }
-
-/* --- Mapa importado con ids normalizados --- */
-const spainMap = {
+/* --- Mapa importado con ids normalizados --- */ const spainMap = {
   viewBox: spainMapRaw.viewBox,
   locations: spainMapRaw.locations.map((l) => ({
     id: normalizeId(l.id ?? l.name),
@@ -186,9 +174,7 @@ const spainMap = {
     path: String(l.path),
   })),
 };
-
-/* --- Separar Canarias --- */
-const canary =
+/* --- Separar Canarias --- */ const canary =
   spainMap.locations.find((l) => {
     const nid = normalizeId(l.id ?? l.name);
     const nname = normalizeId(l.name);
@@ -196,9 +182,9 @@ const canary =
   }) || null;
 
 // const mainlandLocations = spainMap.locations.filter(
-//   (l) => !canary || l.id !== canary.id
-// );
-
+// // (l) => !canary || l.id !== canary.id
+// // );
+//
 /* --- Select con Ceuta/Melilla --- */
 const ccaaList = spainMap.locations
   .map((l) => ({ id: l.id, name: l.name }))
@@ -207,11 +193,10 @@ const ccaaList = spainMap.locations
     { id: "melilla", name: "Melilla" },
   ])
   .sort((a, b) => a.name.localeCompare(b.name, "es"));
-
-/* --- v-model --- */
-const props = defineProps({ modelValue: { type: String, default: null } });
+/* --- v-model --- */ const props = defineProps({
+  modelValue: { type: String, default: null },
+});
 const emit = defineEmits(["update:modelValue", "change"]);
-
 const internalValue = ref(props.modelValue);
 watch(
   () => props.modelValue,
@@ -219,11 +204,9 @@ watch(
     internalValue.value = v;
   }
 );
-
 const selectedName = computed(
   () => (ccaaList.find((c) => c.id === internalValue.value) || {}).name || ""
 );
-
 function select(id) {
   internalValue.value = id;
   emit("update:modelValue", internalValue.value);
@@ -236,16 +219,15 @@ function onSelectChange() {
 function sel(id) {
   return internalValue.value === id ? "selected" : "";
 }
-
-/* --- ViewBox / inset Canarias --- */
-const viewBox = parseViewBox(spainMap.viewBox);
+/* --- ViewBox / inset Canarias --- */ const viewBox = parseViewBox(
+  spainMap.viewBox
+);
 const insetRect = {
   x: viewBox.minX + viewBox.width * 0.82,
   y: viewBox.minY + viewBox.height * 0.4,
   width: viewBox.width * 0.15,
   height: viewBox.height * 0.15,
 };
-
 const canaryPath = ref(null);
 const canaryTransform = ref("");
 
@@ -254,7 +236,7 @@ const computedTransform = computed(() => {
   const baseWidth = 390;
   const s = (vw.value / baseWidth) * 0.7; // MAPAESP TAMAÑO
   const tx = (vw.value / baseWidth) * -41; // MAPAESP POS(X)
-  return `scale(${s}) translate(${tx}, 0)`;
+  return `scale(${s}) translate(${tx}, 0)`; // <- CORRECTO
 });
 
 onMounted(() => {
@@ -268,7 +250,6 @@ onMounted(() => {
     const scaleX = (insetRect.width - padding * 2) / bbox.width;
     const scaleY = (insetRect.height - padding * 2) / bbox.height;
     const scale = Math.min(scaleX, scaleY);
-
     const tx0 = -bbox.x;
     const ty0 = -bbox.y;
     const placedWidth = bbox.width * scale;
@@ -314,7 +295,6 @@ const melillaPos = {
   fill: #6366f1;
   stroke: #4338ca;
 }
-
 text {
   font-size: 12px;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,

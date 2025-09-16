@@ -1,14 +1,13 @@
-<!-- components/GlassNav.vue -->
 <template>
   <nav
-    class="fixed inset-x-0 top-0 z-[9999] h-16 flex items-center bg-black/40 backdrop-blur-md border-b"
+    class="fixed inset-x-0 top-0 z-[9999] h-16 flex items-center bg-gray-100/40 backdrop-blur-md border-b border-gray-300/40 shadow-sm"
   >
     <div class="w-full px-3 mx-auto max-w-7xl sm:px-6">
       <div class="flex items-center gap-3 px-3 py-2 rounded-2xl">
         <!-- Botón menú -->
         <button
           @click="open = !open"
-          class="inline-flex items-center justify-center w-10 h-10 text-gray-200 transition border rounded-xl border-gray-400/60 hover:bg-white/10"
+          class="inline-flex items-center justify-center w-10 h-10 text-gray-700 transition border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
           aria-label="Abrir menú"
         >
           <font-awesome-icon icon="fa-solid fa-bars" />
@@ -17,7 +16,7 @@
         <!-- Marca -->
         <NuxtLink
           to="/"
-          class="hidden font-semibold tracking-wide text-gray-100 sm:block"
+          class="hidden font-semibold tracking-wide text-gray-800 sm:block"
         >
           Live Ambience
         </NuxtLink>
@@ -31,12 +30,12 @@
             <input
               v-model="q"
               type="search"
-              placeholder="Escribe aquí lo que quieres encontrar"
-              class="w-full pl-4 text-gray-100 border rounded-full h-11 pr-11 border-gray-400/60 bg-white/10 placeholder:italic placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300/70 focus:border-gray-300/70"
+              placeholder="Buscar..."
+              class="w-full pl-4 text-gray-800 border rounded-full h-11 pr-11 border-gray-300/50 bg-gray-50/50 placeholder:italic placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300/50 focus:border-gray-300/50"
             />
             <button
               type="submit"
-              class="absolute inset-y-0 right-0 flex items-center justify-center border-l rounded-r-full w-11 border-gray-400/60 text-gray-100/90 hover:bg-white/10"
+              class="absolute inset-y-0 right-0 flex items-center justify-center text-gray-700 border-l rounded-r-full w-11 border-gray-300/50 hover:bg-gray-200/20"
               aria-label="Buscar"
             >
               <font-awesome-icon icon="fa-solid fa-magnifying-glass" />
@@ -48,13 +47,13 @@
         <div class="items-center hidden gap-2 sm:flex">
           <NuxtLink
             to="/login"
-            class="inline-flex items-center h-10 px-3 text-gray-200 border rounded-xl border-gray-400/60 hover:bg-white/10"
+            class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
           >
             Acceder
           </NuxtLink>
           <NuxtLink
             to="/register"
-            class="inline-flex items-center h-10 px-3 text-gray-200 border rounded-xl border-gray-400/60 hover:bg-white/10"
+            class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
           >
             Crear cuenta
           </NuxtLink>
@@ -63,7 +62,7 @@
         <!-- Móvil -->
         <NuxtLink
           to="/login"
-          class="inline-flex items-center justify-center w-10 h-10 text-gray-200 border sm:hidden rounded-xl border-gray-400/60 hover:bg-white/10"
+          class="inline-flex items-center justify-center w-10 h-10 text-gray-700 border sm:hidden rounded-xl border-gray-300/50 hover:bg-gray-200/20"
           aria-label="Acceder"
         >
           <font-awesome-icon icon="fa-regular fa-user" />
@@ -73,42 +72,40 @@
 
     <!-- Panel móvil -->
     <transition name="fade">
-      <div v-if="open" class="absolute left-0 right-0 px-3 top-16 sm:px-6">
-        <div
-          class="p-3 mx-auto space-y-2 border shadow-xl max-w-7xl rounded-2xl border-gray-400/50 bg-black/70 backdrop-blur-md"
+      <div
+        v-if="open"
+        class="absolute p-4 space-y-2 text-gray-800 rounded-lg shadow-lg top-16 left-4 bg-gray-50/90 backdrop-blur-md w-max"
+      >
+        <!-- Menú de un solo nivel -->
+        <NuxtLink
+          to="/previsiones"
+          class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg hover:bg-gray-200/30"
+          @click="open = false"
         >
-          <NuxtLink
-            to="/"
-            class="block px-4 py-3 text-gray-200 border border-transparent rounded-xl hover:bg-white/10 hover:border-gray-400/60"
-            @click="open = false"
-            >Inicio</NuxtLink
-          >
-          <NuxtLink
-            to="/weather"
-            class="block px-4 py-3 text-gray-200 border border-transparent rounded-xl hover:bg-white/10 hover:border-gray-400/60"
-            @click="open = false"
-            >Weather</NuxtLink
-          >
-          <NuxtLink
-            to="/traffic"
-            class="block px-4 py-3 text-gray-200 border border-transparent rounded-xl hover:bg-white/10 hover:border-gray-400/60"
-            @click="open = false"
-            >Traffic</NuxtLink
-          >
-          <div class="h-px my-1 bg-gray-400/40"></div>
-          <NuxtLink
-            to="/login"
-            class="block px-4 py-3 text-gray-200 border border-transparent rounded-xl hover:bg-white/10 hover:border-gray-400/60"
-            @click="open = false"
-            >Acceder</NuxtLink
-          >
-          <NuxtLink
-            to="/register"
-            class="block px-4 py-3 text-gray-200 border border-transparent rounded-xl hover:bg-white/10 hover:border-gray-400/60"
-            @click="open = false"
-            >Crear cuenta</NuxtLink
-          >
-        </div>
+          <font-awesome-icon
+            icon="fa-solid fa-cloud-sun"
+            class="w-4 h-4 mr-2"
+          />
+          Previsiones
+        </NuxtLink>
+
+        <NuxtLink
+          to="/panel"
+          class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg hover:bg-gray-200/30"
+          @click="open = false"
+        >
+          <font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4 mr-2" />
+          Ajustes
+        </NuxtLink>
+
+        <NuxtLink
+          to="/avanzado"
+          class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg hover:bg-gray-200/30"
+          @click="open = false"
+        >
+          <font-awesome-icon icon="fa-solid fa-cogs" class="w-4 h-4 mr-2" />
+          Avanzado
+        </NuxtLink>
       </div>
     </transition>
   </nav>

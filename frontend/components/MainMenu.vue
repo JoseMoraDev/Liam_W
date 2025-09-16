@@ -3,7 +3,7 @@
     class="w-full min-h-screen bg-center bg-cover"
     style="background-image: url('/img/menu.jpg')"
   >
-    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
 
     <div
       :class="mounted ? 'opacity-100' : 'opacity-0'"
@@ -11,9 +11,9 @@
     >
       <!-- WEATHER -->
       <div
-        class="w-full max-w-md p-4 space-y-4 border border-gray-400 rounded-2xl bg-white/10"
+        class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md"
       >
-        <h2 class="text-xl font-bold text-center text-white">
+        <h2 class="text-xl font-bold text-center text-gray-900/90">
           Previsión Meteorológica
         </h2>
 
@@ -35,9 +35,9 @@
 
       <!-- AIR QUALITY -->
       <div
-        class="w-full max-w-md p-4 space-y-4 border border-gray-400 rounded-2xl bg-white/10"
+        class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md"
       >
-        <h2 class="text-xl font-bold text-center text-white">
+        <h2 class="text-xl font-bold text-center text-gray-900/90">
           Calidad del aire
         </h2>
 
@@ -49,9 +49,9 @@
 
       <!-- TRAFFIC -->
       <div
-        class="w-full max-w-md p-4 space-y-4 border border-gray-400 rounded-2xl bg-white/10"
+        class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-100/20 backdrop-blur-md"
       >
-        <h2 class="text-xl font-bold text-center text-white">Tráfico</h2>
+        <h2 class="text-xl font-bold text-center text-gray-900/90">Tráfico</h2>
 
         <div class="grid grid-cols-2 gap-4">
           <NuxtLink to="/traffic/status" class="sub-card">Estado</NuxtLink>
@@ -74,6 +74,6 @@ onMounted(() => {
 
 <style scoped>
 .sub-card {
-  @apply flex items-center justify-center p-4 text-sm font-semibold text-center text-gray-200 transition-colors border border-gray-400 rounded-xl bg-gray-700/40 hover:bg-gray-500 hover:text-white;
+  @apply flex items-center justify-center p-4 text-sm font-semibold text-center text-gray-900/90 transition-colors rounded-xl bg-gray-100/20 backdrop-blur-md hover:bg-gray-200/30 shadow-inner;
 }
 </style>
