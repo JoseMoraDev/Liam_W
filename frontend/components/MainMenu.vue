@@ -18,18 +18,16 @@
         </h2>
 
         <div class="grid grid-cols-2 gap-4">
-          <NuxtLink to="/weather/snow" class="sub-card"
+          <NuxtLink to="/meteo/horaria" class="sub-card"
             >Municipal Horaria</NuxtLink
           >
-          <NuxtLink to="/weather/beach" class="sub-card"
+          <NuxtLink to="/meteo/diaria" class="sub-card"
             >Municipal Diaria</NuxtLink
           >
-          <NuxtLink to="/weather/mountain" class="sub-card">Avisos</NuxtLink>
-          <NuxtLink to="/weather/hourly" class="sub-card">Nivológica</NuxtLink>
-          <NuxtLink to="/weather/sea-temperature" class="sub-card"
-            >Playa</NuxtLink
-          >
-          <NuxtLink to="/weather/alerts" class="sub-card">Montaña</NuxtLink>
+          <NuxtLink to="/meteo/avisos" class="sub-card">Avisos</NuxtLink>
+          <NuxtLink to="/meteo/nieve" class="sub-card">Nivológica</NuxtLink>
+          <NuxtLink to="/meteo/playa" class="sub-card">Playa</NuxtLink>
+          <NuxtLink to="/meteo/montana" class="sub-card">Montaña</NuxtLink>
         </div>
       </div>
 
@@ -42,8 +40,8 @@
         </h2>
 
         <div class="grid grid-cols-2 gap-4">
-          <NuxtLink to="/aqi/current" class="sub-card">Ambiente</NuxtLink>
-          <NuxtLink to="/aqi/forecast" class="sub-card">Polen</NuxtLink>
+          <NuxtLink to="/aire/ambiente" class="sub-card">Ambiental</NuxtLink>
+          <NuxtLink to="/aire/polen" class="sub-card">Polen</NuxtLink>
         </div>
       </div>
 
@@ -54,8 +52,8 @@
         <h2 class="text-xl font-bold text-center text-gray-900/90">Tráfico</h2>
 
         <div class="grid grid-cols-2 gap-4">
-          <NuxtLink to="/traffic/status" class="sub-card">Estado</NuxtLink>
-          <NuxtLink to="/traffic/alerts" class="sub-card">Alertas</NuxtLink>
+          <NuxtLink to="/trafico/estado" class="sub-card">Estado</NuxtLink>
+          <NuxtLink to="/trafico/alertas" class="sub-card">Alertas</NuxtLink>
         </div>
       </div>
     </div>

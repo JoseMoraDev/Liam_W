@@ -10,7 +10,9 @@
           class="inline-flex items-center justify-center w-10 h-10 text-gray-700 transition border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
           aria-label="Abrir menú"
         >
-          <font-awesome-icon icon="fa-solid fa-bars" />
+          <client-only
+            ><font-awesome-icon icon="fa-solid fa-bars"
+          /></client-only>
         </button>
 
         <!-- Marca -->
@@ -38,7 +40,9 @@
               class="absolute inset-y-0 right-0 flex items-center justify-center text-gray-700 border-l rounded-r-full w-11 border-gray-300/50 hover:bg-gray-200/20"
               aria-label="Buscar"
             >
-              <font-awesome-icon icon="fa-solid fa-magnifying-glass" />
+              <client-only
+                ><font-awesome-icon icon="fa-solid fa-magnifying-glass"
+              /></client-only>
             </button>
           </div>
         </form>
@@ -65,7 +69,9 @@
           class="inline-flex items-center justify-center w-10 h-10 text-gray-700 border sm:hidden rounded-xl border-gray-300/50 hover:bg-gray-200/20"
           aria-label="Acceder"
         >
-          <font-awesome-icon icon="fa-regular fa-user" />
+          <client-only
+            ><font-awesome-icon icon="fa-regular fa-user"
+          /></client-only>
         </NuxtLink>
       </div>
     </div>
@@ -82,19 +88,22 @@
           class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg hover:bg-gray-200/30"
           @click="open = false"
         >
-          <font-awesome-icon
-            icon="fa-solid fa-cloud-sun"
-            class="w-4 h-4 mr-2"
-          />
+          <client-only
+            ><font-awesome-icon
+              icon="fa-solid fa-cloud-sun"
+              class="w-4 h-4 mr-2"
+          /></client-only>
           Previsiones
         </NuxtLink>
 
         <NuxtLink
-          to="/panel"
+          to="/ajustes"
           class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg hover:bg-gray-200/30"
           @click="open = false"
         >
-          <font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4 mr-2" />
+          <client-only
+            ><font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4 mr-2"
+          /></client-only>
           Ajustes
         </NuxtLink>
 
@@ -103,7 +112,9 @@
           class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg hover:bg-gray-200/30"
           @click="open = false"
         >
-          <font-awesome-icon icon="fa-solid fa-cogs" class="w-4 h-4 mr-2" />
+          <client-only
+            ><font-awesome-icon icon="fa-solid fa-cogs" class="w-4 h-4 mr-2"
+          /></client-only>
           Avanzado
         </NuxtLink>
       </div>

@@ -1,3 +1,3 @@
 <template>
-  <MainMenu />
+  <GlassNav class="" />
 </template>
