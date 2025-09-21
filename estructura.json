@@ -1,0 +1,55 @@
+{
+  "Live Ambience Weather": {
+    "front": {
+      "landing": {
+        "sign_up": "",
+        "login": {
+          "sign_up": "",
+          "forgot pass": "",
+          "main_MainMenu": {
+            "previsiones": {
+              "Weather": {
+                "municipal horaria": "",
+                "municipal diaria": "",
+                "avisos": "",
+                "nivología": "",
+                "playa": "",
+                "montaña": ""
+              },
+              "Air": {
+                "ambiental": "",
+                "polen": ""
+              },
+              "Traffic": {
+                "estado": "",
+                "alertas": ""
+              }
+            },
+            "ajustes": {
+              "ubicaciones": {
+                "predeterminadas": "",
+                "favoritas": ""
+              },
+              "alertas": "configurar alertas personalizadas",
+              "interfaz": "temas de colores"
+            },
+            "admin": {
+              "gestión de usuarios": "administrar usuarios",
+              "apariencia general": {
+                "fuente por defecto": "",
+                "temas de colores": ""
+              },
+              "logs y auditoría": {
+                "historial de logins": "",
+                "estadísticas": ""
+              }
+            }
+          }
+        }
+      }
+    },
+    "back": {
+      "llamadas": {}
+    }
+  }
+}

@@ -122,14 +122,31 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { axiosClient } from "~/axiosConfig";
+import { useRouter } from "vue-router";
+import { login } from "~/store/auth";
 
 const mounted = ref(false);
 const email = ref("");
 const password = ref("");
+const router = useRouter();
 
-function submitLogin() {
-  console.log("Login con:", email.value, password.value);
-  // Aquí harías tu llamada a la API de backend con fetch/axios
+async function submitLogin() {
+  try {
+    const response = await axiosClient.post("login", {
+      email: email.value,
+      password: password.value,
+    });
+    const newToken = response.data.token;
+
+    // Guardar token y actualizar estado global
+    login(newToken);
+
+    // Redirigir al usuario a /main
+    await router.push("/main");
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 onMounted(() => {

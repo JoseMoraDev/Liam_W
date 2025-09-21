@@ -3,57 +3,71 @@
     class="w-full min-h-screen bg-center bg-cover"
     style="background-image: url('/img/menu.jpg')"
   >
+    <!-- Capa translúcida -->
     <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
 
+    <!-- Contenido principal -->
     <div
       :class="mounted ? 'opacity-100' : 'opacity-0'"
       class="relative z-10 flex flex-col items-center w-full min-h-screen p-6 mt-5 space-y-8 overflow-y-auto transition-opacity duration-300 md:p-8"
     >
-      <!-- WEATHER -->
+      <!-- Título -->
+      <div
+        class="w-full max-w-md p-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md"
+      >
+        <h1 class="text-2xl font-bold text-center text-gray-900/90">
+          Módulo de Administración
+        </h1>
+      </div>
+
+      <!-- GESTIÓN DE USUARIOS -->
       <div
         class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md"
       >
         <h2 class="text-xl font-bold text-center text-gray-900/90">
-          Previsión Meteorológica
+          Gestión de Usuarios
         </h2>
 
-        <div class="grid grid-cols-2 gap-4">
-          <NuxtLink to="/meteo/horaria" class="sub-card"
-            >Municipal Horaria</NuxtLink
-          >
-          <NuxtLink to="/meteo/diaria" class="sub-card"
-            >Municipal Diaria</NuxtLink
-          >
-          <NuxtLink to="/meteo/avisos" class="sub-card">Avisos</NuxtLink>
-          <NuxtLink to="/meteo/nieve" class="sub-card">Nivológica</NuxtLink>
-          <NuxtLink to="/meteo/playa" class="sub-card">Playa</NuxtLink>
-          <NuxtLink to="/meteo/montana" class="sub-card">Montaña</NuxtLink>
+        <div class="grid grid-cols-1 gap-4">
+          <NuxtLink to="/admin/usuarios" class="sub-card">
+            Administrar usuarios
+          </NuxtLink>
         </div>
       </div>
 
-      <!-- AIR QUALITY -->
+      <!-- APARIENCIA GENERAL -->
       <div
         class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md"
       >
         <h2 class="text-xl font-bold text-center text-gray-900/90">
-          Calidad del aire
+          Apariencia General
         </h2>
 
         <div class="grid grid-cols-2 gap-4">
-          <NuxtLink to="/aire/ambiente" class="sub-card">Ambiental</NuxtLink>
-          <NuxtLink to="/aire/polen" class="sub-card">Polen</NuxtLink>
+          <NuxtLink to="/admin/fuentes" class="sub-card">
+            Fuente por defecto
+          </NuxtLink>
+          <NuxtLink to="/admin/temas" class="sub-card">
+            Temas de colores
+          </NuxtLink>
         </div>
       </div>
 
-      <!-- TRAFFIC -->
+      <!-- LOGS Y AUDITORÍA -->
       <div
-        class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-100/20 backdrop-blur-md"
+        class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md"
       >
-        <h2 class="text-xl font-bold text-center text-gray-900/90">Tráfico</h2>
+        <h2 class="text-xl font-bold text-center text-gray-900/90">
+          Logs y Auditoría
+        </h2>
 
         <div class="grid grid-cols-2 gap-4">
-          <NuxtLink to="/trafico/estado" class="sub-card">Estado</NuxtLink>
-          <NuxtLink to="/trafico/alertas" class="sub-card">Alertas</NuxtLink>
+          <NuxtLink to="/admin/logins" class="sub-card">
+            Historial de logins
+          </NuxtLink>
+          <NuxtLink to="/admin/estadisticas" class="sub-card">
+            Estadísticas
+          </NuxtLink>
         </div>
       </div>
     </div>

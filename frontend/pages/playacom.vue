@@ -5,7 +5,6 @@ const comunidad = ref(null);
 
 <template>
   <div class="p-6">
-    <GlassNav />
     <MapaEspana
       v-model="comunidad"
       class="mt-10"

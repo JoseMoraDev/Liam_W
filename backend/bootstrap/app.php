@@ -12,14 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__ . '/../routes/console.php',
         api: __DIR__ . '/../routes/api.php',
     )
-    ->withMiddleware(function ($middleware) {
-        $middleware->group('api', [
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->group('login', [
             EnsureFrontendRequestsAreStateful::class,
         ]);
 
         $middleware->alias([
             'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
         ]);
+        $middleware->validateCsrfTokens(
+            except: ['api'],
+        );
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

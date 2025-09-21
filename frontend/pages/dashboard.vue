@@ -1,3 +1,1 @@
-<template>
-  <GlassNav class="" />
-</template>
+<template></template>

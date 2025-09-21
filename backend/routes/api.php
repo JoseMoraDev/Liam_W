@@ -5,6 +5,7 @@
 use App\Http\Controllers\AemetCapController;
 use App\Http\Controllers\AemetController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 // Api controllers
 use App\Http\Controllers\AQICNController;
@@ -16,17 +17,23 @@ use App\Http\Controllers\TomTomController;
 use App\Http\Controllers\UbicacionEndpointUsuarioController;
 
 
-// Auth
+//! Auth
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
+
+//! middleware
+
+Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
+    return $request->user();
+});
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'me']);
 });
-
 
 Route::middleware('local-only')->prefix('check')->group(function () {
     Route::get('/health', [HealthController::class, 'checkAPI']);
