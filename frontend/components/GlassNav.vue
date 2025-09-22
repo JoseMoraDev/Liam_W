@@ -49,18 +49,31 @@
 
         <!-- Acciones -->
         <div class="items-center hidden gap-2 sm:flex">
-          <NuxtLink
-            to="/login"
-            class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
-          >
-            Acceder
-          </NuxtLink>
-          <NuxtLink
-            to="/register"
-            class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
-          >
-            Crear cuenta
-          </NuxtLink>
+          <template v-if="!userLoggedIn">
+            <NuxtLink
+              to="/login"
+              class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
+            >
+              Acceder
+            </NuxtLink>
+            <NuxtLink
+              to="/register"
+              class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
+            >
+              Crear cuenta
+            </NuxtLink>
+          </template>
+          <template v-else>
+            <span class="px-3 text-gray-700">{{
+              userData?.name || "Usuario"
+            }}</span>
+            <button
+              @click="handleLogout"
+              class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
+            >
+              Cerrar sesión
+            </button>
+          </template>
         </div>
 
         <!-- Móvil -->
@@ -124,6 +137,7 @@
 
 <script setup>
 import { ref } from "vue";
+import { userLoggedIn, logout, userData } from "~/store/auth";
 const open = ref(false);
 const q = ref("");
 
@@ -131,6 +145,11 @@ function onSearch() {
   if (!q.value.trim()) return;
   navigateTo({ path: "/search", query: { q: q.value.trim() } });
   open.value = false;
+}
+
+function handleLogout() {
+  logout();
+  navigateTo("/login");
 }
 </script>
 
