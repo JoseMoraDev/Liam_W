@@ -15,9 +15,8 @@ PLANIFICACIÓN
     - DEPLOY
 
 
+
 BACKEND
-    - ISSUES
-            => Enviar email para recuperar contraseña
     - Todas las respuestas de la API deben retornar json
     - Los parámetros de las llamadas deben de ser dinámicos (ahora están hardcodeados)
     - Adaptar las respuestas del back a las necesidades de la API (formato 24 hrs, cálculos, etc)
@@ -25,10 +24,15 @@ BACKEND
     - Backend de avanzado
     - Testear, reventar, corregir
     - control del tema oscuro
+	- ISSUES
+		=> Enviar email para recuperar contraseña
+
+
 
 FRONTEND
     - ISSUES
             => envío del email tipo 'he olvidado mi contraseña' + página que realmente permita cambiar de contraseña
+			=> manejo errores en register
     - backoffice
     - avanzado - admin
     - seccion pais > autonomia > provincia > municipios
@@ -37,11 +41,8 @@ FRONTEND
     - multitema
     
 
-Listado de llamadas para revisado a JSON ( y hacer cálculos si es necesario)
-> AUTH
-    - login
-    - 
-
+Listado de llamadas para pasarlo a JSON ( y hacer cálculos si es necesario)
+	- login/logout/register
 
 
 
