@@ -1,3 +1,10 @@
+instalado leaflet y chartjs
+--> ver dependencias del proyecto
+
+    <!-- TODO: ESTOY TIRANDO DE API FALTA HACER EL BACK -->
+
+
+
 # Live Ambience Weather - LIAM
 
 # COMMANDS
@@ -245,3 +252,31 @@ Table colors {
   hover_color varchar
   // if user_id is NULL then theme is public/global
 }
+
+
+
+        <div class="items-center hidden gap-2 sm:flex">
+          <template v-if="!userLoggedIn">
+            <NuxtLink
+              to="/login"
+              class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
+            >
+              Acceder
+            </NuxtLink>
+            <NuxtLink
+              to="/register"
+              class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
+            >
+              Crear cuenta
+            </NuxtLink>
+          </template>
+          <template v-else>
+            <span class="px-3 text-gray-700">{{ userData?.name || 'Usuario' }}</span>
+            <button
+              @click="handleLogout"
+              class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
+            >
+              Cerrar sesión
+            </button>
+          </template>
+        </div>

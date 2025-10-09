@@ -6,6 +6,7 @@
       <div class="flex items-center gap-3 px-3 py-2 rounded-2xl">
         <!-- Botón menú -->
         <button
+          ref="menuButtonRef"
           @click="open = !open"
           class="inline-flex items-center justify-center w-10 h-10 text-gray-700 transition border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
           aria-label="Abrir menú"
@@ -93,6 +94,7 @@
     <transition name="fade">
       <div
         v-if="open"
+        ref="menuRef"
         class="absolute p-4 space-y-2 text-gray-800 rounded-lg shadow-lg top-16 left-4 bg-gray-50/90 backdrop-blur-md w-max"
       >
         <!-- Menú de un solo nivel -->
@@ -136,10 +138,15 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { userLoggedIn, logout, userData } from "~/store/auth";
+
 const open = ref(false);
 const q = ref("");
+
+// referencia al panel para detectar clicks fuera
+const menuRef = ref(null);
+const menuButtonRef = ref(null);
 
 function onSearch() {
   if (!q.value.trim()) return;
@@ -151,6 +158,26 @@ function handleLogout() {
   logout();
   navigateTo("/login");
 }
+
+// cerrar menú al hacer click fuera
+function handleClickOutside(e) {
+  if (
+    open.value &&
+    menuRef.value &&
+    !menuRef.value.contains(e.target) &&
+    !menuButtonRef.value.contains(e.target) // ignorar clicks en el botón
+  ) {
+    open.value = false;
+  }
+}
+
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
 </script>
 
 <style scoped>

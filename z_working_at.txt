@@ -1,3 +1,76 @@
+PLANIFICACIÓN
+
+#5 08/12 OCT
+    - backend dev
+#4 13/19 OCT
+    - backend dev
+    - limpiar código
+#3 20/26 OCT
+    - frontend dev
+#2 27/02 OCT/NOV
+    - frontend dev
+#1 03/09 NOV
+    - Memoria & imprevistos
+#0 10/16 NOV
+    - DEPLOY
+
+
+BACKEND
+    - ISSUES
+            => Enviar email para recuperar contraseña
+    - Todas las respuestas de la API deben retornar json
+    - Los parámetros de las llamadas deben de ser dinámicos (ahora están hardcodeados)
+    - Adaptar las respuestas del back a las necesidades de la API (formato 24 hrs, cálculos, etc)
+    - Backend del back office
+    - Backend de avanzado
+    - Testear, reventar, corregir
+    - control del tema oscuro
+
+FRONTEND
+    - ISSUES
+            => envío del email tipo 'he olvidado mi contraseña' + página que realmente permita cambiar de contraseña
+    - backoffice
+    - avanzado - admin
+    - seccion pais > autonomia > provincia > municipios
+        --> para poder elegir donde ubicas cada peticion
+    - Buscador multitodo
+    - multitema
+    
+
+Listado de llamadas para revisado a JSON ( y hacer cálculos si es necesario)
+> AUTH
+    - login
+    - 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**************************************************************************************************************************************************
+
+lo que se resiste a funcionar
+
+    - ir a / a veces da un 500
+
+    - envío del email tipo 'he olvidado mi contraseña' + página que realmente permita cambiar de contraseña
+
+
+
 **************************************************************************************************************************************************
 
 HOJA DE RUTA
@@ -10,7 +83,7 @@ HOJA DE RUTA
         BACK
             - Todas las llamadas deben retornar .JSON
             - Crear la página de ubicaciones para poder enlazar con las llamadas
-            - Comprobar que todas las llamadas sin AUTH funcionan: login/logout/passreset/register
+            - Comprobar que todas las llamadas sin AUTH funcionan: (X -> passreset) (V -> login/logout/register)
             - Implementar AUTH en todas las páginas que lo requieran y verificar que funciona
 
         DESPLIEGUE
@@ -19,28 +92,6 @@ HOJA DE RUTA
 
         2 SEMANAS DE FONDO PARA IMPREVISTOS
 
-**************************************************************************************************************************************************
 
-TODO: ##### 9 ##### -> ##### lun 10 a sab 15 nov  #####
-TODO: ##### 8 ##### -> ##### lun 03 a dom 09 nov  #####
-TODO: ##### 7 ##### -> ##### lun 27 a dom 02 nov  #####
-TODO: ##### 6 ##### -> ##### lun 20 a dom 26 oct  #####
-TODO: ##### 5 ##### -> ##### lun 13 a dom 19 oct  #####
-TODO: ##### 4 ##### -> ##### lun 06 a dom 12 oct  #####
-TODO: ##### 3 ##### -> ##### lun 29 a dom 05 oct  #####
-TODO: ##### 2 ##### -> ##### lun 22 a dom 28 sept #####
-
-**************************************************************************************************************************************************
-
-TODO: ##### 1 ##### -> ##### lun 15 a dom 21 sept #####
-
-        hecho:
-                diseñar
-                navegación
-                implementar
-                agregar opciones usr y admin
-                menu
-                
-**************************************************************************************************************************************************
-
+cuando las credenciales son incorrectas se devuelve un 401
 

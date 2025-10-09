@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
-use App\Services\AemetCapService;
-use Illuminate\Support\Facades\Log;
 use Exception;
-use SimpleXMLElement;
 use ZipArchive;
+use SimpleXMLElement;
+use DateTimeImmutable;
+use Illuminate\Http\Request;
+use App\Services\AemetCapService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class AemetController extends Controller
 {
@@ -511,15 +512,15 @@ class AemetController extends Controller
         // Parte útil
         $parteUtil = $prediccion[0]['prediccion']['dia'] ?? [];
 
-        $hoy = date('Y-m-d');
+        $hoy = new DateTimeImmutable('today'); // siempre 00:00:00 del día actual
         $resultado = [];
 
         foreach ($parteUtil as $dia) {
-            $fechaSimple = substr($dia['fecha'], 0, 10);
+            $fechaDia = new DateTimeImmutable(substr($dia['fecha'], 0, 10));
 
-            if ($fechaSimple >= $hoy) {
+            if ($fechaDia >= $hoy) {
                 $resultado[] = [
-                    'fecha' => $fechaSimple,
+                    'fecha' => $fechaDia->format('Y-m-d'),
                     'probPrecipitacion' => $dia['probPrecipitacion'] ?? [],
                     'estadoCielo' => $dia['estadoCielo'] ?? [],
                     'temperatura' => $dia['temperatura'] ?? []

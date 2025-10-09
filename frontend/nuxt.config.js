@@ -7,4 +7,11 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+  vite: {
+    resolve: {
+      alias: {
+        'form-data': false, // no usar form-data
+      },
+    },
+  },
 })
