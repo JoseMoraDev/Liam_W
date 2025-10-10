@@ -14,6 +14,7 @@ use App\Http\Controllers\ComunidadesProvinciasController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\PlayaController;
 use App\Http\Controllers\TomTomController;
+use App\Http\Controllers\AqaPolenController;
 use App\Http\Controllers\UbicacionEndpointUsuarioController;
 
 
@@ -61,6 +62,12 @@ Route::get('/aqicn/feed-here', [AQICNController::class, 'feedHere']);
 
 // por geolocalización
 Route::get('/aqicn/feed-geo', [AQICNController::class, 'feedGeo']);
+
+
+//! Concentración de Polen API AQA
+
+Route::get('/polen', [AqaPolenController::class, 'index']);
+
 
 //! información local guardada en base de datos
 

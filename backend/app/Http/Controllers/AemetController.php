@@ -110,13 +110,57 @@ class AemetController extends Controller
      */
     public function prediccionPlaya($id_playa)
     {
-        $endpoint = "/prediccion/especifica/playa/{$id_playa}";
+        try {
+            $apiKey = env('AEMET_API_KEY');
+            $baseUrl = "https://opendata.aemet.es/opendata/api/prediccion/especifica/playa/{$id_playa}?api_key={$apiKey}";
 
-        $response = $this->fetchAemetData($endpoint);
+            // Cliente Guzzle con timeout y User-Agent
+            $client = new \GuzzleHttp\Client([
+                'timeout' => 20,
+                'headers' => [
+                    'User-Agent' => 'AEMET-Client/1.0 (+https://tuapp.local)'
+                ]
+            ]);
 
-        // Devuelve directamente la respuesta tal cual venga (JSON o texto)
-        return $response;
+            // 1ª llamada: obtener la URL de los datos
+            $initialResponse = $client->get($baseUrl);
+            $step1 = json_decode($initialResponse->getBody()->getContents(), true);
+
+            if (!isset($step1['datos'])) {
+                return response()->json([
+                    'error' => 'No se encontró la URL de datos en la respuesta de AEMET.',
+                    'respuesta' => $step1,
+                ], 500);
+            }
+
+            // 2ª llamada: obtener los datos reales
+            $dataResponse = $client->get($step1['datos']);
+            $rawBody = $dataResponse->getBody()->getContents();
+
+            // Forzar UTF-8 (AEMET suele devolver ISO-8859-1)
+            $utf8Body = mb_convert_encoding($rawBody, 'UTF-8', 'ISO-8859-1');
+
+            // Decodificar JSON
+            $json = json_decode($utf8Body, true);
+
+            // Siempre devolver JSON
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return response()->json($json, 200, [], JSON_UNESCAPED_UNICODE);
+            } else {
+                return response()->json([
+                    'warning' => 'Respuesta de AEMET no era JSON válido, se devolvió texto convertido a UTF-8',
+                    'raw' => $utf8Body,
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error obteniendo la predicción de playa',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
+
+
 
     /**
      * Predicción específica para montaña
@@ -531,6 +575,190 @@ class AemetController extends Controller
         return response()->json($resultado, 200, [], JSON_UNESCAPED_UNICODE);
     }
 
+
+    // public function prediccionHorariaMunicipio($municipioId)
+    // {
+    //     $token = $this->getToken();
+    //     if (!$token) {
+    //         return response()->json(['error' => 'Token AEMET no encontrado'], 500);
+    //     }
+
+    //     $baseUrl = 'https://opendata.aemet.es/opendata/api';
+    //     $endpoint = "/prediccion/especifica/municipio/horaria/{$municipioId}";
+
+    //     $response = Http::get($baseUrl . $endpoint, ['api_key' => $token]);
+    //     if ($response->failed() || !isset($response->json()['datos'])) {
+    //         return response()->json([
+    //             'error' => 'Error en llamada inicial AEMET o respuesta inesperada.',
+    //             'details' => $response->body()
+    //         ], 500);
+    //     }
+
+    //     $dataUrl = $response->json()['datos'];
+
+    //     try {
+    //         $dataResponse = Http::retry(3, 1000)->timeout(15)->connectTimeout(10)->get($dataUrl);
+    //     } catch (\Illuminate\Http\Client\ConnectionException $e) {
+    //         return response()->json([
+    //             'error' => 'Fallo de conexión con AEMET.',
+    //             'message' => $e->getMessage()
+    //         ], 502);
+    //     }
+
+    //     if ($dataResponse->failed()) {
+    //         return response()->json([
+    //             'error' => 'Error al obtener datos reales de AEMET.',
+    //             'details' => $dataResponse->body()
+    //         ], 500);
+    //     }
+
+    //     $jsonString = mb_convert_encoding($dataResponse->body(), 'UTF-8', 'ISO-8859-1');
+    //     $prediccion = json_decode($jsonString, true);
+
+    //     if (json_last_error() !== JSON_ERROR_NONE) {
+    //         return response()->json([
+    //             'error' => 'No se pudo decodificar el JSON.',
+    //             'json_error' => json_last_error_msg(),
+    //             'raw_response' => $jsonString
+    //         ], 500);
+    //     }
+
+    //     if (!is_array($prediccion) || !isset($prediccion[0]['prediccion']['dia'])) {
+    //         return response()->json([
+    //             'error' => 'La estructura de la respuesta de AEMET no es la esperada.',
+    //             'response' => $prediccion
+    //         ], 500);
+    //     }
+
+    //     $parteUtil = $prediccion[0]['prediccion']['dia'] ?? [];
+    //     $nuevoParte = [];
+
+    //     // Hora actual +2 para corregir desfase
+    //     $horaActual = (intval(date('H')) + 2) % 24;
+
+    //     foreach ($parteUtil as $dia) {
+    //         $nuevoDia = [];
+
+    //         foreach ($dia as $clave => $bloque) {
+    //             if (!is_array($bloque)) {
+    //                 $nuevoDia[$clave] = $bloque;
+    //                 continue;
+    //             }
+
+    //             $nuevoBloque = [];
+
+    //             foreach ($bloque as $entrada) {
+    //                 $valor = $entrada['value'] ?? null;
+    //                 $periodo = $entrada['periodo'] ?? null;
+
+    //                 if (!$periodo) {
+    //                     for ($h = 0; $h < 24; $h++) {
+    //                         if ($h >= $horaActual) {
+    //                             $nuevoBloque[] = [
+    //                                 'periodo' => str_pad($h, 2, '0', STR_PAD_LEFT),
+    //                                 'value' => $valor
+    //                             ];
+    //                         }
+    //                     }
+    //                     continue;
+    //                 }
+
+    //                 if (strlen($periodo) == 4) {
+    //                     $inicio = intval(substr($periodo, 0, 2));
+    //                     $fin = intval(substr($periodo, 2, 2));
+    //                     if ($fin < $inicio) $fin += 24;
+
+    //                     for ($h = $inicio; $h < $fin; $h++) {
+    //                         $hora = $h % 24;
+    //                         if ($hora >= $horaActual) {
+    //                             $nuevoBloque[] = [
+    //                                 'periodo' => str_pad($hora, 2, '0', STR_PAD_LEFT),
+    //                                 'value' => $valor
+    //                             ];
+    //                         }
+    //                     }
+    //                     continue;
+    //                 }
+
+    //                 $hora = intval($periodo);
+    //                 if ($hora >= $horaActual) {
+    //                     $nuevoBloque[] = [
+    //                         'periodo' => str_pad($hora, 2, '0', STR_PAD_LEFT),
+    //                         'value' => $valor
+    //                     ];
+    //                 }
+    //             }
+
+    //             // Eliminar duplicados y ordenar
+    //             $horas = [];
+    //             foreach ($nuevoBloque as $item) {
+    //                 $horas[$item['periodo']] = $item;
+    //             }
+
+    //             ksort($horas);
+    //             $nuevoDia[$clave] = array_values($horas);
+    //         }
+
+    //         // Filtrar solo horas que tengan algún valor
+    //         $horasValidas = [];
+    //         for ($h = $horaActual; $h < 24; $h++) {
+    //             $horaTxt = str_pad($h, 2, '0', STR_PAD_LEFT);
+
+    //             $hayDatos = false;
+    //             $camposComprobacion = ['temperatura', 'sensTermica', 'vientoAndRachaMax', 'humedadRelativa', 'precipitacion', 'nieve'];
+    //             foreach ($camposComprobacion as $campo) {
+    //                 if (isset($nuevoDia[$campo])) {
+    //                     foreach ($nuevoDia[$campo] as $v) {
+    //                         if ($v['periodo'] === $horaTxt && isset($v['value']) && $v['value'] !== '—' && $v['value'] !== null && $v['value'] !== '') {
+    //                             $hayDatos = true;
+    //                             break 2;
+    //                         }
+    //                     }
+    //                 }
+    //             }
+
+    //             if ($hayDatos) {
+    //                 $horasValidas[] = $horaTxt;
+    //             }
+    //         }
+
+    //         foreach ($nuevoDia as $clave => &$bloque) {
+    //             if (is_array($bloque)) {
+    //                 $bloque = array_values(array_filter($bloque, function ($v) use ($horasValidas) {
+    //                     return in_array($v['periodo'], $horasValidas);
+    //                 }));
+    //             }
+    //         }
+    //         unset($bloque);
+
+    //         $nuevoParte[] = $nuevoDia;
+    //     }
+
+    //     // Normalizar UTF-8 para evitar errores
+    //     function utf8ize($mixed)
+    //     {
+    //         if (is_array($mixed)) {
+    //             foreach ($mixed as $key => $value) {
+    //                 $mixed[$key] = utf8ize($value);
+    //             }
+    //         } elseif (is_string($mixed)) {
+    //             return mb_convert_encoding($mixed, 'UTF-8', 'UTF-8');
+    //         }
+    //         return $mixed;
+    //     }
+
+    //     return response()->json(utf8ize($nuevoParte), 200);
+    // }
+
+
+
+
+    public function getMunicipiosByProvincia($provincia)
+    {
+        $municipios = \App\Models\Municipio::where('cpro', $provincia)->get();
+        return response()->json($municipios);
+    }
+
     public function prediccionHorariaMunicipio($municipioId)
     {
         $token = $this->getToken();
@@ -541,11 +769,7 @@ class AemetController extends Controller
         $baseUrl = 'https://opendata.aemet.es/opendata/api';
         $endpoint = "/prediccion/especifica/municipio/horaria/{$municipioId}";
 
-        // 1ª llamada: Obtener el enlace a los datos
-        $response = Http::get($baseUrl . $endpoint, [
-            'api_key' => $token
-        ]);
-
+        $response = Http::get($baseUrl . $endpoint, ['api_key' => $token]);
         if ($response->failed() || !isset($response->json()['datos'])) {
             return response()->json([
                 'error' => 'Error en llamada inicial AEMET o respuesta inesperada.',
@@ -553,9 +777,16 @@ class AemetController extends Controller
             ], 500);
         }
 
-        // 2ª llamada: Obtener los datos reales
         $dataUrl = $response->json()['datos'];
-        $dataResponse = Http::get($dataUrl);
+
+        try {
+            $dataResponse = Http::retry(3, 1000)->timeout(15)->connectTimeout(10)->get($dataUrl);
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            return response()->json([
+                'error' => 'Fallo de conexión con AEMET.',
+                'message' => $e->getMessage()
+            ], 502);
+        }
 
         if ($dataResponse->failed()) {
             return response()->json([
@@ -564,7 +795,6 @@ class AemetController extends Controller
             ], 500);
         }
 
-        // Convertir a UTF-8 y decodificar el JSON
         $jsonString = mb_convert_encoding($dataResponse->body(), 'UTF-8', 'ISO-8859-1');
         $prediccion = json_decode($jsonString, true);
 
@@ -576,8 +806,6 @@ class AemetController extends Controller
             ], 500);
         }
 
-        // Comprobación de la estructura esperada
-        // Se mantiene la estructura de array de un solo elemento para la predicción horaria
         if (!is_array($prediccion) || !isset($prediccion[0]['prediccion']['dia'])) {
             return response()->json([
                 'error' => 'La estructura de la respuesta de AEMET no es la esperada.',
@@ -585,15 +813,88 @@ class AemetController extends Controller
             ], 500);
         }
 
-        // Extraer y devolver la parte útil de la predicción
         $parteUtil = $prediccion[0]['prediccion']['dia'] ?? [];
+        $nuevoParte = [];
 
-        return response()->json($parteUtil, 200);
-    }
+        $horaActual = (intval(date('H')) + 2) % 24;
+        $hoy = date('Y-m-d');
 
-    public function getMunicipiosByProvincia($provincia)
-    {
-        $municipios = \App\Models\Municipio::where('cpro', $provincia)->get();
-        return response()->json($municipios);
+        foreach ($parteUtil as $dia) {
+            $nuevoDia = [];
+
+            foreach ($dia as $clave => $bloque) {
+                if (!is_array($bloque)) {
+                    $nuevoDia[$clave] = $bloque;
+                    continue;
+                }
+
+                $nuevoBloque = [];
+
+                foreach ($bloque as $entrada) {
+                    $valor = $entrada['value'] ?? null;
+                    $periodo = $entrada['periodo'] ?? null;
+
+                    if (!$periodo) {
+                        // Día actual: horas desde horaActual
+                        $inicio = ($dia['fecha'] === $hoy) ? $horaActual : 0;
+                        for ($h = $inicio; $h < 24; $h++) {
+                            $nuevoBloque[] = [
+                                'periodo' => str_pad($h, 2, '0', STR_PAD_LEFT),
+                                'value' => $valor
+                            ];
+                        }
+                        continue;
+                    }
+
+                    if (strlen($periodo) == 4) {
+                        $inicio = intval(substr($periodo, 0, 2));
+                        $fin = intval(substr($periodo, 2, 2));
+                        if ($fin < $inicio) $fin += 24;
+
+                        for ($h = $inicio; $h < $fin; $h++) {
+                            $hora = $h % 24;
+                            if ($dia['fecha'] === $hoy && $hora < $horaActual) continue;
+                            $nuevoBloque[] = [
+                                'periodo' => str_pad($hora, 2, '0', STR_PAD_LEFT),
+                                'value' => $valor
+                            ];
+                        }
+                        continue;
+                    }
+
+                    $hora = intval($periodo);
+                    if ($dia['fecha'] === $hoy && $hora < $horaActual) continue;
+
+                    $nuevoBloque[] = [
+                        'periodo' => str_pad($hora, 2, '0', STR_PAD_LEFT),
+                        'value' => $valor
+                    ];
+                }
+
+                $horas = [];
+                foreach ($nuevoBloque as $item) {
+                    $horas[$item['periodo']] = $item;
+                }
+
+                ksort($horas);
+                $nuevoDia[$clave] = array_values($horas);
+            }
+
+            $nuevoParte[] = $nuevoDia;
+        }
+
+        function utf8ize($mixed)
+        {
+            if (is_array($mixed)) {
+                foreach ($mixed as $key => $value) {
+                    $mixed[$key] = utf8ize($value);
+                }
+            } elseif (is_string($mixed)) {
+                return mb_convert_encoding($mixed, 'UTF-8', 'UTF-8');
+            }
+            return $mixed;
+        }
+
+        return response()->json(utf8ize($nuevoParte), 200);
     }
 }

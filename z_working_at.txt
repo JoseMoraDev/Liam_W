@@ -2,6 +2,8 @@ PLANIFICACIÓN
 
 #5 08/12 OCT
     - backend dev
+        playas siempre devuelve json
+        polen crear back y front
 #4 13/19 OCT
     - backend dev
     - limpiar código
@@ -17,7 +19,6 @@ PLANIFICACIÓN
 
 
 BACKEND
-    - Todas las respuestas de la API deben retornar json
     - Los parámetros de las llamadas deben de ser dinámicos (ahora están hardcodeados)
     - Adaptar las respuestas del back a las necesidades de la API (formato 24 hrs, cálculos, etc)
     - Backend del back office
@@ -26,6 +27,17 @@ BACKEND
     - control del tema oscuro
 	- ISSUES
 		=> Enviar email para recuperar contraseña
+        => Errores en las llamadas
+                        error	"Error en llamada inicial AEMET o respuesta inesperada."
+                        details	'{\n "descripcion" : "Error al obtener los datos",\n "estado" : 404\n}'
+    V Todas las respuestas de la API deben retornar json
+
+
+
+
+
+
+
 
 
 

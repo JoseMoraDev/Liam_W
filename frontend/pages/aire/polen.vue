@@ -1,4 +1,5 @@
 <script setup>
+import { ref, onMounted } from "vue";
 import { Line } from "vue-chartjs";
 import {
   Chart as ChartJS,
@@ -11,8 +12,10 @@ import {
   CategoryScale,
 } from "chart.js";
 
-import { ref, onMounted } from "vue";
+// Importa el cliente axios configurado (ya apunta al backend)
+import { axiosClient } from "~/axiosConfig";
 
+// Registrar los componentes de Chart.js
 ChartJS.register(
   Title,
   Tooltip,
@@ -23,6 +26,7 @@ ChartJS.register(
   CategoryScale
 );
 
+// Estado reactivo para los datos
 const datos = ref({
   labels: [],
   abedul: [],
@@ -30,6 +34,7 @@ const datos = ref({
   olivo: [],
 });
 
+// Opciones base para los gráficos
 const opcionesBase = {
   responsive: true,
   maintainAspectRatio: false,
@@ -37,75 +42,81 @@ const opcionesBase = {
     legend: { display: false },
   },
   scales: {
-    x: { ticks: { color: "#ccc", maxRotation: 0, font: { size: 10 } } },
-    y: { ticks: { color: "#ccc" } },
+    x: {
+      ticks: { color: "#ccc", maxRotation: 0, font: { size: 10 } },
+      grid: { color: "rgba(255,255,255,0.1)" },
+    },
+    y: {
+      ticks: { color: "#ccc" },
+      grid: { color: "rgba(255,255,255,0.1)" },
+    },
   },
 };
 
+// Gráficos reactivos
 const charts = ref({
   abedul: { data: null, options: opcionesBase },
   gramineas: { data: null, options: opcionesBase },
   olivo: { data: null, options: opcionesBase },
 });
 
+// Cargar datos desde el backend
 onMounted(async () => {
-  const res = await fetch(
-    "https://air-quality-api.open-meteo.com/v1/air-quality?latitude=38.2699&longitude=-0.7126&hourly=birch_pollen,grass_pollen,olive_pollen"
-  );
-  const data = await res.json();
+  try {
+    const res = await axiosClient.get("/polen");
+    const data = res.data;
 
-  const labels = data.hourly.time.map((t) =>
-    new Date(t).toLocaleString("es-ES", {
-      weekday: "short",
-      hour: "2-digit",
-    })
-  );
+    datos.value = {
+      labels: data.labels,
+      abedul: data.abedul,
+      gramineas: data.gramineas,
+      olivo: data.olivo,
+    };
 
-  datos.value = {
-    labels,
-    abedul: data.hourly.birch_pollen,
-    gramineas: data.hourly.grass_pollen,
-    olivo: data.hourly.olive_pollen,
-  };
+    // Gráfico: Abedul 🌳
+    charts.value.abedul.data = {
+      labels: datos.value.labels,
+      datasets: [
+        {
+          label: "Abedul",
+          data: datos.value.abedul,
+          borderColor: "#4ade80",
+          backgroundColor: "#4ade80",
+          tension: 0.3,
+        },
+      ],
+    };
 
-  charts.value.abedul.data = {
-    labels,
-    datasets: [
-      {
-        label: "Abedul",
-        data: datos.value.abedul,
-        borderColor: "#4ade80",
-        backgroundColor: "#4ade80",
-        tension: 0.3,
-      },
-    ],
-  };
+    // Gráfico: Gramíneas 🌱
+    charts.value.gramineas.data = {
+      labels: datos.value.labels,
+      datasets: [
+        {
+          label: "Gramíneas",
+          data: datos.value.gramineas,
+          borderColor: "#facc15",
+          backgroundColor: "#facc15",
+          tension: 0.3,
+        },
+      ],
+    };
 
-  charts.value.gramineas.data = {
-    labels,
-    datasets: [
-      {
-        label: "Gramíneas",
-        data: datos.value.gramineas,
-        borderColor: "#facc15",
-        backgroundColor: "#facc15",
-        tension: 0.3,
-      },
-    ],
-  };
-
-  charts.value.olivo.data = {
-    labels,
-    datasets: [
-      {
-        label: "Olivo",
-        data: datos.value.olivo,
-        borderColor: "#60a5fa",
-        backgroundColor: "#60a5fa",
-        tension: 0.3,
-      },
-    ],
-  };
+    // Gráfico: Olivo 🌿
+    charts.value.olivo.data = {
+      labels: datos.value.labels,
+      datasets: [
+        {
+          label: "Olivo",
+          data: datos.value.olivo,
+          borderColor: "#60a5fa",
+          backgroundColor: "#60a5fa",
+          tension: 0.3,
+        },
+      ],
+    };
+  } catch (err) {
+    console.error("Error cargando datos de polen:", err);
+  }
 });
 </script>
 
@@ -117,7 +128,7 @@ onMounted(async () => {
       <p class="text-gray-400">Ubicación: Elche (Alicante) · Datos horarios</p>
     </div>
 
-    <!-- Lista de tarjetas, mobile-first -->
+    <!-- Lista de tarjetas -->
     <div class="flex flex-col gap-6">
       <!-- Abedul -->
       <div class="p-4 bg-gray-800 shadow rounded-xl">
@@ -128,6 +139,7 @@ onMounted(async () => {
             :data="charts.abedul.data"
             :options="charts.abedul.options"
           />
+          <p v-else class="text-sm text-gray-400">Cargando datos...</p>
         </div>
         <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
       </div>
@@ -141,6 +153,7 @@ onMounted(async () => {
             :data="charts.gramineas.data"
             :options="charts.gramineas.options"
           />
+          <p v-else class="text-sm text-gray-400">Cargando datos...</p>
         </div>
         <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
       </div>
@@ -154,6 +167,7 @@ onMounted(async () => {
             :data="charts.olivo.data"
             :options="charts.olivo.options"
           />
+          <p v-else class="text-sm text-gray-400">Cargando datos...</p>
         </div>
         <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
       </div>
