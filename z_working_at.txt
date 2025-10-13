@@ -1,80 +1,166 @@
-PLANIFICACIÓN
+-------------------------------------------------------------------------------------------------------------
 
-#5 08/12 OCT
-    - backend dev
-        playas siempre devuelve json
-        polen crear back y front
-#4 13/19 OCT
-    - backend dev
-    - limpiar código
-#3 20/26 OCT
-    - frontend dev
-#2 27/02 OCT/NOV
-    - frontend dev
-#1 03/09 NOV
-    - Memoria & imprevistos
-#0 10/16 NOV
-    - DEPLOY
+        PLANIFICACIÓN
+
+                #4 13/19 OCT
+                        - backend dev
+                        - limpiar código
 
 
+                #3 20/26 OCT
+                        - frontend dev
+
+
+                #2 27/02 OCT/NOV
+                        - frontend dev
+                        - limpiar código
+
+
+                #1 03/09 NOV
+                        - Memoria & imprevistos
+
+
+                #0 10/16 NOV
+                        - DEPLOY
+
+
+-------------------------------------------------------------------------------------------------------------
+
+ver si puedo traducir una sola geo a los parametros que necesita la AEMET
+
+## Qué parámetros tiene cada una de las llamadas?
+coordenadas
+- traffic flow, traffic incidents, air quality geo,
+
+autogeo
+- air quality ip, 
+
+enteros: 0/1
+- todas deben tener una opción de ver por CCAA
+- [0 || 1] nivológica (p. NavarroAragonés || p. Catalán) ==> elegir el mas cerca de la ubi
+- [1234567] playa  ==> elegir la más cerca de la ubi || dar a elegir entre las más cercanas a la ubi || ver todas las de tu provincia || ver por CCAA
+- [1] montaña prevision || dar a elegir, a ver como: las mas cercanas por ubicacion, verlas todas
+- [12] avisos => se pueden ver por pais o CCAA --> obtener la CCAA por ubicación
+- [12345] municipio (diaria || horaria) se decodifica el nombre con la api tomtom y se convierte a coordenadas
+
+
+
+### próximos objetivos
+    - Enpoint últimas alertas - Por Comunidad Autónoma -
+    - hacer autogeo: tener en cuenta, favorito, por defecto y otras ubicaciones
+
+
+### LO QUE ESTOY HACIENDO
+
+  - Autenticación de usuarios
+    - API Tokens con Sanctum
+    - Endpoints REST para gestionar el flujo
+
+    - PROBLEMAS
+      - font_id y color_id tienen que funcionar cuando se crea el usuario y valen NULL, o al crear el user establecerse como 1
+
+  - Plan básico de Auth en tu API (Laravel 11 + Sanctum)
+
+            Logout → POST /api/logout
+            Requiere token válido.
+            Borra el token actual.
+
+            Perfil del usuario autenticado → GET /api/user
+            Devuelve los datos del usuario según el token.
+
+            Forgot password → POST /api/forgot-password
+            Envía un mail con un link/token para resetear contraseña.
+
+            Reset password → POST /api/reset-password
+            Cambia la contraseña usando el token enviado al correo.
+
+# LOG DIARIO DE TRABAJO
+
+de login todo va menos el reset pass y user profile
+
+# LA API DE AEMET FALLA MAS QUE UNA ESCOPETA DE FERIA, HABRA QUE HACER RETRYS
+
+
+SECCIONES USER Y ADMIN
+
+--- user menu: Ajustes ---
+        
+        > ubicaciones
+                - predeterminadas
+                - favoritas
+        > alertas
+                - configurar alertas personalizadas
+            
+        > Interfaz
+                - temas de colores
+                - fuentes
+
+--- root menu ---
+
+        Usuarios
+        - CRUD
+        - roles de user(normal y admin) USERS.rol
+
+        configuración global
+        - limite de peticiones por usuario USERS.max_req_num
+        - logo
+        - colores
+        - fuentes
+
+        logs y auditoría
+        - historial de logins
+        - estadisticas por usuario
+
+        mantenimiento
+
+-------------------------------------------------------------------------------------------------------------
+
+FULLSTACK
+    - plantear backoffice y avanzado
+    - codificar backoffice y avanzado
+    - el middleware no esta funcionando
+
+-------------------------------------------------------------------------------------------------------------
 
 BACKEND
+    - *Backend del back office
+    - *Backend de avanzado
+
+    - Comprobar que todas las llamadas sin AUTH funcionan: (X -> passreset) (V -> login/logout/register)
+        - Comprobar que todos los middleware funcionan correctamente
+    
+    - Crear la página de ubicaciones para poder enlazar con las llamadas
+    
+    - control del tema oscuro, en una tabla?
+
     - Los parámetros de las llamadas deben de ser dinámicos (ahora están hardcodeados)
-    - Adaptar las respuestas del back a las necesidades de la API (formato 24 hrs, cálculos, etc)
-    - Backend del back office
-    - Backend de avanzado
+    
     - Testear, reventar, corregir
-    - control del tema oscuro
+
 	- ISSUES
 		=> Enviar email para recuperar contraseña
+        => Desplegar lo que hay y ver si funciona
         => Errores en las llamadas
                         error	"Error en llamada inicial AEMET o respuesta inesperada."
                         details	'{\n "descripcion" : "Error al obtener los datos",\n "estado" : 404\n}'
-    V Todas las respuestas de la API deben retornar json
 
-
-
-
-
-
-
-
-
+-------------------------------------------------------------------------------------------------------------
 
 FRONTEND
     - ISSUES
             => envío del email tipo 'he olvidado mi contraseña' + página que realmente permita cambiar de contraseña
 			=> manejo errores en register
-    - backoffice
-    - avanzado - admin
+    - *backoffice
+    - *avanzado - admin
+    - hacer el buscador multitodo
+    - En el caso de realizar varias llamadas, utilizar un sistema de control para que si una falla, las demás se completen...promesas?
+    - cuando las credenciales son incorrectas se devuelve un 401
     - seccion pais > autonomia > provincia > municipios
         --> para poder elegir donde ubicas cada peticion
     - Buscador multitodo
     - multitema
-    
 
-Listado de llamadas para pasarlo a JSON ( y hacer cálculos si es necesario)
-	- login/logout/register
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-**************************************************************************************************************************************************
+-------------------------------------------------------------------------------------------------------------
 
 lo que se resiste a funcionar
 
@@ -82,29 +168,6 @@ lo que se resiste a funcionar
 
     - envío del email tipo 'he olvidado mi contraseña' + página que realmente permita cambiar de contraseña
 
+-------------------------------------------------------------------------------------------------------------
 
-
-**************************************************************************************************************************************************
-
-HOJA DE RUTA
-        FRONT
-            - llamdas tiempo, aire y tráfico - PLANTEAR ANTES DE PROGRAMAR
-                - Diseñar la vista de la página de cada una de las llamadas a las apis: enviar los parámetros cuando esté configurado el back
-            - hacer el buscador multitodo
-            - En el caso de realizar varias llamadas, utilizar un sistema de control para que si una falla, las demás se completen...promesas?
-
-        BACK
-            - Todas las llamadas deben retornar .JSON
-            - Crear la página de ubicaciones para poder enlazar con las llamadas
-            - Comprobar que todas las llamadas sin AUTH funcionan: (X -> passreset) (V -> login/logout/register)
-            - Implementar AUTH en todas las páginas que lo requieran y verificar que funciona
-
-        DESPLIEGUE
-
-        MEMORIA
-
-        2 SEMANAS DE FONDO PARA IMPREVISTOS
-
-
-cuando las credenciales son incorrectas se devuelve un 401
 
