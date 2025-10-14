@@ -1,15 +1,18 @@
-import { userLoggedIn, checkAuth } from '~/store/auth';
+// middleware/auth.global.js
+export default defineNuxtRouteMiddleware((to) => {
+  const token = useCookie('token').value
 
-export default defineNuxtRouteMiddleware(async (to, from) => {
-  if (import.meta.client) {
-    const valid = await checkAuth();
+  const rutasProtegidas = ['/previsiones','/ajustes','/perfil']
 
-    if (to.path === '/main' && !valid) {
-      return navigateTo('/login');
-    }
+  const requiereAuth =
+    rutasProtegidas.includes(to.path)
+    || to.path.startsWith('/previsiones/')
+    || to.path.startsWith('/meteo/')
+    || to.path.startsWith('/aire/')
+    || to.path.startsWith('/trafico/')
+    || to.path.startsWith('/ajustes/')
+    || to.path.startsWith('/avanzado/')
 
-    if ((to.path === '/login' || to.path === '/register') && userLoggedIn.value) {
-      return navigateTo('/main');
-    }
-  }
-});
+  if (!token && requiereAuth) return navigateTo('/login')
+  if (token && (to.path === '/' || to.path === '/login')) return navigateTo('/previsiones')
+})

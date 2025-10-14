@@ -50,7 +50,7 @@
 
         <!-- Acciones -->
         <div class="items-center hidden gap-2 sm:flex">
-          <template v-if="!userLoggedIn">
+          <template v-if="!isLoggedIn">
             <NuxtLink
               to="/login"
               class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
@@ -65,9 +65,9 @@
             </NuxtLink>
           </template>
           <template v-else>
-            <span class="px-3 text-gray-700">{{
-              userData?.name || "Usuario"
-            }}</span>
+            <span class="px-3 text-gray-700">
+              {{ currentUser?.name || "Usuario" }}
+            </span>
             <button
               @click="handleLogout"
               class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
@@ -138,34 +138,40 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
 import { userLoggedIn, logout, userData } from "~/store/auth";
+import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 
 const open = ref(false);
 const q = ref("");
 
-// referencia al panel para detectar clicks fuera
+// Referencias al menú
 const menuRef = ref(null);
 const menuButtonRef = ref(null);
 
+// Computed reactivos (enlazan directamente con el store)
+const isLoggedIn = computed(() => userLoggedIn.value);
+const currentUser = computed(() => userData.value);
+
+// Búsqueda
 function onSearch() {
   if (!q.value.trim()) return;
   navigateTo({ path: "/search", query: { q: q.value.trim() } });
   open.value = false;
 }
 
+// Logout
 function handleLogout() {
   logout();
   navigateTo("/login");
 }
 
-// cerrar menú al hacer click fuera
+// Cerrar menú al hacer click fuera
 function handleClickOutside(e) {
   if (
     open.value &&
     menuRef.value &&
     !menuRef.value.contains(e.target) &&
-    !menuButtonRef.value.contains(e.target) // ignorar clicks en el botón
+    !menuButtonRef.value.contains(e.target)
   ) {
     open.value = false;
   }

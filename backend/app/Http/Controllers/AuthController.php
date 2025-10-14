@@ -37,32 +37,36 @@ class AuthController extends Controller
     // 🔹 Login
     public function login(Request $request)
     {
-        try {
-            $request->validate([
-                'email'    => 'required|email',
-                'password' => 'required|string'
-            ]);
+        $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string'
+        ]);
 
-            $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->first();
 
-            if (!$user || !Hash::check($request->password, $user->password)) {
-                return response()->json(['message' => 'Credenciales incorrectas'], 401);
-            }
-
-            $token = $user->createToken('api-token')->plainTextToken;
-
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
-                'message' => 'Login correcto',
-                'token'   => $token,
-                'user'    => $user
-            ]);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'message' => 'Error inesperado',
-                'error'   => $e->getMessage()
-            ], 500);
+                'message' => 'Credenciales incorrectas'
+            ], 401);
         }
+
+        // Crear token con nombre único opcional
+        $token = $user->createToken('api-token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login correcto',
+            'token'   => $token,
+            'user'    => [
+                'id'       => $user->id,
+                'name'     => $user->name,
+                'username' => $user->username,
+                'email'    => $user->email,
+                'font_id'  => $user->font_id,
+                'color_id' => $user->color_id,
+            ]
+        ]);
     }
+
 
     // 🔹 Logout
     public function logout(Request $request)
@@ -72,11 +76,13 @@ class AuthController extends Controller
         return response()->json(['message' => 'Logout correcto']);
     }
 
-    // 🔹 Perfil usuario
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json([
+            'user' => $request->user()
+        ]);
     }
+
 
     // 🔹 Recuperar contraseña (forgot password)
     public function forgotPassword(Request $request)

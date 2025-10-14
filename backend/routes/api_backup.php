@@ -1,110 +1,82 @@
 <?php
 
-// TODO: quitar username de la tabla de usuarios
-
-use App\Http\Controllers\AemetCapController;
-use App\Http\Controllers\AemetController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
-// Api controllers
-use App\Http\Controllers\AQICNController;
+// Controladores
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UbicacionEndpointUsuarioController;
 use App\Http\Controllers\ComunidadesProvinciasController;
-use App\Http\Controllers\HealthController;
+use App\Http\Controllers\AemetController;
+use App\Http\Controllers\AemetCapController;
 use App\Http\Controllers\PlayaController;
 use App\Http\Controllers\TomTomController;
+use App\Http\Controllers\AQICNController;
 use App\Http\Controllers\AqaPolenController;
-use App\Http\Controllers\UbicacionEndpointUsuarioController;
 
+// =============================
+// 🔐 AUTENTICACIÓN
+// =============================
 
-//! Auth
+// Rutas públicas
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
-
-//! middleware
-
+// Rutas protegidas con Sanctum
 Route::middleware('auth:sanctum')->group(function () {
-    // Auth
+    // Perfil del usuario autenticado
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Ubicaciones
-    Route::post('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'storeOrUpdate']);
+    // Ubicaciones del usuario
     Route::get('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'index']);
+    Route::post('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'storeOrUpdate']);
     Route::post('/ubicaciones/{id}/predeterminada', [UbicacionEndpointUsuarioController::class, 'setPredeterminada']);
 });
 
+// =============================
+// 🚗 TRÁFICO (API TomTom)
+// =============================
 
-
-
-//! Tráfico API TomTom
-
-// flujo de tráfico
 Route::get('/tomtom/traffic-flow', [TomTomController::class, 'trafficFlow']);
-
-// accidentes
 Route::get('/tomtom/traffic-incidents', [TomTomController::class, 'trafficIncidents']);
 
-//! Calidad del aire API AQICN
+// =============================
+// 🌫️ CALIDAD DEL AIRE (API AQICN)
+// =============================
 
-// por IP
 Route::get('/aqicn/feed-here', [AQICNController::class, 'feedHere']);
-
-// por geolocalización
 Route::get('/aqicn/feed-geo', [AQICNController::class, 'feedGeo']);
 
-
-//! Concentración de Polen API AQA
+// =============================
+// 🌾 POLEN (API AQA)
+// =============================
 
 Route::get('/polen', [AqaPolenController::class, 'index']);
 
+// =============================
+// 🏖️ INFORMACIÓN LOCAL (BD)
+// =============================
 
-//! información local guardada en base de datos
-
-// listado de playas
 Route::get('/playas', [PlayaController::class, 'index']);
-
-// infomación de playa
 Route::get('/playa/{id}', [PlayaController::class, 'show']);
 
-// Listado de autonomías y provincias
+// Comunidades y provincias
 Route::get('/comunidades-provincias', [ComunidadesProvinciasController::class, 'index']);
-
-// Listar municipios por provincia
 Route::get('/municipios/{provincia}', [AemetController::class, 'getMunicipiosByProvincia']);
 
-//! Condiciones meteorológicas API AEMET
+// =============================
+// 🌦️ AEMET (Datos meteorológicos)
+// =============================
 
-// nivologica
+// Predicciones y avisos
 Route::get('/aemet/nivologica/{area_nivologica}', [AemetController::class, 'prediccionNivologica']);
-
-// montaña
 Route::get('/aemet/montana/{area_montana}/{dia_montana}', [AemetController::class, 'prediccionMontana']);
-
-// playa
 Route::get('/aemet/playa/{id_playa}', [AemetController::class, 'prediccionPlaya']);
-
-// temperatura del mar
 Route::get('/aemet/sst', [AemetController::class, 'temperaturaSuperficieMar']);
-
-// alertas
 Route::get('/avisos_cap/{tipo}/{codigo?}', [AemetCapController::class, 'mostrarAviso']);
-
-//?    Avisos CAP AEMET - borrar?
-Route::get('/aemet/avisos_cap/meteoalerta/{region}', [AemetController::class, 'avisosCapMeteoalerta']);
-
-//?    Avisos CAP AEMET - borrar?
-Route::get('/aemet/avisos_cap/avisos_cap_es', [AemetController::class, 'avisosCapEspaña']);
-
-// Avisos CAP AEMET
 Route::get('/aemet/avisos_cap/ultimoelaborado/area/{area}/{format?}', [AemetController::class, 'avisosCapUltimoElaborado']);
-
-// Predicción diaria por municipio
 Route::get('/prediccion/diaria/{municipioId}', [AemetController::class, 'prediccionDiariaMunicipio']);
-
-// Predicción horaria por municipio
 Route::get('/prediccion/horaria/{municipioId}', [AemetController::class, 'prediccionHorariaMunicipio']);

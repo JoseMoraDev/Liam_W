@@ -124,7 +124,6 @@
 import { ref, onMounted } from "vue";
 import { axiosClient } from "~/axiosConfig";
 import { useRouter } from "vue-router";
-import { login } from "~/store/auth";
 
 const mounted = ref(false);
 const email = ref("");
@@ -133,19 +132,26 @@ const router = useRouter();
 
 async function submitLogin() {
   try {
-    const response = await axiosClient.post("login", {
+    // 🔹 Login al backend
+    const response = await axiosClient.post("/login", {
       email: email.value,
       password: password.value,
     });
-    const newToken = response.data.token;
 
-    // Guardar token y actualizar estado global
-    login(newToken);
+    const token = response.data.token;
 
-    // Redirigir al usuario a /main
-    await router.push("/main");
+    // 🔹 Guardar token en cookie (path '/' para que middleware lo detecte)
+    useCookie("token", { path: "/" }).value = token;
+
+    // 🔹 Guardar usuario en estado global
+    const user = useState("user");
+    user.value = response.data.user;
+
+    // 🔹 Redirigir al usuario a la página principal protegida
+    await router.push("/previsiones");
   } catch (error) {
-    console.error(error);
+    console.error("Error en login:", error);
+    // Aquí puedes mostrar un toast o mensaje de error
   }
 }
 
