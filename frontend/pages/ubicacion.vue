@@ -10,8 +10,5 @@ const comunidad = ref(null);
       class="mt-10"
       @change="(id) => console.log('Elegida:', id)"
     />
-    <p class="mt-4">
-      Comunidad seleccionada: <strong>{{ comunidad || "—" }}</strong>
-    </p>
   </div>
 </template>

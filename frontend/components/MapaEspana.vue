@@ -1,17 +1,20 @@
 <template>
-  <div class="flex flex-col w-screen h-screen">
+  <div>
     <!-- Cabecera -->
     <div
-      class="flex flex-col items-start justify-between mt-12 -translate-y-6 md:flex-row md:items-center"
+      class="flex flex-col items-center justify-start w-full gap-4 mt-4 text-center"
     >
       <h2 class="text-2xl font-semibold text-black">
         Selecciona una Comunidad Autónoma
       </h2>
-      <div class="flex items-center gap-2 mt-2 md:mt-0">
-        <label for="ccaa" class="text-sm text-gray-300">Búsqueda rápida</label>
+
+      <div class="flex flex-col items-center gap-2">
+        <label for="ccaa" class="text-sm text-center text-gray-500"
+          >Búsqueda rápida</label
+        >
         <select
           id="ccaa"
-          class="px-2 py-1 text-sm border rounded"
+          class="px-3 py-2 text-sm border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           v-model="internalValue"
           @change="onSelectChange"
         >
@@ -22,17 +25,18 @@
         </select>
       </div>
     </div>
-    <!-- Mapa ocupa 100% -->
-    <div class="relative flex-1">
+
+    <!-- Contenedor del mapa centrado -->
+    <div class="flex items-center justify-center w-full mt-8">
       <svg
-        :viewBox="spainMap.viewBox"
+        :viewBox="`${viewBox.minX} ${viewBox.minY} ${viewBox.width} ${viewBox.height}`"
         xmlns="http://www.w3.org/2000/svg"
-        class="absolute inset-0 w-full h-full select-none"
-        preserveAspectRatio="xMidYMid slice"
+        class="w-full select-none max-w-7xl"
+        preserveAspectRatio="xMidYMid meet"
         role="img"
       >
-        <!-- Mapa principal España -->
-        <g :transform="computedTransform">
+        <!-- Ppenínsula de España -->
+        <g>
           <template v-for="loc in mainlandLocations" :key="loc.id">
             <path
               class="region"
@@ -46,84 +50,12 @@
             />
           </template>
         </g>
-        <!-- Inset de Canarias -->
-        <g :transform="'translate(-160, -60)'">
-          <rect
-            :x="insetRect.x"
-            :y="insetRect.y"
-            :width="insetRect.width"
-            :height="insetRect.height"
-            fill="none"
-            stroke="#9ca3af"
-            stroke-dasharray="4 4"
-            rx="6"
-            ry="6"
-          />
-          <text
-            :x="insetRect.x + insetRect.width / 2"
-            :y="insetRect.y - 6"
-            text-anchor="middle"
-            class="text-xs fill-gray-300"
-          >
-            Islas Canarias
-          </text>
-          <g :transform="canaryTransform">
-            <path
-              v-if="canary"
-              ref="canaryPath"
-              class="region"
-              :class="sel(canary.id)"
-              :d="canary.path"
-              tabindex="0"
-              :aria-label="canary.name"
-              @click="select(canary.id)"
-              @keydown.enter.prevent="select(canary.id)"
-              @keydown.space.prevent="select(canary.id)"
-            />
-          </g>
-        </g>
-        <!-- Marcadores de Ceuta y Melilla -->
-        <g :transform="'translate(-77, -70)'">
-          <circle
-            :cx="ceutaPos.x"
-            :cy="ceutaPos.y"
-            r="10"
-            class="region"
-            :class="sel('ceuta')"
-            tabindex="0"
-            @click="select('ceuta')"
-            @keydown.enter.prevent="select('ceuta')"
-            @keydown.space.prevent="select('ceuta')"
-          >
-            <title>Ceuta</title>
-          </circle>
-          <circle
-            :cx="melillaPos.x"
-            :cy="melillaPos.y"
-            r="10"
-            class="region"
-            :class="sel('melilla')"
-            tabindex="0"
-            @click="select('melilla')"
-            @keydown.enter.prevent="select('melilla')"
-            @keydown.space.prevent="select('melilla')"
-          >
-            <title>Melilla</title>
-          </circle>
-          <text
-            :x="(ceutaPos.x + melillaPos.x) / 2"
-            :y="Math.min(ceutaPos.y, melillaPos.y) - 10"
-            text-anchor="middle"
-            class="text-xs fill-gray-300"
-          >
-            Ceuta / Melilla
-          </text>
-        </g>
       </svg>
     </div>
+
     <!-- Footer fijo -->
     <div
-      class="w-3/4 p-3 ml-6 text-sm text-center text-gray-200 bg-gray-900 flitems-center -translate-y-80"
+      class="w-full p-3 mt-4 text-sm text-center text-gray-200 bg-gray-900 md:mt-6"
     >
       <strong>Seleccionado: </strong>
       <span v-if="selectedName">{{ selectedName }}</span>
@@ -131,24 +63,13 @@
     </div>
   </div>
 </template>
-<script setup>
-import { watch } from "vue";
-import spainMapRaw from "@svg-maps/spain";
-import { ref, computed, onMounted, onUnmounted } from "vue";
-const mainlandLocations = computed(() =>
-  spainMap.locations.filter((l) => {
-    const nid = normalizeId(l.id ?? l.name);
-    const nname = normalizeId(l.name);
-    return !/canar/.test(nid) && !/canar/.test(nname);
-  })
-);
-const vw = ref(typeof window !== "undefined" ? window.innerWidth : 390);
 
-// Actualiza vw al redimensionar
-const handleResize = () => {
-  vw.value = window.innerWidth;
-};
-/* --- Utilidades --- */ function normalizeId(id) {
+<script setup>
+import { watch, ref, computed, onMounted, onUnmounted } from "vue";
+import spainMapRaw from "@svg-maps/spain";
+
+/* --- Normalización de nombres --- */
+function normalizeId(id) {
   return String(id)
     .toLowerCase()
     .replace(/[\s_]+/g, "-")
@@ -159,6 +80,7 @@ const handleResize = () => {
     .replace(/ú/g, "u")
     .replace(/ñ/g, "n");
 }
+
 function parseViewBox(vb) {
   const m = String(vb).trim().split(/\s+/).map(Number);
   const [minX, minY, width, height] = [m[0], m[1], m[2], m[3]].map((n) =>
@@ -166,7 +88,9 @@ function parseViewBox(vb) {
   );
   return { minX, minY, width: width || 1000, height: height || 1000 };
 }
-/* --- Mapa importado con ids normalizados --- */ const spainMap = {
+
+/* --- Mapa importado con ids normalizados --- */
+const spainMap = {
   viewBox: spainMapRaw.viewBox,
   locations: spainMapRaw.locations.map((l) => ({
     id: normalizeId(l.id ?? l.name),
@@ -174,18 +98,17 @@ function parseViewBox(vb) {
     path: String(l.path),
   })),
 };
-/* --- Separar Canarias --- */ const canary =
-  spainMap.locations.find((l) => {
+
+/* --- Filtrar Canarias del mapa principal --- */
+const mainlandLocations = computed(() =>
+  spainMap.locations.filter((l) => {
     const nid = normalizeId(l.id ?? l.name);
     const nname = normalizeId(l.name);
-    return /canar/.test(nid) || /canar/.test(nname);
-  }) || null;
+    return !/canar/.test(nid) && !/canar/.test(nname);
+  })
+);
 
-// const mainlandLocations = spainMap.locations.filter(
-// // (l) => !canary || l.id !== canary.id
-// // );
-//
-/* --- Select con Ceuta/Melilla --- */
+/* --- Lista desplegable de CCAA --- */
 const ccaaList = spainMap.locations
   .map((l) => ({ id: l.id, name: l.name }))
   .concat([
@@ -193,24 +116,27 @@ const ccaaList = spainMap.locations
     { id: "melilla", name: "Melilla" },
   ])
   .sort((a, b) => a.name.localeCompare(b.name, "es"));
-/* --- v-model --- */ const props = defineProps({
+
+/* --- Props y eventos --- */
+const props = defineProps({
   modelValue: { type: String, default: null },
 });
 const emit = defineEmits(["update:modelValue", "change"]);
+
 const internalValue = ref(props.modelValue);
 watch(
   () => props.modelValue,
-  (v) => {
-    internalValue.value = v;
-  }
+  (v) => (internalValue.value = v)
 );
+
 const selectedName = computed(
-  () => (ccaaList.find((c) => c.id === internalValue.value) || {}).name || ""
+  () => ccaaList.find((c) => c.id === internalValue.value)?.name || ""
 );
+
 function select(id) {
   internalValue.value = id;
-  emit("update:modelValue", internalValue.value);
-  emit("change", internalValue.value);
+  emit("update:modelValue", id);
+  emit("change", id);
 }
 function onSelectChange() {
   emit("update:modelValue", internalValue.value);
@@ -219,63 +145,14 @@ function onSelectChange() {
 function sel(id) {
   return internalValue.value === id ? "selected" : "";
 }
-/* --- ViewBox / inset Canarias --- */ const viewBox = parseViewBox(
-  spainMap.viewBox
-);
-const insetRect = {
-  x: viewBox.minX + viewBox.width * 0.82,
-  y: viewBox.minY + viewBox.height * 0.4,
-  width: viewBox.width * 0.15,
-  height: viewBox.height * 0.15,
-};
-const canaryPath = ref(null);
-const canaryTransform = ref("");
 
-// Escala y traslación relativas al ancho de pantalla
-const computedTransform = computed(() => {
-  const baseWidth = 390;
-  const s = (vw.value / baseWidth) * 0.7; // MAPAESP TAMAÑO
-  const tx = (vw.value / baseWidth) * -41; // MAPAESP POS(X)
-  return `scale(${s}) translate(${tx}, 0)`; // <- CORRECTO
-});
-
-onMounted(() => {
-  if (typeof window !== "undefined") {
-    window.addEventListener("resize", handleResize);
-  }
-
-  if (canaryPath.value) {
-    const bbox = canaryPath.value.getBBox();
-    const padding = 6;
-    const scaleX = (insetRect.width - padding * 2) / bbox.width;
-    const scaleY = (insetRect.height - padding * 2) / bbox.height;
-    const scale = Math.min(scaleX, scaleY);
-    const tx0 = -bbox.x;
-    const ty0 = -bbox.y;
-    const placedWidth = bbox.width * scale;
-    const placedHeight = bbox.height * scale;
-    const dx = insetRect.x + (insetRect.width - placedWidth) / 2;
-    const dy = insetRect.y + (insetRect.height - placedHeight) / 2;
-
-    canaryTransform.value = `translate(${dx},${dy}) scale(${scale}) translate(${tx0},${ty0})`;
-  }
-});
-
-onUnmounted(() => {
-  if (typeof window !== "undefined") {
-    window.removeEventListener("resize", handleResize);
-  }
-});
-
-/* --- Ceuta / Melilla --- */
-const ceutaPos = {
-  x: viewBox.minX + viewBox.width * 0.49,
-  y: viewBox.minY + viewBox.height * 0.54,
-};
-const melillaPos = {
-  x: viewBox.minX + viewBox.width * 0.535,
-  y: viewBox.minY + viewBox.height * 0.56,
-};
+/* --- Ajuste de posición --- */
+const viewBox = (() => {
+  const vb = parseViewBox(spainMap.viewBox);
+  // opcional: centrar horizontalmente la península
+  const centerOffsetX = vb.minX + vb.width / 2 - 400; // 500 = mitad de ancho del canvas deseado
+  return { ...vb, minX: vb.minX - centerOffsetX };
+})();
 </script>
 
 <style scoped>

@@ -9,6 +9,30 @@
       :class="mounted ? 'opacity-100' : 'opacity-0'"
       class="relative z-10 flex flex-col items-center w-full min-h-screen p-6 mt-5 space-y-8 overflow-y-auto transition-opacity duration-300 md:p-8"
     >
+      <!-- LOCATION -->
+      <div
+        class="flex items-center justify-between w-full max-w-md p-4 shadow-inner rounded-2xl bg-gray-100/20 backdrop-blur-md"
+      >
+        <div class="flex items-center w-3/4 space-x-3">
+          <client-only>
+            <font-awesome-icon
+              icon="fa-solid fa-location-dot"
+              class="text-xl text-gray-700"
+            />
+          </client-only>
+          <h2 class="text-lg font-semibold text-gray-900/90">
+            Ubicación: <span class="font-bold text-gray-800">Elche</span>
+          </h2>
+        </div>
+
+        <NuxtLink
+          to="/ubicacion"
+          class="px-3 py-1.5 flex text-sm font-medium text-gray-700 border border-gray-300/50 rounded-full bg-gray-100/20 hover:bg-gray-200/40 transition-all duration-300 shadow-sm"
+        >
+          Cambiar
+        </NuxtLink>
+      </div>
+
       <!-- WEATHER -->
       <div
         class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md"
