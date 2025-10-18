@@ -9,18 +9,15 @@
       </h2>
 
       <div class="flex flex-col items-center gap-2">
-        <label for="ccaa" class="text-sm text-center text-gray-500"
-          >Búsqueda rápida</label
-        >
         <select
           id="ccaa"
           class="px-3 py-2 text-sm border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           v-model="internalValue"
           @change="onSelectChange"
         >
-          <option value="" disabled>-- Selecciona --</option>
+          <option value="" disabled>Búsqueda rápida</option>
           <option v-for="c in ccaaList" :key="c.id" :value="c.id">
-            {{ c.name }}
+            {{ regionNamesEs[c.name] || c.name }}
           </option>
         </select>
       </div>
@@ -43,7 +40,7 @@
               :class="sel(loc.id)"
               :d="loc.path"
               tabindex="0"
-              :aria-label="loc.name"
+              :aria-label="regionNamesEs[loc.name] || loc.name"
               @click="select(loc.id)"
               @keydown.enter.prevent="select(loc.id)"
               @keydown.space.prevent="select(loc.id)"
@@ -165,6 +162,29 @@ function parseViewBox(vb) {
 }
 
 /* --- Datos del mapa --- */
+
+const regionNamesEs = {
+  Andalusia: "Andalucía",
+  Aragon: "Aragón",
+  Asturias: "Asturias",
+  "Balearic Islands": "Islas Baleares",
+  "Basque Country": "País Vasco",
+  "Canary Islands": "Islas Canarias",
+  Cantabria: "Cantabria",
+  "Castile and Leon": "Castilla y León",
+  "Castile-La Mancha": "Castilla La Mancha",
+  Catalonia: "Cataluña",
+  Ceuta: "Ceuta",
+  Extremadura: "Extremadura",
+  Galicia: "Galicia",
+  "La Rioja": "La Rioja",
+  Madrid: "Madrid",
+  Melilla: "Melilla",
+  Murcia: "Región de Murcia",
+  Navarre: "Navarra",
+  Valencia: "Comunidad Valenciana",
+};
+
 const spainMap = {
   viewBox: spainMapRaw.viewBox,
   locations: spainMapRaw.locations.map((l) => ({
@@ -190,13 +210,23 @@ const canary =
 const viewBox = (() => {
   const vb = parseViewBox(spainMap.viewBox);
   const centerOffsetX = vb.minX + vb.width / 2 - 430;
-  return { ...vb, minX: vb.minX - centerOffsetX };
+
+  // Recortar parte inferior (reduce el espacio vacío bajo el mapa)
+  const topOffset = 0; // sube el mapa (puedes ajustar)
+  const heightCut = 200; // recorta el área vacía inferior
+
+  return {
+    minX: vb.minX - centerOffsetX,
+    minY: vb.minY + topOffset,
+    width: vb.width,
+    height: vb.height - heightCut,
+  };
 })();
 
 /* Posiciones relativas */
 const insetRect = {
   x: viewBox.minX + viewBox.width * 0.66,
-  y: viewBox.minY + viewBox.height * 0.43,
+  y: viewBox.minY + viewBox.height * 0.75,
   width: viewBox.width * 0.15,
   height: viewBox.height * 0.15,
 };
@@ -222,11 +252,11 @@ onMounted(() => {
 
 const ceutaPos = {
   x: viewBox.minX + viewBox.width * 0.36,
-  y: viewBox.minY + viewBox.height * 0.54,
+  y: viewBox.minY + viewBox.height * 0.86,
 };
 const melillaPos = {
   x: viewBox.minX + viewBox.width * 0.49,
-  y: viewBox.minY + viewBox.height * 0.56,
+  y: viewBox.minY + viewBox.height * 0.88,
 };
 
 /* --- Lista CCAA --- */
@@ -243,16 +273,17 @@ const props = defineProps({
   modelValue: { type: String, default: null },
 });
 const emit = defineEmits(["update:modelValue", "change"]);
-const internalValue = ref(props.modelValue);
+const internalValue = ref(props.modelValue ?? "");
 
 watch(
   () => props.modelValue,
   (v) => (internalValue.value = v)
 );
 
-const selectedName = computed(
-  () => ccaaList.find((c) => c.id === internalValue.value)?.name || ""
-);
+const selectedName = computed(() => {
+  const c = ccaaList.find((c) => c.id === internalValue.value);
+  return c ? regionNamesEs[c.name] || c.name : "";
+});
 
 function select(id) {
   internalValue.value = id;
