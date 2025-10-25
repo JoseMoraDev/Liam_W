@@ -158,24 +158,7 @@ lo que se resiste a funcionar
 
 ### LO QUE ESTOY HACIENDO
 
-  - Autenticación de usuarios
-    - API Tokens con Sanctum
-    - Endpoints REST para gestionar el flujo
-
     - PROBLEMAS
       - font_id y color_id tienen que funcionar cuando se crea el usuario y valen NULL, o al crear el user establecerse como 1
 
-  - Plan básico de Auth en tu API (Laravel 11 + Sanctum)
 
-            Logout → POST /api/logout
-            Requiere token válido.
-            Borra el token actual.
-
-            Perfil del usuario autenticado → GET /api/user
-            Devuelve los datos del usuario según el token.
-
-            Forgot password → POST /api/forgot-password
-            Envía un mail con un link/token para resetear contraseña.
-
-            Reset password → POST /api/reset-password
-            Cambia la contraseña usando el token enviado al correo.
