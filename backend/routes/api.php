@@ -1,11 +1,18 @@
 <?php
 
 // TODO: quitar username de la tabla de usuarios
-
+// TODO: CLASIFICAR TODOS LOS
 use App\Http\Controllers\AemetCapController;
 use App\Http\Controllers\AemetController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\RecuperarPasswd;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
+use App\Models\User;
 
 // Api controllers
 use App\Http\Controllers\AQICNController;
@@ -17,6 +24,68 @@ use App\Http\Controllers\TomTomController;
 use App\Http\Controllers\AqaPolenController;
 use App\Http\Controllers\UbicacionEndpointUsuarioController;
 
+Route::post('/cambiar-passwd', function (Request $request) {
+    $request->validate([
+        'token' => 'required',
+        'password' => 'required|min:6|confirmed'
+    ]);
+
+    $record = DB::table('password_reset_tokens')
+        ->where('token', $request->token)
+        ->first();
+
+    if (!$record) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Token inválido o expirado.'
+        ], 400);
+    }
+
+    // Actualizar contraseña
+    DB::table('users')
+        ->where('email', $record->email)
+        ->update(['password' => Hash::make($request->password)]);
+
+    // Borrar token
+    DB::table('password_reset_tokens')->where('email', $record->email)->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Contraseña cambiada correctamente.'
+    ]);
+});
+
+
+Route::post('/recuperar-passwd', function (Request $request) {
+    $request->validate([
+        'email' => 'required|email|exists:users,email'
+    ]);
+
+    // TODO: VALIDAR EL USUARIO ASI
+    // if (!$user) {
+    //     return response()->json([
+    //         'success' => false,
+    //         'message' => 'No existe ningún usuario con ese correo.'
+    //     ], 404);
+    // }
+
+    $token = Str::random(64);
+
+    // Guardar token en la tabla
+    DB::table('password_reset_tokens')->updateOrInsert(
+        ['email' => $request->email],
+        ['token' => $token, 'created_at' => now()]
+    );
+
+    // Enviar correo
+    Mail::to($request->email)->send(new RecuperarPasswd($token));
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Correo de recuperación enviado correctamente.'
+    ]);
+});
+
 
 //! Auth
 Route::post('/register', [AuthController::class, 'register']);
@@ -26,7 +95,6 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 
 //! middleware
-
 Route::middleware('auth:sanctum')->group(function () {
     // Auth
     Route::get('/me', [AuthController::class, 'me']);
@@ -42,7 +110,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 //! Tráfico API TomTom
-
 // flujo de tráfico
 Route::get('/tomtom/traffic-flow', [TomTomController::class, 'trafficFlow']);
 
@@ -50,7 +117,6 @@ Route::get('/tomtom/traffic-flow', [TomTomController::class, 'trafficFlow']);
 Route::get('/tomtom/traffic-incidents', [TomTomController::class, 'trafficIncidents']);
 
 //! Calidad del aire API AQICN
-
 // por IP
 Route::get('/aqicn/feed-here', [AQICNController::class, 'feedHere']);
 
@@ -59,12 +125,10 @@ Route::get('/aqicn/feed-geo', [AQICNController::class, 'feedGeo']);
 
 
 //! Concentración de Polen API AQA
-
 Route::get('/polen', [AqaPolenController::class, 'index']);
 
 
 //! información local guardada en base de datos
-
 // listado de playas
 Route::get('/playas', [PlayaController::class, 'index']);
 
@@ -78,7 +142,6 @@ Route::get('/comunidades-provincias', [ComunidadesProvinciasController::class, '
 Route::get('/municipios/{provincia}', [AemetController::class, 'getMunicipiosByProvincia']);
 
 //! Condiciones meteorológicas API AEMET
-
 // nivologica
 Route::get('/aemet/nivologica/{area_nivologica}', [AemetController::class, 'prediccionNivologica']);
 

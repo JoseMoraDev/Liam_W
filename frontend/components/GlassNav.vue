@@ -1,3 +1,4 @@
+<!-- TODO: cuando el usuario se loguea no se actualiza esto -->
 <template>
   <nav
     class="fixed inset-x-0 top-0 z-[9999] h-16 flex items-center bg-gray-100/40 backdrop-blur-md border-b border-gray-300/40 shadow-sm"

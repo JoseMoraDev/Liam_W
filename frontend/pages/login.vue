@@ -80,6 +80,13 @@
               Entrar
             </button>
           </div>
+
+          <p
+            v-if="errorMessage"
+            class="mt-2 font-semibold text-center text-red-500"
+          >
+            {{ errorMessage }}
+          </p>
         </form>
       </div>
 
@@ -129,6 +136,7 @@ const mounted = ref(false);
 const email = ref("");
 const password = ref("");
 const router = useRouter();
+const errorMessage = ref("");
 
 async function submitLogin() {
   try {
@@ -151,7 +159,22 @@ async function submitLogin() {
     await router.push("/previsiones");
   } catch (error) {
     console.error("Error en login:", error);
-    // Aquí puedes mostrar un toast o mensaje de error
+
+    // Capturar errores de Axios y mostrar mensaje amigable
+    if (error.response) {
+      if (error.response.status === 401) {
+        errorMessage.value =
+          "Correo o contraseña incorrectos. Inténtalo de nuevo.";
+      } else {
+        errorMessage.value =
+          "Ha ocurrido un error en el servidor. Inténtalo más tarde.";
+      }
+    } else if (error.request) {
+      errorMessage.value =
+        "No se pudo conectar con el servidor. Revisa tu conexión.";
+    } else {
+      errorMessage.value = "Error desconocido.";
+    }
   }
 }
 

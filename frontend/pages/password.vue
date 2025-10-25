@@ -105,21 +105,39 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import axios from "axios";
 
 const mounted = ref(false);
 const email = ref("");
 const message = ref("");
 const error = ref("");
 
-const sendResetEmail = () => {
+const sendResetEmail = async () => {
   message.value = "";
   error.value = "";
 
-  // Simulación de envío de correo
-  if (email.value.includes("@")) {
-    message.value = `Simulación: se ha enviado un enlace a ${email.value}.`;
-  } else {
+  if (!email.value.includes("@")) {
     error.value = "Por favor, introduce un correo válido.";
+    return;
+  }
+
+  try {
+    const response = await axios.post(
+      "http://localhost:8000/api/recuperar-passwd",
+      {
+        email: email.value,
+      }
+    );
+
+    if (response.data.success) {
+      message.value =
+        response.data.message || `Se ha enviado un enlace a ${email.value}.`;
+    } else {
+      error.value = response.data.message || "Error al enviar el correo.";
+    }
+  } catch (err) {
+    error.value =
+      err.response?.data?.message || "Error al conectar con el servidor.";
   }
 };
 
