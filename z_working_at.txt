@@ -23,11 +23,8 @@
 
     QUE FALTA DEL PROYECTO Y DONDE
 
-        21 - ubicacion > las CCAA con una sola provincia ==> autoseleccionar esa provincia
-        20 - ubicación > aspecto de la página 
-        19 - ubicación > ubicación del mapa en mobile y pc
-        18 - ubicación > provincias clickables
-        17 - ubicación > al clickar, cada provincia abre su modal de municipios
+        18 - ubicación > aspecto de la página 
+        17 - ubicación > ubicación del mapa en mobile y pc
         16 - ubicación > guardar la eleccion del usuario con las distintas coordenadas de las llamadas
         15 - ubicación > puedo ver el mapa sin estar logueado
  
