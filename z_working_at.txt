@@ -1,28 +1,64 @@
 -------------------------------------------------------------------------------------------------------------
+    PLANIFICACIÓN
+        sáb 01/11 ## 15
+        dom 02/11 ## 14
 
-        PLANIFICACIÓN
+        lun 03/11 ## 13
+        mar 04/11 ## 12
+        mié 05/11 ## 11
+        jue 06/11 ## 10
+        vie 07/11 ## 09
+        sáb 08/11 ## 08
+        dom 09/11 ## 07
 
-                #4 13/19 OCT
-                        - backend dev
-                        - limpiar código
+        lun 10/11 ## 06
+        mar 11/11 ## 05
+        mié 12/11 ## 04
+        jue 13/11 ## 03
+        vie 14/11 ## 02
+        sáb 15/11 ## 01
+        dom 16/11 ## 00
 
+-------------------------------------------------------------------------------------------------------------
 
-                #3 20/26 OCT
-                        - frontend dev
+    QUE FALTA DEL PROYECTO Y DONDE
 
-
-                #2 27/02 OCT/NOV
-                        - frontend dev
-                        - limpiar código
-
-
-                #1 03/09 NOV
-                        - Memoria & imprevistos
-
-
-                #0 10/16 NOV
-                        - DEPLOY
-
+        21 - ubicacion > las CCAA con una sola provincia ==> autoseleccionar esa provincia
+        20 - ubicación > aspecto de la página 
+        19 - ubicación > ubicación del mapa en mobile y pc
+        18 - ubicación > provincias clickables
+        17 - ubicación > al clickar, cada provincia abre su modal de municipios
+        16 - ubicación > guardar la eleccion del usuario con las distintas coordenadas de las llamadas
+        15 - ubicación > puedo ver el mapa sin estar logueado
+ 
+        14 - todas las previsiones > que obtengan correctamente las coordenadas y quitar el hardcodeo de cada llamada
+ 
+        13 - ajustes > gestor de ubicaciones
+        12 - ubicación > integrar gestor de ubicaciones
+ 
+        11 - ajustes > gestor de alertas personalizadas
+        10 - ajustes > color de interfa<
+ 
+        09 - toda la app: sustituir colores por variables que se controlan desde el gestor de interfaces
+ 
+        08 - avanzado
+                 > gestión de usuarios ¿CRUD + perfiles?
+                 > apariencia general
+                         >>> fuente y tamaño
+                         >>> gestor de temas de colores ¡CRUD!
+                 > login y estadísticas
+                         >>> historial de logins
+                         >>> estadísticas
+ 
+        07 - glassNav > Términos y enlaces para que la barra de búsqueda los pueda encontrar
+ 
+        06 - tráfico/estado > rehacer toda la página
+        05 - tráfico/incidencias > mejorar bastante la presentación
+ 
+        04 - limpiar el código
+        03 - despliegue final
+        02 - hacer la memoria
+        01 - preparar la entrega > memoria, repo github, credenciales, 
 
 -------------------------------------------------------------------------------------------------------------
 
@@ -145,20 +181,13 @@ FRONTEND
 
 -------------------------------------------------------------------------------------------------------------
 
-lo que se resiste a funcionar
-
-    - ir a / a veces da un 500
-
-    - envío del email tipo 'he olvidado mi contraseña' + página que realmente permita cambiar de contraseña
-
--------------------------------------------------------------------------------------------------------------
-
-
-
-
 ### LO QUE ESTOY HACIENDO
 
     - PROBLEMAS
       - font_id y color_id tienen que funcionar cuando se crea el usuario y valen NULL, o al crear el user establecerse como 1
 
+-------------------------------------------------------------------------------------------------------------
 
+
+1instalado leaflet y chartjs
+--> ver dependencias del proyecto

@@ -5,6 +5,8 @@
   >
     <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
 
+    <div></div>
+
     <div
       :class="mounted ? 'opacity-100' : 'opacity-0'"
       class="relative z-10 flex flex-col items-center w-full min-h-screen p-6 mt-5 space-y-8 overflow-y-auto transition-opacity duration-300 md:p-8"
@@ -25,12 +27,7 @@
           </h2>
         </div>
 
-        <NuxtLink
-          to="/ubicacion"
-          class="px-3 py-1.5 flex text-sm font-medium text-gray-700 border border-gray-300/50 rounded-full bg-gray-100/20 hover:bg-gray-200/40 transition-all duration-300 shadow-sm"
-        >
-          Cambiar
-        </NuxtLink>
+        <NuxtLink to="/ubicacion">Personalizar</NuxtLink>
       </div>
 
       <!-- WEATHER -->
@@ -86,6 +83,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { navigateTo } from "#app";
 
 const mounted = ref(false);
 

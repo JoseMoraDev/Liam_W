@@ -1,11 +1,8 @@
-<!-- layouts/default.vue -->
 <template>
   <div>
-    <!-- Navbar global -->
     <GlassNav />
-
     <main class="pt-10">
-      <slot />
+      <NuxtPage />
     </main>
   </div>
 </template>

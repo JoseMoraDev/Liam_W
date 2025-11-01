@@ -125,20 +125,34 @@
       </footer>
     </div>
   </div>
+  <!-- Spinner de carga -->
+  <div
+    v-if="loading"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+  >
+    <div
+      class="w-16 h-16 border-4 border-gray-200 rounded-full border-t-transparent animate-spin"
+    ></div>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
 import { axiosClient } from "~/axiosConfig";
 import { useRouter } from "vue-router";
+import { login } from "~/store/auth";
 
 const mounted = ref(false);
 const email = ref("");
 const password = ref("");
 const router = useRouter();
 const errorMessage = ref("");
+const loading = ref(false);
 
 async function submitLogin() {
+  loading.value = true;
+  errorMessage.value = "";
+
   try {
     // 🔹 Login al backend
     const response = await axiosClient.post("/login", {
@@ -146,17 +160,23 @@ async function submitLogin() {
       password: password.value,
     });
 
-    const token = response.data.token;
+    // const token = response.data.token;
 
-    // 🔹 Guardar token en cookie (path '/' para que middleware lo detecte)
-    useCookie("token", { path: "/" }).value = token;
+    // // 🔹 Guardar token en cookie (path '/' para que middleware lo detecte)
+    // useCookie("token", { path: "/" }).value = token;
 
-    // 🔹 Guardar usuario en estado global
-    const user = useState("user");
-    user.value = response.data.user;
+    // // 🔹 Guardar usuario en estado global
+    // const user = useState("user");
+    // user.value = response.data.user;
 
-    // 🔹 Redirigir al usuario a la página principal protegida
-    await router.push("/previsiones");
+    // // 🔹 Redirigir al usuario a la página principal protegida
+    // await router.push("/previsiones");
+
+    // ✅ Usar la función del store para guardar token y usuario globalmente
+    await login(response.data.user, response.data.token);
+
+    // ✅ Redirigir tras login correcto
+    router.push("/previsiones");
   } catch (error) {
     console.error("Error en login:", error);
 
@@ -175,6 +195,7 @@ async function submitLogin() {
     } else {
       errorMessage.value = "Error desconocido.";
     }
+    loading.value = false;
   }
 }
 

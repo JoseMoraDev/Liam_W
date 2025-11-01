@@ -150,8 +150,8 @@ const menuRef = ref(null);
 const menuButtonRef = ref(null);
 
 // Computed reactivos (enlazan directamente con el store)
-const isLoggedIn = computed(() => userLoggedIn.value);
-const currentUser = computed(() => userData.value);
+const isLoggedIn = computed(() => userLoggedIn().value);
+const currentUser = computed(() => userData().value);
 
 // Búsqueda
 function onSearch() {

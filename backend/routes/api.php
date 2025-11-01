@@ -4,6 +4,7 @@
 // TODO: CLASIFICAR TODOS LOS
 use App\Http\Controllers\AemetCapController;
 use App\Http\Controllers\AemetController;
+use App\Http\Controllers\MunicipioController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\RecuperarPasswd;
@@ -140,6 +141,8 @@ Route::get('/comunidades-provincias', [ComunidadesProvinciasController::class, '
 
 // Listar municipios por provincia
 Route::get('/municipios/{provincia}', [AemetController::class, 'getMunicipiosByProvincia']);
+Route::get('/municipios/{cpro}', [MunicipioController::class, 'getByProvincia']);
+
 
 //! Condiciones meteorológicas API AEMET
 // nivologica

@@ -1,6 +1,3 @@
-1instalado leaflet y chartjs
---> ver dependencias del proyecto
-
 # Live Ambience Weather - LIAM
 
 # COMMANDS
