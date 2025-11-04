@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Illuminate\Http\Middleware\HandleCors;
 
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -13,6 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__ . '/../routes/api.php',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // CORS para peticiones desde frontend (Nuxt) en desarrollo
+        $middleware->use([
+            HandleCors::class,
+        ]);
         $middleware->group('login', [
             EnsureFrontendRequestsAreStateful::class,
         ]);

@@ -15,6 +15,8 @@ use Database\Seeders\ApiCallsTableSeeder;
 use Database\Seeders\ComunidadesProvinciasSeeder;
 use Database\Seeders\MunicipiosTableSeeder;
 use Database\Seeders\PlayasTableSeeder;
+use Database\Seeders\MontanosasTableSeeder;
+use Database\Seeders\ComunidadesProvinciasAreasSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -30,6 +32,8 @@ class DatabaseSeeder extends Seeder
             WeatherDataTableSeeder::class,
             ApiCallsTableSeeder::class,
             ComunidadesProvinciasSeeder::class,
+            MontanosasTableSeeder::class,
+            ComunidadesProvinciasAreasSeeder::class,
             MunicipiosTableSeeder::class,
             PlayasTableSeeder::class,
             EndpointsTableSeeder::class,

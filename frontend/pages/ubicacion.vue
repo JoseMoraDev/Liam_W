@@ -1,11 +1,31 @@
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { axiosClient } from "../axiosConfig.js";
 const comunidad = ref(null);
 const municipios = ref([]);
 const modalOpen = ref(false);
 const municipioSearch = ref("");
 const loading = ref(false);
+const selectedProvinceName = ref("");
+const selectedProvinceCpro = ref("");
+const selectedAreaCode = ref("");
+const cpList = ref([]); // comunidades_provincias
+const selectedMunicipio = ref(null);
+const selectedMunicipioId = ref("");
+
+// Cargar comunidades_provincias para conocer el mapeo provincia -> área montañosa
+onMounted(async () => {
+  try {
+    const res = await axiosClient.get("comunidades-provincias");
+    cpList.value = Array.isArray(res.data) ? res.data : [];
+  } catch (e) {
+    console.error("Error cargando comunidades_provincias", e);
+    cpList.value = [];
+  }
+});
+
+// (UI de área montañosa y selects principales se trasladan a MapaEspana)
+
 const filteredMunicipios = computed(() => {
   const q = municipioSearch.value.trim().toLowerCase();
   if (!q) return municipios.value;
@@ -68,10 +88,17 @@ const PROV_CPRO = {
 };
 
 async function onProvinceChange(payload) {
+  // No abrir el modal cuando el cambio de provincia sea programático (restauración inicial)
+  if (payload?.auto) return;
   const name = payload?.name || "";
   const fallback = payload?.cpro || "";
   const cpro = PROV_CPRO[name] || fallback;
   if (!cpro) return;
+  selectedProvinceName.value = name;
+  selectedProvinceCpro.value = cpro;
+  // Autocompletar el área montañosa a partir de comunidades_provincias
+  const match = cpList.value.find((r) => String(r.cpro) === String(cpro));
+  selectedAreaCode.value = match?.codAreaMont || "";
   try {
     // open modal immediately and show loader
     modalOpen.value = true;
@@ -100,6 +127,23 @@ async function onProvinceChange(payload) {
     municipios.value = Array.isArray(res.data)
       ? res.data.map(m => ({ ...m, nombre: fixMojibake(m?.nombre) }))
       : [];
+    // Reset municipio seleccionado al cambiar de provincia
+    selectedMunicipio.value = null;
+    selectedMunicipioId.value = "";
+    // Limpiar persistencia previa de municipio al cambiar de provincia
+    try {
+      localStorage.removeItem('locpref_municipio_id');
+      localStorage.removeItem('locpref_municipio_name');
+      // Si hay usuario autenticado, también limpiar clave namespaced
+      try {
+        const me = await axiosClient.get('me');
+        const uid = me?.data?.id ?? me?.data?.user?.id;
+        if (uid) {
+          localStorage.removeItem(`locpref_${uid}_municipio_id`);
+          localStorage.removeItem(`locpref_${uid}_municipio_name`);
+        }
+      } catch {}
+    } catch {}
     console.log("Municipios (", cpro, "):", municipios.value);
   } catch (e) {
     console.error("Error cargando municipios", e);
@@ -115,19 +159,67 @@ watch(
     if (!open) municipioSearch.value = "";
   }
 );
+
+function onMunicipioClick(m) {
+  if (!m) return;
+  selectedMunicipio.value = m;
+  selectedMunicipioId.value = m.id ?? "";
+  modalOpen.value = false;
+}
+
+const municipioOptions = computed(() =>
+  (municipios.value || []).map(m => ({ id: m.id, name: m.nombre }))
+);
+
+watch(
+  () => selectedMunicipioId.value,
+  (id) => {
+    if (!id) return;
+    const m = (municipios.value || []).find(mm => String(mm.id) === String(id));
+    if (m) selectedMunicipio.value = m;
+    // Persistir selección de municipio en localStorage (genérico + namespaced si hay user)
+    (async () => {
+      try {
+        localStorage.setItem('locpref_municipio_id', String(id));
+        localStorage.setItem('locpref_municipio_name', String(m?.nombre || ''));
+        try {
+          const me = await axiosClient.get('me');
+          const uid = me?.data?.id ?? me?.data?.user?.id;
+          if (uid) {
+            localStorage.setItem(`locpref_${uid}_municipio_id`, String(id));
+            localStorage.setItem(`locpref_${uid}_municipio_name`, String(m?.nombre || ''));
+          }
+        } catch {}
+      } catch {}
+    })();
+  }
+);
+
+// Los selects principales y el área montañosa están en MapaEspana
 </script>
 
 <template>
   <div class="p-6">
-    <MapaEspana v-model="comunidad" class="mt-10" @change="(id) => console.log('Elegida:', id)"
-      @province-change="onProvinceChange" />
+    <!-- Selección de CCAA y provincia se mantiene en MapaEspana -->
+
+    <MapaEspana
+      v-model="comunidad"
+      v-model:municipioId="selectedMunicipioId"
+      :municipios="municipios"
+      :suppressRestore="true"
+      class="mt-10"
+      @change="(id) => console.log('Elegida:', id)"
+      @province-change="onProvinceChange"
+    />
+
+    
 
     <div v-if="modalOpen" class="fixed inset-0 z-50 overflow-y-auto">
       <div class="fixed inset-0 bg-black/50" @click="modalOpen = false"></div>
       <div class="absolute inset-0 flex items-center justify-center">
         <div class="z-50 w-full max-w-md p-5 mx-4 bg-white rounded-lg shadow-lg">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold">Selecciona el municipio</h3>
+            <h3 class="text-base font-semibold">Selecciona el municipio en {{ selectedProvinceName }}</h3>
             <button type="button" class="px-3 py-1 text-sm border rounded-full" @click="modalOpen = false">
               Cerrar
             </button>
@@ -146,7 +238,9 @@ watch(
               </div>
               <ul v-else class="divide-y divide-gray-200">
                 <li v-for="m in filteredMunicipios" :key="m.id"
-                  class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50">
+                  class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50"
+                  @click="onMunicipioClick(m)"
+                  role="button" tabindex="0">
                   {{ m.nombre }}
                 </li>
               </ul>

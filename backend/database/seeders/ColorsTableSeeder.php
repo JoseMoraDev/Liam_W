@@ -9,10 +9,12 @@ class ColorsTableSeeder extends Seeder
 {
     public function run()
     {
+        $userId = DB::table('users')->value('id');
+
         DB::table('colors')->insert([
             [
                 'name' => 'Blue',
-                'user_id' => 1,
+                'user_id' => $userId ?? null,
                 'description' => 'Blue color theme',
                 'font_id' => 1,
                 'font_size' => '12px',

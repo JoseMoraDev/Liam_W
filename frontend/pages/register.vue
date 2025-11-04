@@ -89,7 +89,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import { axiosClient } from "~/axiosConfig";
 
 const mounted = ref(false);
 const router = useRouter();
@@ -109,7 +109,7 @@ async function submitRegister() {
   }
 
   try {
-    const res = await axios.post("http://localhost:8000/api/register", {
+    const res = await axiosClient.post("/register", {
       name: name.value,
       email: email.value,
       password: password.value,

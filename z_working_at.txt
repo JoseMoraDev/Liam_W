@@ -1,8 +1,47 @@
 -------------------------------------------------------------------------------------------------------------
-    PLANIFICACIÓN
-        sáb 01/11 ## 15
-        dom 02/11 ## 14
 
+FALTA
+        ubicacion: 
+                > aspecto de la página 
+                > ubicación del mapa en mobile y pc
+                > integrar gestor de ubicaciones
+ 
+        todas las llamadas
+                > que obtengan correctamente las coordenadas y quitar el hardcodeo de cada llamada
+ 
+        ajustes
+                > gestor de ubicaciones
+                > gestor de alertas personalizadas
+                > color de interfaz
+  
+        avanzado
+                 > gestión de usuarios ¿CRUD + perfiles?
+                 > apariencia general
+                         >>> fuente y tamaño
+                         >>> gestor de temas de colores ¡CRUD!
+                 > login y estadísticas
+                         >>> historial de logins
+                         >>> estadísticas
+ 
+        07 - glassNav > Términos y enlaces para que la barra de búsqueda los pueda encontrar
+ 
+        06 - tráfico/estado > rehacer toda la página
+        05 - tráfico/incidencias > mejorar bastante la presentación
+
+        09 - toda la app: sustituir colores por variables que se controlan desde el gestor de interfaces
+
+        > Control de errores en las llamadas
+
+        > Testear, reventar, corregir
+ 
+        04 - limpiar el código
+        03 - despliegue final
+        02 - hacer la memoria
+        01 - preparar la entrega > memoria, repo github, credenciales, 
+
+-------------------------------------------------------------------------------------------------------------
+
+    COUNTDOWN
         lun 03/11 ## 13
         mar 04/11 ## 12
         mié 05/11 ## 11
@@ -21,50 +60,7 @@
 
 -------------------------------------------------------------------------------------------------------------
 
-    QUE FALTA DEL PROYECTO Y DONDE
-
-        18 - ubicación > aspecto de la página 
-        17 - ubicación > ubicación del mapa en mobile y pc
-        16 - ubicación > guardar la eleccion del usuario con las distintas coordenadas de las llamadas
-        15 - ubicación > puedo ver el mapa sin estar logueado
- 
-        14 - todas las previsiones > que obtengan correctamente las coordenadas y quitar el hardcodeo de cada llamada
- 
-        13 - ajustes > gestor de ubicaciones
-        12 - ubicación > integrar gestor de ubicaciones
- 
-        11 - ajustes > gestor de alertas personalizadas
-        10 - ajustes > color de interfa<
- 
-        09 - toda la app: sustituir colores por variables que se controlan desde el gestor de interfaces
- 
-        08 - avanzado
-                 > gestión de usuarios ¿CRUD + perfiles?
-                 > apariencia general
-                         >>> fuente y tamaño
-                         >>> gestor de temas de colores ¡CRUD!
-                 > login y estadísticas
-                         >>> historial de logins
-                         >>> estadísticas
- 
-        07 - glassNav > Términos y enlaces para que la barra de búsqueda los pueda encontrar
- 
-        06 - tráfico/estado > rehacer toda la página
-        05 - tráfico/incidencias > mejorar bastante la presentación
- 
-        04 - limpiar el código
-        03 - despliegue final
-        02 - hacer la memoria
-        01 - preparar la entrega > memoria, repo github, credenciales, 
-
--------------------------------------------------------------------------------------------------------------
-
 GESTOR DE UBICACIONES
-
-        arriba de previsión meteorológica
-                meter lo de la ubicación
-
-                hay que arreglar este componente de mapa para que funcione bien
 
         TRADUCIR COORDENADAS A NOMBRE COORDENADAS
                 - ver si puedo traducir una sola geo a los parametros que necesita la AEMET
@@ -95,7 +91,7 @@ GESTOR DE UBICACIONES
 
 # LA API DE AEMET FALLA MAS QUE UNA ESCOPETA DE FERIA, HABRA QUE HACER RETRYS
 
--------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------
 
 SECCIONES USER Y ADMIN
 
@@ -131,30 +127,8 @@ SECCIONES USER Y ADMIN
 
 -------------------------------------------------------------------------------------------------------------
 
-FULLSTACK
-    - plantear backoffice y avanzado
-    - codificar backoffice y avanzado
-    - el middleware no esta funcionando
-
--------------------------------------------------------------------------------------------------------------
-
 BACKEND
-    - *Backend del back office
-    - *Backend de avanzado
 
-    - Comprobar que todas las llamadas sin AUTH funcionan: (X -> passreset) (V -> login/logout/register)
-        - Comprobar que todos los middleware funcionan correctamente
-    
-    - Crear la página de ubicaciones para poder enlazar con las llamadas
-    
-    - control del tema oscuro, en una tabla?
-
-    - Los parámetros de las llamadas deben de ser dinámicos (ahora están hardcodeados)
-    
-    - Testear, reventar, corregir
-
-	- ISSUES
-		=> Enviar email para recuperar contraseña
         => Desplegar lo que hay y ver si funciona
         => Errores en las llamadas
                         error	"Error en llamada inicial AEMET o respuesta inesperada."
@@ -163,16 +137,9 @@ BACKEND
 -------------------------------------------------------------------------------------------------------------
 
 FRONTEND
-    - ISSUES
-            => envío del email tipo 'he olvidado mi contraseña' + página que realmente permita cambiar de contraseña
-			=> manejo errores en register
-    - *backoffice
-    - *avanzado - admin
-    - hacer el buscador multitodo
+
     - En el caso de realizar varias llamadas, utilizar un sistema de control para que si una falla, las demás se completen...promesas?
     - cuando las credenciales son incorrectas se devuelve un 401
-    - seccion pais > autonomia > provincia > municipios
-        --> para poder elegir donde ubicas cada peticion
     - Buscador multitodo
     - multitema
 

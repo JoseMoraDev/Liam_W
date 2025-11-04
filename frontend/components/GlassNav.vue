@@ -7,6 +7,7 @@
       <div class="flex items-center gap-3 px-3 py-2 rounded-2xl">
         <!-- Botón menú -->
         <button
+          v-if="isLoggedIn"
           ref="menuButtonRef"
           @click="open = !open"
           class="inline-flex items-center justify-center w-10 h-10 text-gray-700 transition border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
@@ -16,6 +17,7 @@
             ><font-awesome-icon icon="fa-solid fa-bars"
           /></client-only>
         </button>
+        <div v-else class="w-10 h-10"></div>
 
         <!-- Marca -->
         <NuxtLink
@@ -25,8 +27,17 @@
           Live Ambience
         </NuxtLink>
 
+        <NuxtLink
+          to="/ubicacion"
+          class="hidden px-2 py-1 ml-2 text-sm text-gray-800 border rounded-lg sm:inline-flex items-center gap-2 border-gray-300/60 bg-white/50 hover:bg-white/70"
+        >
+          <client-only><font-awesome-icon icon="fa-solid fa-location-dot" class="w-4 h-4" /></client-only>
+          <span>{{ municipioDisplay }}</span>
+        </NuxtLink>
+
         <!-- Buscador -->
         <form
+          v-if="isLoggedIn"
           @submit.prevent="onSearch"
           class="flex items-center justify-center flex-1"
         >
@@ -36,6 +47,9 @@
               type="search"
               placeholder="Buscar..."
               class="w-full pl-4 text-gray-800 border rounded-full h-11 pr-11 border-gray-300/50 bg-gray-50/50 placeholder:italic placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300/50 focus:border-gray-300/50"
+              @input="onInput"
+              @focus="showSuggestions = true"
+              @blur="onBlur"
             />
             <button
               type="submit"
@@ -46,11 +60,35 @@
                 ><font-awesome-icon icon="fa-solid fa-magnifying-glass"
               /></client-only>
             </button>
+
+            <div
+              v-if="showSuggestions && q"
+              class="absolute z-50 w-full mt-1 overflow-hidden bg-white border rounded-lg shadow-lg"
+            >
+              <template v-if="filteredTerms.length">
+                <ul class="py-1 divide-y divide-gray-100">
+                  <li
+                    v-for="t in filteredTerms"
+                    :key="t"
+                    class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50"
+                    @mousedown.prevent="selectTerm(t)"
+                  >
+                    {{ t }}
+                  </li>
+                </ul>
+              </template>
+              <div v-else class="px-3 py-2 text-sm text-gray-500">
+                No se encontraron términos para esta búsqueda
+              </div>
+            </div>
           </div>
         </form>
+        <div v-else class="flex-1">
+          <div class="w-full max-w-xl h-11"></div>
+        </div>
 
         <!-- Acciones -->
-        <div class="items-center hidden gap-2 sm:flex">
+        <div class="items-center hidden gap-2 ml-auto sm:flex">
           <template v-if="!isLoggedIn">
             <NuxtLink
               to="/login"
@@ -94,7 +132,7 @@
     <!-- Panel móvil -->
     <transition name="fade">
       <div
-        v-if="open"
+        v-if="isLoggedIn && open"
         ref="menuRef"
         class="absolute p-4 space-y-2 text-gray-800 rounded-lg shadow-lg top-16 left-4 bg-gray-50/90 backdrop-blur-md w-max"
       >
@@ -144,6 +182,59 @@ import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 
 const open = ref(false);
 const q = ref("");
+const showSuggestions = ref(false);
+
+// Allowlisted terms
+const allowlist = [
+  "previsiones",
+  "ajustes",
+  "avanzado",
+  "personalizar ubicación",
+  "previsión municipal horaria",
+  "previsión municipal diaria",
+  "avisos",
+  "previsión nivológica",
+  "previsión playa",
+  "previsión montaña",
+  "calidad ambiental del aire",
+  "polen en el aire",
+  "estado del tráfico",
+  "alertas de tráfico",
+  "ajustes",
+  "ubicaciones predeterminadas",
+  "ubicaciones favoritas",
+  "configurar alertas personalizadas",
+  "tema de colores",
+];
+
+function norm(s) {
+  return String(s)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+const filteredTerms = computed(() => {
+  const query = norm(q.value);
+  if (!query) return allowlist;
+  return allowlist.filter((t) => norm(t).includes(query));
+});
+
+function onInput() {
+  showSuggestions.value = true;
+}
+
+function onBlur() {
+  // Delay to allow click selection
+  setTimeout(() => (showSuggestions.value = false), 100);
+}
+
+function selectTerm(t) {
+  q.value = t;
+  showSuggestions.value = false;
+  onSearch();
+}
 
 // Referencias al menú
 const menuRef = ref(null);
@@ -153,10 +244,34 @@ const menuButtonRef = ref(null);
 const isLoggedIn = computed(() => userLoggedIn().value);
 const currentUser = computed(() => userData().value);
 
+const municipioName = ref("");
+const municipioDisplay = computed(() => municipioName.value || "Selecciona ubicación");
+
+function lsMunicipioName() {
+  try {
+    const uid = currentUser.value?.id;
+    if (userLoggedIn().value && uid) {
+      const v = localStorage.getItem(`locpref_${uid}_municipio_name`);
+      if (v) return v;
+    }
+    return localStorage.getItem("locpref_municipio_name") || "";
+  } catch {
+    return "";
+  }
+}
+
+function refreshMunicipio() {
+  municipioName.value = lsMunicipioName();
+}
+
 // Búsqueda
 function onSearch() {
   if (!q.value.trim()) return;
-  navigateTo({ path: "/search", query: { q: q.value.trim() } });
+  // Only navigate if input matches allowlist term (case/accents-insensitive)
+  const input = norm(q.value);
+  const match = allowlist.find((t) => norm(t) === input);
+  if (!match) return; // ignore non-allowlisted queries
+  navigateTo({ path: "/search", query: { q: match } });
   open.value = false;
 }
 
@@ -180,10 +295,17 @@ function handleClickOutside(e) {
 
 onMounted(() => {
   document.addEventListener("click", handleClickOutside);
+  refreshMunicipio();
+  window.addEventListener("storage", refreshMunicipio);
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleClickOutside);
+  window.removeEventListener("storage", refreshMunicipio);
+});
+
+watch(isLoggedIn, () => {
+  refreshMunicipio();
 });
 </script>
 

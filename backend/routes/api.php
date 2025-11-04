@@ -24,6 +24,7 @@ use App\Http\Controllers\PlayaController;
 use App\Http\Controllers\TomTomController;
 use App\Http\Controllers\AqaPolenController;
 use App\Http\Controllers\UbicacionEndpointUsuarioController;
+use App\Http\Controllers\UserLocationPrefController;
 
 Route::post('/cambiar-passwd', function (Request $request) {
     $request->validate([
@@ -95,8 +96,8 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 
-//! middleware
-Route::middleware('auth:sanctum')->group(function () {
+//! middleware (SPA cookie-based): ensure web session + sanctum
+Route::middleware(['web', 'auth:sanctum'])->group(function () {
     // Auth
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -105,7 +106,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'storeOrUpdate']);
     Route::get('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'index']);
     Route::post('/ubicaciones/{id}/predeterminada', [UbicacionEndpointUsuarioController::class, 'setPredeterminada']);
+
+    // Preferencias de ubicación del usuario (última selección)
+    Route::get('/user/location-pref', [UserLocationPrefController::class, 'show']);
 });
+
+// Ruta pública para guardar preferencia de ubicación (relajada por requerimiento)
+Route::post('/user/location-pref', [UserLocationPrefController::class, 'store']);
 
 
 

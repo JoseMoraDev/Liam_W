@@ -6,10 +6,12 @@
         Selecciona Comunidad y Provincia
       </h2>
 
-      <div class="flex flex-row flex-wrap items-start justify-center gap-4">
-        <select id="ccaa" v-model="internalValue" @change="onSelectChange"
-          class="px-3 py-2 text-sm text-gray-900 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          :class="{ 'text-gray-400': !internalValue }" ref="ccaaSelectEl" :style="{ width: selectWidth }">
+      <div class="flex flex-row flex-wrap items-start justify-center gap-6">
+        <div class="flex flex-col items-start gap-1">
+          <span class="text-xs font-semibold text-gray-600">Selecciona Comunidad Autónoma</span>
+          <select id="ccaa" v-model="internalValue" @change="onSelectChange"
+            class="px-3 py-2 text-sm text-gray-900 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            :class="{ 'text-gray-400': !internalValue }" ref="ccaaSelectEl" :style="{ width: selectWidth }">
           <!-- Placeholder -->
           <option value="" disabled hidden class="text-gray-400">
             Selecciona CCAA
@@ -19,22 +21,75 @@
           <option v-for="c in ccaaList" :key="c.id" :value="c.id">
             {{ regionNamesEs[c.name] || c.name }}
           </option>
-        </select>
+          </select>
+        </div>
 
         <!-- Select de provincia -->
-        <select v-model="selectedProvince"
-          class="px-3 py-2 text-sm text-gray-900 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 peer"
-          :class="{ 'text-gray-400': !selectedProvince }" :style="{ width: selectWidth }" :disabled="!internalValue">
-          <!-- Placeholder -->
-          <option value="" disabled hidden class="text-gray-400">
-            Selecciona provincia
-          </option>
+        <div class="flex flex-col items-start gap-1">
+          <span class="text-xs font-semibold text-gray-600">Selecciona Provincia</span>
+          <select v-model="selectedProvince"
+            class="px-3 py-2 text-sm text-gray-900 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 peer"
+            :class="{ 'text-gray-400': !selectedProvince }" :style="{ width: selectWidth }" :disabled="!internalValue">
+            <!-- Placeholder -->
+            <option value="" disabled hidden class="text-gray-400">
+              Selecciona provincia
+            </option>
 
-          <!-- Opciones -->
-          <option v-for="p in selectedProvinces" :key="p.cpro" :value="p.cpro">
-            {{ p.nombre }}
-          </option>
-        </select>
+            <!-- Opciones -->
+            <option v-for="p in selectedProvinces" :key="p.cpro" :value="p.cpro">
+              {{ p.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Select de Municipio -->
+        <div class="flex flex-col items-start gap-1">
+          <span class="text-xs font-semibold text-gray-600">Selecciona Municipio</span>
+          <select
+            v-model="localMunicipioId"
+            class="px-3 py-2 text-sm text-gray-900 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            :class="{ 'text-gray-400': !localMunicipioId }"
+            :style="{ width: selectWidth }"
+            :disabled="!selectedProvince"
+          >
+            <option value="" disabled hidden class="text-gray-400">Selecciona municipio</option>
+            <option v-for="m in municipioOptions" :key="m.id" :value="m.id">{{ m.name }}</option>
+          </select>
+        </div>
+
+        <!-- Select de Área montañosa (solo nombre) -->
+        <div class="flex flex-col items-start gap-1">
+          <span class="text-xs font-semibold text-gray-600">Selecciona Zona Montañosa</span>
+          <select v-model="selectedAreaCode"
+            class="px-3 py-2 text-sm text-gray-900 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            :class="{ 'text-gray-400': !selectedAreaCode }" :style="{ width: selectWidth }" :disabled="montanosasOptions.length === 0">
+            <option value="" disabled hidden class="text-gray-400">
+              Selecciona área montañosa
+            </option>
+            <option v-for="opt in montanosasOptions" :key="opt.code" :value="opt.code">
+              {{ opt.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Botón Guardar -->
+        <div class="flex items-end">
+          <button
+            class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded shadow disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700"
+            :disabled="!canSave || saving"
+            @click="saveNow"
+            :title="canSave ? (saving ? 'Guardando...' : 'Guardar ubicación') : 'Completa todas las selecciones'"
+          >
+            <span v-if="!saving">Guardar</span>
+            <span v-else class="inline-flex items-center gap-2">
+              <svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+              </svg>
+              Guardando…
+            </span>
+          </button>
+        </div>
       </div>
       <!-- FIN Cabecera -->
 
@@ -335,13 +390,43 @@
         </svg>
       </div>
 
+      <!-- Modal: Selecciona provincia -->
+      <div v-if="provinceModalOpen" class="fixed inset-0 z-50 overflow-y-auto">
+        <div class="fixed inset-0 bg-black/50" @click="provinceModalOpen = false"></div>
+        <div class="absolute inset-0 flex items-start justify-center py-10">
+          <div class="z-50 w-full max-w-md p-5 mx-4 bg-white rounded-lg shadow-lg">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-semibold text-left">Selecciona la provincia en {{ selectedName }}</h3>
+              <button type="button" class="px-3 py-1 text-sm border rounded-full" @click="provinceModalOpen = false">
+                Cerrar
+              </button>
+            </div>
+            <div class="mt-3 overflow-y-auto max-h-80">
+              <template v-if="(selectedProvinces || []).length">
+                <ul class="divide-y divide-gray-200 text-left">
+                  <li v-for="p in selectedProvinces" :key="p.cpro" class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 text-left"
+                    @click="onProvincePick(p.cpro)">
+                    {{ p.nombre }}
+                  </li>
+                </ul>
+              </template>
+              <div v-else class="px-2 py-3 text-sm text-gray-500">No hay provincias disponibles.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, nextTick } from "vue";
 import spainMapRaw from "@svg-maps/spain";
+import axios from "axios";
+import { userLoggedIn, userData } from "~/store/auth";
+import { axiosClient } from "../axiosConfig.js";
+import { navigateTo } from "#app";
 
 /* --- Normalización --- */
 function normalizeId(id) {
@@ -354,6 +439,78 @@ function normalizeId(id) {
     .replace(/ó/g, "o")
     .replace(/ú/g, "u")
     .replace(/ñ/g, "n");
+}
+
+function onProvincePick(cpro) {
+  selectProvince(cpro);
+  provinceModalOpen.value = false;
+}
+
+async function saveNow() {
+  if (!canSave.value) return;
+  try {
+    saving.value = true;
+    // Asegurar cookie CSRF de Sanctum antes de POST protegido
+    try {
+      const apiBase = axiosClient.defaults.baseURL || '';
+      const root = apiBase.replace(/\/?api\/?$/, '');
+      await axios.get(`${root}/sanctum/csrf-cookie`, { withCredentials: true });
+    } catch (_) {}
+    const m = (props.municipios || []).find(
+      (mm) => String(mm.id) === String(localMunicipioId.value)
+    );
+    const payload = {
+      ccaa_id: selectedCodauto.value || null,
+      cpro: selectedProvince.value || null,
+      area_code: selectedAreaCode.value || null,
+      municipio_id: localMunicipioId.value || null,
+      municipio_name: m?.nombre || null,
+      user_id: userId.value || null,
+    };
+    await axiosClient.post("user/location-pref", payload);
+    // Persistir municipio para GlassNav
+    try {
+      const uid = userId.value;
+      const name = m?.nombre || '';
+      const idVal = localMunicipioId.value || '';
+      if (uid) {
+        localStorage.setItem(`locpref_${uid}_municipio_name`, name);
+        localStorage.setItem(`locpref_${uid}_municipio_id`, String(idVal));
+      }
+      // Fallback sin namespace
+      localStorage.setItem('locpref_municipio_name', name);
+      localStorage.setItem('locpref_municipio_id', String(idVal));
+      // Forzar actualización de GlassNav en esta pestaña
+      window.dispatchEvent(new Event('storage'));
+    } catch {}
+    console.log("[MapaEspana] Preferencia guardada", payload);
+    // Redirigir a previsiones
+    navigateTo('/previsiones');
+  } catch (e) {
+    console.error("[MapaEspana] Error guardando preferencia", e);
+    if (e?.response?.status === 401) {
+      alert('Inicia sesión para guardar tu ubicación.');
+    }
+  }
+  finally {
+    saving.value = false;
+  }
+}
+function savePrefDebounced() {
+  if (!isAuthed.value) return;
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      const payload = {
+        ccaa_id: selectedCodauto.value || null,
+        cpro: selectedProvince.value || null,
+        area_code: selectedAreaCode.value || null,
+      };
+      await axiosClient.post('user/location-pref', payload);
+    } catch (_) {
+      // Silenciar errores; localStorage actúa como respaldo
+    }
+  }, 300);
 }
 
 function parseViewBox(vb) {
@@ -612,15 +769,180 @@ onMounted(() => {
     // Fallback width
     selectWidth.value = '280px';
   }
+  // Mantener sincronizado con el store de auth
+  try {
+    watch(() => userLoggedIn().value, (v) => { isAuthed.value = !!v; });
+    watch(() => userData().value, (ud) => { userId.value = ud?.id ?? null; });
+  } catch (_) {}
+});
+
+const municipioOptions = computed(() =>
+  (props.municipios || []).map((m) => ({ id: m.id, name: m.nombre }))
+);
+const localMunicipioId = computed({
+  get: () => (props.municipioId != null ? String(props.municipioId) : ""),
+  set: (v) => emit('update:municipioId', v),
 });
 
 /* --- Props y eventos --- */
-const props = defineProps({ modelValue: { type: String, default: null } });
-const emit = defineEmits(["update:modelValue", "change", "province-change"]);
+const props = defineProps({
+  modelValue: { type: String, default: null },
+  municipios: { type: Array, default: () => [] },
+  municipioId: { type: [String, Number], default: "" },
+  suppressRestore: { type: Boolean, default: false },
+});
+const emit = defineEmits(["update:modelValue", "change", "province-change", "update:municipioId"]);
 const internalValue = ref(props.modelValue ?? "");
 const selectedProvince = ref("");
 const ccaaSelectEl = ref(null);
 const selectWidth = ref("auto");
+const isAuthed = ref(false);
+let saveTimer = null;
+const userId = ref(null);
+const programmaticProvinceSet = ref(false);
+const provinceModalOpen = ref(false);
+const saving = ref(false);
+const selectedCodauto = computed(() => {
+  const row = (cpList.value || []).find(
+    (r) => String(r.cpro) === String(selectedProvince.value)
+  );
+  return row?.codauto || '';
+});
+const hasMunicipio = computed(() => {
+  const v = localMunicipioId.value;
+  return v !== null && v !== undefined && String(v) !== '';
+});
+const canSave = computed(() => {
+  return Boolean(
+    (internalValue.value && String(internalValue.value) !== '') &&
+    (selectedProvince.value && String(selectedProvince.value) !== '') &&
+    (selectedAreaCode.value && String(selectedAreaCode.value) !== '') &&
+    hasMunicipio.value
+  );
+});
+
+function nsKey(base) {
+  return isAuthed.value && userId.value ? `locpref_${userId.value}_${base}` : `locpref_${base}`;
+}
+function lsGet(base) {
+  try { return localStorage.getItem(nsKey(base)); } catch { return null; }
+}
+function lsSet(base, val) {
+  try { localStorage.setItem(nsKey(base), String(val ?? '')); } catch {}
+}
+function lsRemoveLegacyGuestKeys() {
+  // Remove non-namespaced keys to avoid cross-user leakage
+  try {
+    ['ccaa','cpro','area'].forEach(k => localStorage.removeItem(`locpref_${k}`));
+  } catch {}
+}
+
+// Datos de comunidades_provincias y área montañosa
+const cpList = ref([]);
+const selectedAreaCode = ref("");
+const montanosasOptions = computed(() => {
+  const map = new Map();
+  for (const r of cpList.value) {
+    if (r?.codAreaMont && r?.areaMontana && !map.has(r.codAreaMont)) {
+      map.set(r.codAreaMont, r.areaMontana);
+    }
+  }
+  return Array.from(map.entries()).map(([code, name]) => ({ code, name }));
+});
+
+onMounted(async () => {
+  // Cargar catálogo comunidades_provincias
+  try {
+    const res = await axiosClient.get("comunidades-provincias");
+    cpList.value = Array.isArray(res.data) ? res.data : [];
+  } catch (e) {
+    console.error("[MapaEspana] Error cargando comunidades_provincias", e);
+    cpList.value = [];
+  }
+
+  // Detectar autenticación siempre (independiente de suppressRestore)
+  let authed = false;
+  // Inicializar desde el store (mismo origen que GlassNav)
+  try {
+    const logged = userLoggedIn().value;
+    const ud = userData().value;
+    if (logged) {
+      isAuthed.value = true;
+      userId.value = ud?.id ?? null;
+    }
+  } catch (_) {}
+  try {
+    const me = await axiosClient.get('me');
+    if (me && me.status === 200) {
+      authed = true;
+      isAuthed.value = true;
+      userId.value = me?.data?.id ?? me?.data?.user?.id ?? null;
+      lsRemoveLegacyGuestKeys();
+      // Restaurar solo si no se suprime
+      if (!props.suppressRestore) {
+        try {
+          const pref = await axiosClient.get('user/location-pref');
+          const data = pref?.data || {};
+          if (data.ccaa_id) {
+            internalValue.value = String(data.ccaa_id);
+            emit("update:modelValue", internalValue.value);
+            emit("change", internalValue.value);
+          }
+          if (data.cpro) {
+            setTimeout(() => {
+              const provs = selectedProvinces.value || [];
+              if (provs.some(p => String(p.cpro) === String(data.cpro))) {
+                programmaticProvinceSet.value = true;
+                selectedProvince.value = String(data.cpro);
+                setTimeout(() => { programmaticProvinceSet.value = false; });
+              }
+            });
+          }
+          if (data.area_code) {
+            selectedAreaCode.value = String(data.area_code);
+          }
+        } catch (_) {}
+      }
+    }
+  } catch (_) {}
+
+  // Invitado: restaurar desde localStorage solo si no se suprime
+  if (!authed && !props.suppressRestore) {
+    try {
+      const savedCcaa = lsGet('ccaa') || '';
+      const savedCpro = lsGet('cpro') || '';
+      const savedArea = lsGet('area') || '';
+      if (savedCcaa) {
+        internalValue.value = savedCcaa;
+        emit("update:modelValue", savedCcaa);
+        emit("change", savedCcaa);
+        if (savedCpro) {
+          setTimeout(() => {
+            const provs = selectedProvinces.value || [];
+            if (provs.some(p => String(p.cpro) === String(savedCpro))) {
+              programmaticProvinceSet.value = true;
+              selectedProvince.value = savedCpro;
+              setTimeout(() => { programmaticProvinceSet.value = false; });
+            }
+          });
+        }
+      }
+      if (savedArea) {
+        selectedAreaCode.value = savedArea;
+      }
+    } catch {}
+  }
+
+  // Si se suprime restauración, asegurar estado vacío visible
+  if (props.suppressRestore) {
+    internalValue.value = "";
+    selectedProvince.value = "";
+    selectedAreaCode.value = "";
+    emit("update:modelValue", "");
+    emit("change", "");
+    emit('update:municipioId', "");
+  }
+});
 
 watch(
   () => props.modelValue,
@@ -636,18 +958,25 @@ watch(
     if (!cpro) return;
     const prov = selectedProvinces.value.find((p) => p.cpro === cpro);
     const name = prov ? prov.nombre : "";
-    emit("province-change", { cpro, name });
+    emit("province-change", { cpro, name, auto: programmaticProvinceSet.value });
+    // Autocompletar área montañosa según tabla comunidades_provincias
+    const match = cpList.value.find((r) => String(r.cpro) === String(cpro));
+    selectedAreaCode.value = match?.codAreaMont || "";
+    // Guardar provincia
+    lsSet('cpro', cpro);
+    // Guardado en BD (autenticado)
+    savePrefDebounced();
   }
 );
 
 /* --- Lista CCAA --- */
-const ccaaList = spainMap.locations
-  .map((l) => ({ id: l.id, name: l.name }))
+const ccaaList = Object.keys(mapasCCAA)
+  .map((k) => ({ id: normalizeId(k), name: k }))
   .concat([
     { id: "ceuta", name: "Ceuta" },
     { id: "melilla", name: "Melilla" },
   ])
-  .sort((a, b) => a.name.localeCompare(b.name, "es"));
+  .sort((a, b) => (regionNamesEs[a.name] || a.name).localeCompare(regionNamesEs[b.name] || b.name, "es"));
 
 /* --- Provincias de la CCAA seleccionada --- */
 const selectedProvinces = computed(() => {
@@ -675,23 +1004,41 @@ function select(id) {
   selectedProvince.value = ""; // Reset provincia al cambiar CCAA
   emit("update:modelValue", id);
   emit("change", id);
+  // Limpiar municipio seleccionado al cambiar CCAA
+  emit('update:municipioId', "");
+  // Guardar CCAA
+  lsSet('ccaa', id);
   // Auto-seleccionar la provincia si la CCAA solo tiene una
   const provs = selectedProvinces.value;
   if (Array.isArray(provs) && provs.length === 1) {
     selectProvince(provs[0].cpro);
   }
+  // Guardado en BD (autenticado)
+  savePrefDebounced();
 }
 function selectProvince(cpro) {
   selectedProvince.value = cpro;
+  // Limpiar municipio seleccionado al cambiar provincia
+  emit('update:municipioId', "");
 }
-function onSelectChange() {
+async function onSelectChange() {
   emit("update:modelValue", internalValue.value);
   emit("change", internalValue.value);
+  // Limpiar municipio seleccionado al cambiar CCAA desde desplegable
+  emit('update:municipioId', "");
+  // Guardar CCAA
+  lsSet('ccaa', internalValue.value);
   // Auto-seleccionar la provincia si la CCAA solo tiene una
+  await nextTick();
   const provs = selectedProvinces.value;
   if (Array.isArray(provs) && provs.length === 1) {
     selectProvince(provs[0].cpro);
+  } else {
+    // Si NO hay exactamente una provincia (0 o >1), abrir modal de provincias
+    provinceModalOpen.value = true;
   }
+  // Guardado en BD (autenticado)
+  savePrefDebounced();
 }
 function sel(id) {
   return internalValue.value === id ? "selected" : "";
@@ -699,6 +1046,15 @@ function sel(id) {
 function selProvince(cpro) {
   return selectedProvince.value === cpro ? "selected" : "";
 }
+
+// Guardar área montañosa cuando cambie manualmente
+watch(
+  () => selectedAreaCode.value,
+  (code) => {
+    lsSet('area', code || '');
+    savePrefDebounced();
+  }
+);
 
 function onMapClick(event) {
   const target = event.target;

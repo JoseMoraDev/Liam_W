@@ -2,7 +2,7 @@
 export default defineNuxtRouteMiddleware((to) => {
   const token = useCookie('token').value
 
-  const rutasProtegidas = ['/previsiones','/ajustes','/perfil']
+  const rutasProtegidas = ['/previsiones', '/ajustes', '/perfil']
 
   const requiereAuth =
     rutasProtegidas.includes(to.path)
@@ -12,6 +12,7 @@ export default defineNuxtRouteMiddleware((to) => {
     || to.path.startsWith('/trafico/')
     || to.path.startsWith('/ajustes/')
     || to.path.startsWith('/avanzado/')
+    || to.path.startsWith('/ubicacion')
 
   if (!token && requiereAuth) return navigateTo('/login')
   if (token && (to.path === '/' || to.path === '/login')) return navigateTo('/previsiones')
