@@ -16,5 +16,6 @@ class UserLocationPref extends Model
         'area_code',
         'municipio_id',
         'municipio_name',
+        'codigo_playa',
     ];
 }

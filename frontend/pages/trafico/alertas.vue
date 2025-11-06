@@ -1,11 +1,12 @@
 <script setup>
 import { ref, onMounted, nextTick } from "vue";
-import axios from "axios";
+import { axiosClient } from "~/axiosConfig";
 import "leaflet/dist/leaflet.css";
 
 const incidentes = ref([]);
 const cargando = ref(true);
 let map = null;
+const center = ref([40.4168, -3.7038]); // fallback Madrid
 
 // Función para obtener descripción de la categoría
 function descripcionCategoria(iconCategory) {
@@ -68,8 +69,8 @@ async function initMap() {
   const mapElement = document.getElementById("mapa");
   if (!mapElement || map) return;
 
-  // Inicializamos mapa en Elche
-  map = L.map(mapElement).setView([38.2699, -0.7126], 14);
+  // Inicializamos mapa
+  map = L.map(mapElement).setView(center.value, 13);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors",
@@ -96,9 +97,17 @@ async function initMap() {
 // Cargar datos
 onMounted(async () => {
   try {
-    const res = await axios.get(
-      "http://localhost:8000/api/tomtom/traffic-incidents?bbox=-0.735,38.250,-0.690,38.280"
-    );
+    // Obtener coordenadas y construir un bbox pequeño alrededor
+    const pref = await axiosClient.get('/user/location-pref');
+    const { lat, lon } = pref.data || {};
+    if (lat != null && lon != null) {
+      center.value = [lat, lon];
+    }
+    const delta = 0.02; // ~2km aprox
+    const bbox = (lat != null && lon != null)
+      ? `${(lon - delta).toFixed(3)},${(lat - delta).toFixed(3)},${(lon + delta).toFixed(3)},${(lat + delta).toFixed(3)}`
+      : `-3.73,40.40,-3.68,40.44`; // bbox Madrid
+    const res = await axiosClient.get('/tomtom/traffic-incidents', { params: { bbox } });
     incidentes.value = res.data.incidents || [];
 
     await nextTick();
@@ -113,9 +122,7 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen p-4 text-gray-200 bg-gray-900">
-    <h1 class="mt-12 mb-6 text-2xl font-bold text-center">
-      🚦 Incidencias de tráfico en Elche
-    </h1>
+    <h1 class="mt-12 mb-6 text-2xl font-bold text-center">🚦 Incidencias de tráfico</h1>
 
     <div v-if="cargando" class="py-10 text-lg text-center">
       Cargando incidentes...

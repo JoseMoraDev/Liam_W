@@ -473,13 +473,16 @@ async function saveNow() {
       const uid = userId.value;
       const name = m?.nombre || '';
       const idVal = localMunicipioId.value || '';
+      const ccaa = selectedCodauto.value || '';
       if (uid) {
         localStorage.setItem(`locpref_${uid}_municipio_name`, name);
         localStorage.setItem(`locpref_${uid}_municipio_id`, String(idVal));
+        localStorage.setItem(`locpref_${uid}_ccaa_id`, String(ccaa));
       }
       // Fallback sin namespace
       localStorage.setItem('locpref_municipio_name', name);
       localStorage.setItem('locpref_municipio_id', String(idVal));
+      localStorage.setItem('locpref_ccaa_id', String(ccaa));
       // Forzar actualización de GlassNav en esta pestaña
       window.dispatchEvent(new Event('storage'));
     } catch {}

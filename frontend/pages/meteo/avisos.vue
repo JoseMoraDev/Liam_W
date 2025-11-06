@@ -23,7 +23,7 @@
         v-else-if="aviso"
         class="max-w-lg px-6 py-4 mt-12 text-center shadow-inner rounded-2xl bg-white/10 backdrop-blur-sm"
       >
-        <h1 class="text-2xl font-bold text-yellow-300 md:text-3xl">
+        <h1 :class="['text-2xl','font-bold','md:text-3xl', levelClass(aviso.info.parameters.level)]">
           🚨 {{ aviso.info.event }}
         </h1>
         <p class="mt-2 text-sm text-gray-200">
@@ -71,7 +71,7 @@
         v-if="aviso"
         class="max-w-lg px-6 py-4 mt-8 space-y-2 text-center shadow-inner rounded-2xl bg-white/5 backdrop-blur-sm"
       >
-        <p class="text-lg font-bold text-yellow-300">
+        <p :class="['text-lg','font-bold', levelClass(aviso.info.parameters.level)]">
           Nivel: {{ aviso.info.parameters.level.toUpperCase() }}
         </p>
         <p class="text-sm text-gray-200">
@@ -120,7 +120,8 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import { axiosClient } from "~/axiosConfig";
+import { userData } from "~/store/auth";
 
 const mounted = ref(false);
 const aviso = ref(null);
@@ -152,12 +153,43 @@ const areas = {
 
 //! TODO: Hacer las áreas dinámicas
 
+function norm(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[^a-z0-9]+/g,'').replace(/[\u0300-\u036f]/g,'');
+}
+
+function mapRegionFromCodauto(cod){
+  const map = {
+    '01':'61','02':'62','03':'63','04':'64','05':'65','06':'66','07':'67','08':'68','09':'69','10':'70','11':'71','12':'72','13':'73','14':'74','15':'75','16':'76','17':'77','18':'78','19':'79'
+  };
+  const key = cod==null?null:String(cod).padStart(2,'0');
+  return map[key]||null;
+}
+
+function mapRegionFromName(name){
+  const n = norm(name);
+  const pairs = [
+    ['andalucia','61'],['aragon','62'],['asturias','63'],
+    ['illesbalears','64'],['islasbaleares','64'],['baleares','64'],
+    ['canarias','65'],['cantabria','66'],['castillayleon','67'],['castillalamancha','68'],
+    ['cataluna','69'],['catalunya','69'],['cataluna','69'],['catalonia','69'],
+    ['extremadura','70'],['galicia','71'],['madrid','72'],['murcia','73'],['navarra','74'],['paisvasco','75'],['larioja','76'],
+    ['comunitatvalenciana','77'],['comunidadvalenciana','77'],['valencia','77'],
+    ['ceuta','78'],['melilla','79']
+  ];
+  for(const [k,v] of pairs){ if(n.includes(k)) return v; }
+  return null;
+}
+
 onMounted(async () => {
   mounted.value = true;
   try {
-    const { data } = await axios.get(
-      "http://localhost:8000/api/aemet/avisos_cap/ultimoelaborado/area/77"
-    );
+    // Obtener región dinámica desde preferencias; fallback por ccaa_id o nombre
+    const uid = userData()?.value?.id;
+    const prefRes = await axiosClient.get('/user/location-pref', { params: uid ? { user_id: uid } : {} });
+    const pref = prefRes?.data || {};
+    let region = pref.avisos_region || mapRegionFromCodauto(pref.ccaa_id) || mapRegionFromName(pref.ccaa_id) || 'esp';
+    console.debug('[Avisos] región usada:', region, 'ccaa_id:', pref.ccaa_id, 'avisos_region:', pref.avisos_region);
+    const { data } = await axiosClient.get(`/aemet/avisos_cap/ultimoelaborado/area/${region}`);
     aviso.value = data;
   } catch (err) {
     error.value = err.message;
@@ -176,5 +208,14 @@ function formateaFecha(iso) {
     day: "numeric",
     month: "long",
   });
+}
+
+function levelClass(level){
+  const v = String(level||'').toUpperCase();
+  if (v.includes('VERDE')) return 'text-green-400';
+  if (v.includes('AMARILLO')) return 'text-yellow-300';
+  if (v.includes('NARANJA')) return 'text-orange-400';
+  if (v.includes('ROJO')) return 'text-red-500';
+  return 'text-gray-200';
 }
 </script>

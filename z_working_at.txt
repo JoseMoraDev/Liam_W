@@ -6,8 +6,16 @@ FALTA
                 > ubicación del mapa en mobile y pc
                 > integrar gestor de ubicaciones
  
-        todas las llamadas
-                > que obtengan correctamente las coordenadas y quitar el hardcodeo de cada llamada
+        llamada playa maquetar y que funcione
+
+        glassNav 
+                > Términos y enlaces para que la barra de búsqueda los pueda encontrar
+ 
+        tráfico/estado 
+                > rehacer toda la página
+        
+        tráfico/incidencias 
+                > mejorar bastante la presentación
  
         ajustes
                 > gestor de ubicaciones
@@ -22,13 +30,9 @@ FALTA
                  > login y estadísticas
                          >>> historial de logins
                          >>> estadísticas
- 
-        07 - glassNav > Términos y enlaces para que la barra de búsqueda los pueda encontrar
- 
-        06 - tráfico/estado > rehacer toda la página
-        05 - tráfico/incidencias > mejorar bastante la presentación
 
-        09 - toda la app: sustituir colores por variables que se controlan desde el gestor de interfaces
+        toda la app
+                sustituir colores por variables que se controlan desde el gestor de interfaces
 
         > Control de errores en las llamadas
 

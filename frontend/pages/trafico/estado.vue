@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import { axiosClient } from "~/axiosConfig";
+import { userData } from "~/store/auth";
 
 // Vue Leaflet
 import { LMap, LTileLayer, LMarker, LPolyline } from "@vue-leaflet/vue-leaflet";
@@ -86,9 +87,14 @@ onMounted(async () => {
   }
 
   try {
-    const res = await axios.get(
-      "http://localhost:8000/api/tomtom/traffic-flow?point=38.2699,-0.7126&unit=KMPH"
-    );
+    // Obtener coordenadas de la ubicación guardada
+    const uid = userData()?.value?.id;
+    const pref = await axiosClient.get('/user/location-pref', { params: uid ? { user_id: uid } : {} });
+    const { lat, lon } = pref.data || {};
+    const params = (lat != null && lon != null)
+      ? { point: `${lat},${lon}`, unit: 'KMPH' }
+      : { point: `40.4168,-3.7038`, unit: 'KMPH' }; // Fallback Madrid
+    const res = await axiosClient.get('/tomtom/traffic-flow', { params });
     datos.value = res.data.flowSegmentData;
 
     if (datos.value) {
@@ -169,7 +175,7 @@ const onMapReady = (map) => {
 
 <template>
   <div class="min-h-screen p-4 text-gray-200 bg-gray-900">
-    <h1 class="mb-4 text-xl font-bold">🚦 Estado del tráfico en Elche</h1>
+    <h1 class="mb-4 text-xl font-bold">🚦 Estado del tráfico</h1>
 
     <div v-if="!datos">Cargando tráfico...</div>
 

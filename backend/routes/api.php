@@ -107,12 +107,15 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
     Route::get('/ubicaciones', [UbicacionEndpointUsuarioController::class, 'index']);
     Route::post('/ubicaciones/{id}/predeterminada', [UbicacionEndpointUsuarioController::class, 'setPredeterminada']);
 
-    // Preferencias de ubicación del usuario (última selección)
+    // Preferencias de ubicación del usuario (última selección) [protegido por sesión]
     Route::get('/user/location-pref', [UserLocationPrefController::class, 'show']);
 });
 
 // Ruta pública para guardar preferencia de ubicación (relajada por requerimiento)
 Route::post('/user/location-pref', [UserLocationPrefController::class, 'store']);
+
+// Ruta pública para consultar preferencia de ubicación (acepta user_id)
+Route::get('/user/location-pref', [UserLocationPrefController::class, 'show']);
 
 
 

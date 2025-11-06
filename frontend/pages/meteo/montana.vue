@@ -5,27 +5,39 @@
       <h1
         class="text-3xl font-bold tracking-wide text-gray-800 dark:text-gray-100"
       >
-        Predicción AEMET
+        Predicción AEMET Montaña
       </h1>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ prediccion.origen.tipo }}
+      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400" v-if="zona">
+        Zona: {{ zona }} · Día: {{ dia }}
       </p>
+      <p v-if="loading" class="mt-2 text-sm text-gray-500 dark:text-gray-400">Cargando…</p>
+      <p v-if="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
+      <div class="flex items-center justify-center gap-3 mt-3" v-if="!error">
+        <span class="text-sm text-gray-600 dark:text-gray-300">Mostrar</span>
+        <select v-model="selectedDay" class="px-3 py-1 text-sm rounded-md bg-white/70 dark:bg-black/30 border border-white/40 dark:border-gray-700/40">
+          <option v-for="opt in dayOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+        </select>
+      </div>
     </div>
 
-    <!-- Estado general -->
-    <section class="space-y-4">
+    <!-- Boletín como texto plano -->
+    <section v-if="!loading && !error && isTexto" class="space-y-4">
+      <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200">Boletín</h2>
+      <pre class="p-4 overflow-auto text-sm whitespace-pre-wrap rounded-2xl bg-white/20 dark:bg-black/20 border border-white/30 dark:border-gray-700/40">{{ boletin }}</pre>
+    </section>
+
+    <!-- Boletín estructurado -->
+    <section v-if="!loading && !error && !isTexto && (boletin?.seccion?.[0]?.apartado?.length)" class="space-y-4">
       <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200">
         Estado general
       </h2>
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <div
-          v-for="apartado in prediccion.seccion[0].apartado"
+          v-for="apartado in boletin.seccion[0].apartado"
           :key="apartado.nombre"
           class="flex flex-col p-6 transition border shadow-md rounded-2xl bg-white/20 dark:bg-black/20 backdrop-blur-xl border-white/30 dark:border-gray-700/40 hover:shadow-lg"
         >
-          <h3
-            class="mb-2 text-lg font-semibold text-gray-800 dark:text-gray-100"
-          >
+          <h3 class="mb-2 text-lg font-semibold text-gray-800 dark:text-gray-100">
             {{ apartado.cabecera }}
           </h3>
           <p class="leading-relaxed text-gray-600 dark:text-gray-300">
@@ -36,13 +48,13 @@
     </section>
 
     <!-- Atmósfera libre -->
-    <section class="space-y-4">
+    <section v-if="!loading && !error && !isTexto && (boletin?.seccion?.[1]?.apartado?.length)" class="space-y-4">
       <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200">
         Atmósfera libre
       </h2>
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div
-          v-for="apartado in prediccion.seccion[1].apartado"
+          v-for="apartado in boletin.seccion[1].apartado"
           :key="apartado.nombre"
           class="flex flex-col p-6 transition border shadow-md rounded-2xl bg-white/20 dark:bg-black/20 backdrop-blur-xl border-white/30 dark:border-gray-700/40 hover:shadow-lg"
         >
@@ -59,13 +71,13 @@
     </section>
 
     <!-- Sensación térmica -->
-    <section class="space-y-4">
+    <section v-if="!loading && !error && !isTexto && (boletin?.seccion?.[2]?.lugar?.length)" class="space-y-4">
       <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200">
         Sensación térmica
       </h2>
       <div class="grid gap-6 sm:grid-cols-2">
         <div
-          v-for="lugar in prediccion.seccion[2].lugar"
+          v-for="lugar in boletin.seccion[2].lugar"
           :key="lugar.nombre"
           class="flex flex-col p-6 transition border shadow-md rounded-2xl bg-white/20 dark:bg-black/20 backdrop-blur-xl border-white/30 dark:border-gray-700/40 hover:shadow-lg"
         >
@@ -94,9 +106,9 @@
     <footer
       class="pt-6 text-sm text-center text-gray-500 border-t dark:text-gray-400 border-white/30 dark:border-gray-700/40"
     >
-      Datos: {{ prediccion.origen.productor }} -
+      Datos: Agencia Estatal de Meteorología -
       <a
-        :href="prediccion.origen.web"
+        :href="sourceLink"
         target="_blank"
         class="underline hover:text-gray-700 dark:hover:text-gray-200"
         >AEMET</a
@@ -106,87 +118,68 @@
 </template>
 
 <script setup>
-// Simulación de datos que devolvería la API de AEMET
-const prediccion = {
-  origen: {
-    productor: "Agencia Estatal de Meteorología - AEMET - Gobierno de España",
-    web: "http://www.aemet.es",
-    tipo: "Predicción de montaña",
-    language: "es",
-    copyright: "© AEMET. Autorizado el uso de la información citando a AEMET.",
-    notaLegal: "http://www.aemet.es/es/nota_legal",
-  },
-  seccion: [
-    {
-      apartado: [
-        {
-          cabecera: "Estado del cielo",
-          texto: "Intervalos nubosos...",
-          nombre: "nubosidad",
-        },
-        {
-          cabecera: "Precipitaciones",
-          texto: "Se esperan chubascos ocasionales...",
-          nombre: "pcp",
-        },
-        {
-          cabecera: "Tormentas",
-          texto: "Podrán acompañar a los chubascos.",
-          nombre: "tormentas",
-        },
-        {
-          cabecera: "Temperaturas",
-          texto: "En moderado descenso...",
-          nombre: "temperatura",
-        },
-        {
-          cabecera: "Viento",
-          texto: "Soplarán vientos flojos o moderados...",
-          nombre: "viento",
-        },
-      ],
-      nombre: "prediccion",
-    },
-    {
-      apartado: [
-        {
-          cabecera: "Altitud isoterma 0ºC",
-          texto: "4.000 m",
-          nombre: "isocero",
-        },
-        {
-          cabecera: "Altitud isoterma -10ºC",
-          texto: "5.600 m",
-          nombre: "iso10",
-        },
-        { cabecera: "Viento a 1500 m", texto: "SW 15 km/h", nombre: "v1500" },
-        { cabecera: "Viento a 3000 m", texto: "W 30 km/h", nombre: "v3000" },
-      ],
-      nombre: "atmosferalibre",
-    },
-    {
-      lugar: [
-        {
-          minima: 11,
-          stminima: 11,
-          maxima: 16,
-          stmaxima: 16,
-          nombre: "Pradollano",
-          altitud: "2165 m",
-        },
-        {
-          minima: 7,
-          stminima: 4,
-          maxima: 12,
-          stmaxima: 12,
-          nombre: "Borreguiles",
-          altitud: "2665 m",
-        },
-      ],
-      nombre: "sensacion_termica",
-    },
-  ],
-};
+import { ref, onMounted, computed, watch } from 'vue';
+import { axiosClient } from "~/axiosConfig";
+import { userData } from "~/store/auth";
+
+const loading = ref(true);
+const error = ref(null);
+const zona = ref('');
+const dia = ref('');
+const boletin = ref(null);
+const isTexto = computed(() => typeof boletin.value === 'string');
+
+const sourceLink = computed(() => {
+  if (!isTexto.value && boletin.value?.origen?.web) return boletin.value.origen.web;
+  return 'https://www.aemet.es';
+});
+
+const selectedDay = ref(0);
+const dayOptions = computed(() => {
+  const opts = [];
+  for (let i = 0; i <= 3; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const label = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+    opts.push({ value: i, label });
+  }
+  return opts;
+});
+
+async function fetchMontana(day) {
+  try {
+    const uid = userData()?.value?.id;
+    // 1) Obtener preferencias para extraer area_code
+    const prefRes = await axiosClient.get('/user/location-pref', { params: uid ? { user_id: uid } : {} });
+    const pref = prefRes?.data || {};
+    const areaCode = pref?.area_code;
+    if (!areaCode) {
+      throw new Error('No hay area_code guardado en preferencias. Guarda tu ubicación de montaña.');
+    }
+    // 2) Llamar backend con el área explícita
+    const url = `/aemet/montana/${areaCode}/${day}`;
+    console.debug('[Montaña] solicitando', url);
+    const { data } = await axiosClient.get(url, { params: { t: Date.now() } });
+    zona.value = data?.zona || '';
+    dia.value = data?.dia ?? '';
+    const b = data?.boletin ?? null;
+    boletin.value = Array.isArray(b) ? (b[0] || null) : b;
+  } catch (e) {
+    error.value = e?.message || 'Error cargando predicción de montaña';
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(async () => {
+  loading.value = true;
+  await fetchMontana(selectedDay.value);
+});
+
+watch(selectedDay, async (nv) => {
+  loading.value = true;
+  await fetchMontana(nv);
+});
 </script>
 
 <style scoped>

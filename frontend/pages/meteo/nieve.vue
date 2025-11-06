@@ -27,23 +27,14 @@
         <p class="text-red-700">⚠️ Error: {{ error }}</p>
       </div>
 
-      <!-- Boletín -->
-      <div
-        v-else-if="nivologica"
-        class="w-full max-w-3xl p-6 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md"
-      >
-        <h2 class="text-xl font-bold text-center text-gray-900/90">
-          🌨️ Boletín Nivológico
-        </h2>
-
-        <p class="font-semibold text-center text-gray-800">
-          Zona: {{ nivologica.zona }}
-        </p>
-
-        <div
-          class="p-4 mt-2 text-sm leading-relaxed whitespace-pre-line shadow-inner text-gray-900/80 rounded-xl bg-gray-100/20"
-        >
-          {{ nivologica.boletin }}
+      <!-- Boletines -->
+      <div v-else class="w-full max-w-5xl space-y-8">
+        <div v-for="b in boletines" :key="b.zona" class="p-6 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md">
+          <h2 class="text-xl font-bold text-center text-gray-900/90">🌨️ Boletín Nivológico</h2>
+          <p class="font-semibold text-center text-gray-800">Zona: {{ b.zona }}</p>
+          <div class="w-full p-4 mt-2 leading-relaxed whitespace-normal shadow-inner text-gray-900/80 rounded-xl bg-gray-100/20 text-[0.95rem]">
+            {{ b.boletin }}
+          </div>
         </div>
       </div>
 
@@ -64,23 +55,24 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import { axiosClient } from "~/axiosConfig";
 
 const mounted = ref(false);
-const nivologica = ref(null);
+const boletines = ref([]);
 const loading = ref(true);
 const error = ref(null);
-
-// ⚠️ Aquí puedes cambiar dinámicamente la zona
-const zonaId = 1;
 
 onMounted(async () => {
   mounted.value = true;
   try {
-    const { data } = await axios.get(
-      `http://localhost:8000/api/aemet/nivologica/${zonaId}`
-    );
-    nivologica.value = data;
+    const [cat, navAra] = await Promise.all([
+      axiosClient.get('/aemet/nivologica/0'),
+      axiosClient.get('/aemet/nivologica/1'),
+    ]);
+    const arr = [];
+    if (cat?.data) arr.push(cat.data);
+    if (navAra?.data) arr.push(navAra.data);
+    boletines.value = arr;
   } catch (err) {
     error.value = err.message;
   } finally {

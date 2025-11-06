@@ -1,9 +1,19 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import { axiosClient } from "~/axiosConfig";
+import { userData } from "~/store/auth";
+import PlayaPickerModal from "~/components/PlayaPickerModal.vue";
 
-const datos = ref(null);
+const datos = ref([]);
 const nombrePlaya = ref("");
+const openPicker = ref(false);
+const municipioId = ref(null);
+const municipioName = ref("");
+const cpro = ref(null);
+const codigoPlaya = ref(null);
+const loading = ref(true);
+const savingSelection = ref(false);
+const error = ref(null);
 
 // Función para formatear fecha estilo "lun 02"
 function formatearFechaYYYYMMDD(fechaNum) {
@@ -19,18 +29,53 @@ function formatearFechaYYYYMMDD(fechaNum) {
     .replace(".", "");
 }
 
-// Cargar datos desde API playa
-onMounted(async () => {
-  try {
-    const res = await axios.get(
-      "http://localhost:8000/api/aemet/playa/0301101"
-    );
+async function cargarPrediccion(idPlaya){
+  try{
+    loading.value = true; error.value = null;
+    const { data } = await axiosClient.get(`/aemet/playa/${idPlaya}`, { params:{ t: Date.now() } });
+    const playa = Array.isArray(data) ? data[0] : data;
+    nombrePlaya.value = playa?.nombre || "";
+    datos.value = playa?.prediccion?.dia || [];
+  }catch(e){
+    error.value = e?.message || 'Error cargando predicción de playa';
+  }finally{
+    loading.value = false;
+  }
+}
 
-    const playa = res.data[0];
-    nombrePlaya.value = playa.nombre;
-    datos.value = playa.prediccion.dia || [];
-  } catch (err) {
-    console.error("Error al cargar predicción de playa:", err);
+async function guardarSeleccion(pl){
+  savingSelection.value = true;
+  try{
+    const uid = userData()?.value?.id;
+    await axiosClient.post('/user/location-pref', { user_id: uid, codigo_playa: pl.id_playa });
+    codigoPlaya.value = pl.id_playa;
+    nombrePlaya.value = pl.nombre_playa;
+    await cargarPrediccion(pl.id_playa);
+  }catch(e){
+    console.error(e);
+  }finally{
+    savingSelection.value = false;
+    openPicker.value = false;
+  }
+}
+
+onMounted(async () => {
+  try{
+    const uid = userData()?.value?.id;
+    const { data } = await axiosClient.get('/user/location-pref', { params: uid ? { user_id: uid } : {} });
+    municipioId.value = data?.municipio_id != null ? String(data.municipio_id) : null;
+    municipioName.value = data?.municipio_name || '';
+    cpro.value = data?.cpro ? String(data.cpro).padStart(2,'0') : null;
+    codigoPlaya.value = data?.codigo_playa || null;
+    if(codigoPlaya.value){
+      await cargarPrediccion(codigoPlaya.value);
+    }else{
+      openPicker.value = true;
+    }
+  }catch(e){
+    error.value = e?.message || 'Error cargando preferencias de usuario';
+  }finally{
+    loading.value = false;
   }
 });
 </script>
@@ -38,11 +83,18 @@ onMounted(async () => {
 <template>
   <div class="min-h-screen p-4 text-gray-200 bg-gray-900">
     <h1 class="mb-2 text-xl font-bold">🏖️ Previsión en la playa</h1>
-    <h2 class="mb-4 text-lg text-slate-300">{{ nombrePlaya }}</h2>
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-lg text-slate-300">{{ nombrePlaya || 'Selecciona una playa' }}</h2>
+      <button @click="openPicker = true" class="px-3 py-1 text-sm rounded-md bg-white/10 border border-white/20 hover:bg-white/20">
+        {{ nombrePlaya ? 'Cambiar' : 'Elegir playa' }}
+      </button>
+    </div>
 
-    <div v-if="!datos">Cargando datos...</div>
+    <div v-if="loading">Cargando datos...</div>
+    <div v-else-if="error" class="text-red-400">{{ error }}</div>
+    <div v-else-if="!codigoPlaya">Elige una playa para ver la predicción.</div>
 
-    <div v-else class="overflow-x-auto">
+    <div v-else-if="datos && datos.length" class="overflow-x-auto">
       <table class="min-w-full border-collapse">
         <thead>
           <tr class="bg-gray-800 text-slate-300">
@@ -107,5 +159,15 @@ onMounted(async () => {
         </tbody>
       </table>
     </div>
+
+    <PlayaPickerModal
+      :open="openPicker"
+      :municipio-id="municipioId"
+      :cpro="cpro"
+      :municipio-name="municipioName"
+      :saving="savingSelection"
+      @close="openPicker = false"
+      @selected="guardarSeleccion"
+    />
   </div>
 </template>

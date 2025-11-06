@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import { axiosClient } from "~/axiosConfig";
+import { userData } from "~/store/auth";
 
 const aire = ref(null);
 
@@ -15,7 +16,17 @@ function formatearFecha(fechaISO) {
 
 onMounted(async () => {
   try {
-    const res = await axios.get("http://localhost:8000/api/aqicn/feed-here");
+    // Obtener lat/lon guardadas
+    const uid = userData()?.value?.id;
+    const pref = await axiosClient.get("/user/location-pref", { params: uid ? { user_id: uid } : {} });
+    const { lat, lon } = pref.data || {};
+    let res;
+    if (lat != null && lon != null) {
+      res = await axiosClient.get(`/aqicn/feed-geo`, { params: { lat, lon } });
+    } else {
+      // Fallback a feed-here si no hay coordenadas
+      res = await axiosClient.get(`/aqicn/feed-here`);
+    }
     aire.value = res.data?.data || null;
   } catch (err) {
     console.error("Error al cargar calidad del aire:", err);
