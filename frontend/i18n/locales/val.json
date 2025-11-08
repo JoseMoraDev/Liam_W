@@ -62,4 +62,28 @@
     "error_send": "Error en enviar el correu.",
     "error_server": "Error en connectar amb el servidor."
   }
+  ,
+  "forecasts": {
+    "current_location": "Ubicació actual",
+    "change": "Canviar",
+    "weather_title": "Previsió meteorològica",
+    "municipal_hourly": "Municipal horària",
+    "municipal_daily": "Municipal diària",
+    "alerts": "Avisos",
+    "snow": "Nivològica",
+    "beach": "Platja",
+    "mountain": "Muntanya",
+    "air_title": "Qualitat de l'aire",
+    "air_ambient": "Ambiental",
+    "air_pollen": "Pol·len",
+    "traffic_title": "Trànsit",
+    "traffic_state": "Estat",
+    "traffic_alerts": "Alertes",
+    "select_location": "Selecciona ubicació"
+  }
+  ,
+  "settings": {
+    "language": "Idioma",
+    "change_language": "Canviar idioma"
+  }
 }

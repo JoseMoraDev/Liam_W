@@ -63,4 +63,28 @@
     "error_send": "Errorea mezua bidaltzean.",
     "error_server": "Zerbitzarira konektatzean errorea."
   }
+  ,
+  "forecasts": {
+    "current_location": "Uneko kokapena",
+    "change": "Aldatu",
+    "weather_title": "Eguraldiaren iragarpena",
+    "municipal_hourly": "Udal ordurokoa",
+    "municipal_daily": "Udal egunerokoa",
+    "alerts": "Abisuak",
+    "snow": "Elurra",
+    "beach": "Hondartza",
+    "mountain": "Mendia",
+    "air_title": "Airearen kalitatea",
+    "air_ambient": "Ingurumenekoa",
+    "air_pollen": "Polena",
+    "traffic_title": "Trafikoa",
+    "traffic_state": "Egoera",
+    "traffic_alerts": "Alertak",
+    "select_location": "Hautatu kokapena"
+  }
+  ,
+  "settings": {
+    "language": "Hizkuntza",
+    "change_language": "Hizkuntza aldatu"
+  }
 }

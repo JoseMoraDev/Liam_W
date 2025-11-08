@@ -62,4 +62,28 @@
     "error_send": "Error al enviar el correo.",
     "error_server": "Error al conectar con el servidor."
   }
+  ,
+  "forecasts": {
+    "current_location": "Ubicación actual",
+    "change": "Cambiar",
+    "weather_title": "Previsión Meteorológica",
+    "municipal_hourly": "Municipal Horaria",
+    "municipal_daily": "Municipal Diaria",
+    "alerts": "Avisos",
+    "snow": "Nivológica",
+    "beach": "Playa",
+    "mountain": "Montaña",
+    "air_title": "Calidad del aire",
+    "air_ambient": "Ambiental",
+    "air_pollen": "Polen",
+    "traffic_title": "Tráfico",
+    "traffic_state": "Estado",
+    "traffic_alerts": "Alertas",
+    "select_location": "Selecciona ubicación"
+  }
+  ,
+  "settings": {
+    "language": "Idioma",
+    "change_language": "Cambiar idioma"
+  }
 }

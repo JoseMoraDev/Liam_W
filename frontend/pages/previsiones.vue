@@ -14,48 +14,48 @@
             <font-awesome-icon icon="fa-solid fa-location-dot" class="text-xl text-gray-700" />
           </client-only>
           <h2 class="text-lg font-semibold text-gray-900/90">
-            Ubicación actual: <span class="font-bold text-gray-800">{{ municipioDisplay }}</span>
+            {{ t('forecasts.current_location') }}: <span class="font-bold text-gray-800">{{ municipioDisplay }}</span>
           </h2>
         </div>
 
-        <NuxtLink to="/ubicacion">Cambiar</NuxtLink>
+        <NuxtLink to="/ubicacion">{{ t('forecasts.change') }}</NuxtLink>
       </div>
 
       <!-- WEATHER -->
       <div class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md">
         <h2 class="text-xl font-bold text-center text-gray-900/90">
-          Previsión Meteorológica
+          {{ t('forecasts.weather_title') }}
         </h2>
 
         <div class="grid grid-cols-2 gap-4">
-          <NuxtLink to="/meteo/horaria" class="sub-card">Municipal Horaria</NuxtLink>
-          <NuxtLink to="/meteo/diaria" class="sub-card">Municipal Diaria</NuxtLink>
-          <NuxtLink to="/meteo/avisos" class="sub-card">Avisos</NuxtLink>
-          <NuxtLink to="/meteo/nieve" class="sub-card">Nivológica</NuxtLink>
-          <NuxtLink to="/meteo/playa" class="sub-card">Playa</NuxtLink>
-          <NuxtLink to="/meteo/montana" class="sub-card">Montaña</NuxtLink>
+          <NuxtLink to="/meteo/horaria" class="sub-card">{{ t('forecasts.municipal_hourly') }}</NuxtLink>
+          <NuxtLink to="/meteo/diaria" class="sub-card">{{ t('forecasts.municipal_daily') }}</NuxtLink>
+          <NuxtLink to="/meteo/avisos" class="sub-card">{{ t('forecasts.alerts') }}</NuxtLink>
+          <NuxtLink to="/meteo/nieve" class="sub-card">{{ t('forecasts.snow') }}</NuxtLink>
+          <NuxtLink to="/meteo/playa" class="sub-card">{{ t('forecasts.beach') }}</NuxtLink>
+          <NuxtLink to="/meteo/montana" class="sub-card">{{ t('forecasts.mountain') }}</NuxtLink>
         </div>
       </div>
 
       <!-- AIR QUALITY -->
       <div class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md">
         <h2 class="text-xl font-bold text-center text-gray-900/90">
-          Calidad del aire
+          {{ t('forecasts.air_title') }}
         </h2>
 
         <div class="grid grid-cols-2 gap-4">
-          <NuxtLink to="/aire/ambiente" class="sub-card">Ambiental</NuxtLink>
-          <NuxtLink to="/aire/polen" class="sub-card">Polen</NuxtLink>
+          <NuxtLink to="/aire/ambiente" class="sub-card">{{ t('forecasts.air_ambient') }}</NuxtLink>
+          <NuxtLink to="/aire/polen" class="sub-card">{{ t('forecasts.air_pollen') }}</NuxtLink>
         </div>
       </div>
 
       <!-- TRAFFIC -->
       <div class="w-full max-w-md p-4 space-y-4 shadow-inner rounded-2xl bg-gray-100/20 backdrop-blur-md">
-        <h2 class="text-xl font-bold text-center text-gray-900/90">Tráfico</h2>
+        <h2 class="text-xl font-bold text-center text-gray-900/90">{{ t('forecasts.traffic_title') }}</h2>
 
         <div class="grid grid-cols-2 gap-4">
-          <NuxtLink to="/trafico/estado" class="sub-card">Estado</NuxtLink>
-          <NuxtLink to="/trafico/alertas" class="sub-card">Alertas</NuxtLink>
+          <NuxtLink to="/trafico/estado" class="sub-card">{{ t('forecasts.traffic_state') }}</NuxtLink>
+          <NuxtLink to="/trafico/alertas" class="sub-card">{{ t('forecasts.traffic_alerts') }}</NuxtLink>
         </div>
       </div>
     </div>
@@ -66,6 +66,8 @@
 import { ref, onMounted, onBeforeUnmount, computed, watch } from "vue";
 import { navigateTo } from "#app";
 import { userLoggedIn, userData } from "~/store/auth";
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const mounted = ref(false);
 
@@ -83,7 +85,7 @@ const isLoggedIn = computed(() => userLoggedIn().value);
 const currentUser = computed(() => userData().value);
 
 const municipioName = ref("");
-const municipioDisplay = computed(() => municipioName.value || "Selecciona ubicación");
+const municipioDisplay = computed(() => municipioName.value || t('forecasts.select_location'));
 
 function lsMunicipioName() {
   try {
