@@ -1,0 +1,6 @@
+{
+  "app": { "title": "Aplicació" },
+  "nav": { "home": "Inici", "about": "Quant a" },
+  "actions": { "save": "Desa", "cancel": "Cancel·la" },
+  "language": { "label": "Idioma", "change": "Canvia l'idioma" }
+}

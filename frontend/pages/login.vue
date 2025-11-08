@@ -24,7 +24,7 @@
         class="flex flex-col items-center justify-center w-2/3 mt-10 space-y-6 h-2/10"
       >
         <p class="mt-2 text-xl text-center text-gray-200 md:text-2xl">
-          Iniciar sesión
+          {{ t('login.subtitle') }}
         </p>
       </div>
 
@@ -48,7 +48,7 @@
               v-model="email"
               type="email"
               required
-              placeholder="Correo"
+              :placeholder="t('login.email')"
               class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
             />
           </div>
@@ -67,7 +67,7 @@
               v-model="password"
               type="password"
               required
-              placeholder="Contraseña"
+              :placeholder="t('login.password')"
               class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
             />
           </div>
@@ -77,7 +77,7 @@
               type="submit"
               class="w-1/2 py-2 font-bold text-gray-200 transition-colors border border-gray-400 rounded-md bg-white/30 hover:bg-gray-400 hover:text-white"
             >
-              Entrar
+              {{ t('login.submit') }}
             </button>
           </div>
 
@@ -96,7 +96,7 @@
           to="/password"
           class="w-1/2 py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
         >
-          He olvidado la contraseña
+          {{ t('login.forgot_password') }}
         </NuxtLink>
 
         <!-- Botón 2 -->
@@ -104,7 +104,7 @@
           to="/register"
           class="w-1/2 py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
         >
-          Aún no tengo una cuenta
+          {{ t('login.signup_cta') }}
         </NuxtLink>
       </div>
 
@@ -141,6 +141,7 @@ import { ref, onMounted } from "vue";
 import { axiosClient } from "~/axiosConfig";
 import { useRouter } from "vue-router";
 import { login } from "~/store/auth";
+import { useI18n } from 'vue-i18n'
 
 const mounted = ref(false);
 const email = ref("");
@@ -148,6 +149,7 @@ const password = ref("");
 const router = useRouter();
 const errorMessage = ref("");
 const loading = ref(false);
+const { t } = useI18n()
 
 async function submitLogin() {
   loading.value = true;
@@ -183,17 +185,14 @@ async function submitLogin() {
     // Capturar errores de Axios y mostrar mensaje amigable
     if (error.response) {
       if (error.response.status === 401) {
-        errorMessage.value =
-          "Correo o contraseña incorrectos. Inténtalo de nuevo.";
+        errorMessage.value = t('login.error_401');
       } else {
-        errorMessage.value =
-          "Ha ocurrido un error en el servidor. Inténtalo más tarde.";
+        errorMessage.value = t('login.error_server');
       }
     } else if (error.request) {
-      errorMessage.value =
-        "No se pudo conectar con el servidor. Revisa tu conexión.";
+      errorMessage.value = t('login.error_network');
     } else {
-      errorMessage.value = "Error desconocido.";
+      errorMessage.value = t('login.error_unknown');
     }
     loading.value = false;
   }

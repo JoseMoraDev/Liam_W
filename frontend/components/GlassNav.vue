@@ -11,7 +11,7 @@
           ref="menuButtonRef"
           @click="open = !open"
           class="inline-flex items-center justify-center w-10 h-10 text-gray-700 transition border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
-          aria-label="Abrir menú"
+          :aria-label="t('aria.open_menu')"
         >
           <client-only
             ><font-awesome-icon icon="fa-solid fa-bars"
@@ -45,7 +45,7 @@
             <input
               v-model="q"
               type="search"
-              placeholder="Buscar..."
+              :placeholder="t('nav.search_placeholder')"
               class="w-full pl-4 text-gray-800 border rounded-full h-11 pr-11 border-gray-300/50 bg-gray-50/50 placeholder:italic placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300/50 focus:border-gray-300/50"
               @input="onInput"
               @focus="showSuggestions = true"
@@ -54,7 +54,7 @@
             <button
               type="submit"
               class="absolute inset-y-0 right-0 flex items-center justify-center text-gray-700 border-l rounded-r-full w-11 border-gray-300/50 hover:bg-gray-200/20"
-              aria-label="Buscar"
+              :aria-label="t('aria.search')"
             >
               <client-only
                 ><font-awesome-icon icon="fa-solid fa-magnifying-glass"
@@ -78,7 +78,7 @@
                 </ul>
               </template>
               <div v-else class="px-3 py-2 text-sm text-gray-500">
-                No se encontraron términos para esta búsqueda
+                {{ t('nav.search_no_results') }}
               </div>
             </div>
           </div>
@@ -94,33 +94,64 @@
               to="/login"
               class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
             >
-              Acceder
+              {{ t('nav.login') }}
             </NuxtLink>
             <NuxtLink
               to="/register"
               class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
             >
-              Crear cuenta
+              {{ t('nav.register') }}
             </NuxtLink>
           </template>
           <template v-else>
             <span class="px-3 text-gray-700">
-              {{ currentUser?.name || "Usuario" }}
+              {{ currentUser?.name || t('user.default_name') }}
             </span>
             <button
               @click="handleLogout"
               class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
             >
-              Cerrar sesión
+              {{ t('nav.logout') }}
             </button>
           </template>
+          <div class="relative">
+            <button
+              @click="langOpen = !langOpen"
+              class="inline-flex items-center h-10 px-2 text-sm text-gray-700 border rounded-xl border-gray-300/50 bg-white/50 hover:bg-white/70"
+              aria-haspopup="listbox"
+              :aria-expanded="langOpen ? 'true' : 'false'"
+            >
+              <img
+                :src="activeLocale.flag"
+                :alt="activeLocale.name"
+                class="w-5 h-5 mr-2 rounded-sm object-cover"
+              />
+              <span>{{ activeLocale.name }}</span>
+            </button>
+            <div
+              v-if="langOpen"
+              class="absolute right-0 z-[10000] mt-1 w-44 overflow-hidden bg-white border rounded-lg shadow-lg"
+              role="listbox"
+            >
+              <button
+                v-for="l in locales"
+                :key="l.code"
+                class="flex items-center w-full px-2 py-2 text-left text-sm hover:bg-gray-50"
+                @click="selectLocale(l.code)"
+                role="option"
+              >
+                <img :src="l.flag" :alt="l.name" class="w-5 h-5 mr-2 rounded-sm object-cover" />
+                <span>{{ l.name }}</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Móvil -->
         <NuxtLink
           to="/login"
           class="inline-flex items-center justify-center w-10 h-10 text-gray-700 border sm:hidden rounded-xl border-gray-300/50 hover:bg-gray-200/20"
-          aria-label="Acceder"
+          :aria-label="t('nav.login')"
         >
           <client-only
             ><font-awesome-icon icon="fa-regular fa-user"
@@ -147,7 +178,7 @@
               icon="fa-solid fa-cloud-sun"
               class="w-4 h-4 mr-2"
           /></client-only>
-          Previsiones
+          {{ t('nav.forecasts') }}
         </NuxtLink>
 
         <NuxtLink
@@ -158,7 +189,7 @@
           <client-only
             ><font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4 mr-2"
           /></client-only>
-          Ajustes
+          {{ t('nav.settings') }}
         </NuxtLink>
 
         <NuxtLink
@@ -169,7 +200,7 @@
           <client-only
             ><font-awesome-icon icon="fa-solid fa-cogs" class="w-4 h-4 mr-2"
           /></client-only>
-          Avanzado
+          {{ t('nav.advanced') }}
         </NuxtLink>
       </div>
     </transition>
@@ -179,6 +210,7 @@
 <script setup>
 import { userLoggedIn, logout, userData } from "~/store/auth";
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
+import { useI18n } from "vue-i18n";
 
 const open = ref(false);
 const q = ref("");
@@ -220,6 +252,28 @@ const filteredTerms = computed(() => {
   if (!query) return allowlist;
   return allowlist.filter((t) => norm(t).includes(query));
 });
+
+// Idiomas
+const { t, locale, setLocale } = useI18n();
+const locales = [
+  { code: "es", name: "Español", flag: "/flags/es.svg" },
+  { code: "ca", name: "Català", flag: "/flags/catalunya.svg" },
+  { code: "val", name: "Valencià", flag: "/flags/valencia.svg" },
+  { code: "gl", name: "Galego", flag: "/flags/galicia.svg" },
+  { code: "eu", name: "Euskara", flag: "/flags/euskadi.svg" },
+  { code: "ary", name: "العربية المغربية", flag: "/flags/maroc.svg" },
+];
+const currentLocale = computed({
+  get: () => locale.value,
+  set: (val) => setLocale(val),
+});
+
+const langOpen = ref(false);
+const activeLocale = computed(() => locales.find((l) => l.code === currentLocale.value) || locales[0]);
+function selectLocale(code) {
+  setLocale(code);
+  langOpen.value = false;
+}
 
 function onInput() {
   showSuggestions.value = true;

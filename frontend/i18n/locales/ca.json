@@ -1,0 +1,65 @@
+{
+  "app": { "title": "Aplicació" },
+  "nav": {
+    "home": "Inici",
+    "about": "Quant a",
+    "login": "Accedir",
+    "register": "Crear compte",
+    "logout": "Tancar sessió",
+    "forecasts": "Previsions",
+    "settings": "Configuració",
+    "advanced": "Avançat",
+    "search_placeholder": "Cerca...",
+    "search_no_results": "No s'han trobat termes per a aquesta cerca"
+  },
+  "actions": { "save": "Desa", "cancel": "Cancel·la" },
+  "language": { "label": "Idioma", "change": "Canvia l'idioma" },
+  "aria": { "open_menu": "Obrir menú", "search": "Cercar" },
+  "user": { "default_name": "Usuari" },
+  "home": {
+    "slogan_line1": "Fem el teu dia més clar",
+    "slogan_line2": "i els teus viatges més fàcils",
+    "have_account": "Ja tens compte?",
+    "yes": "Sí",
+    "no": "No",
+    "signup": "Registrar-se",
+    "photo_credit": "Foto per Danieljschwarz allotjada a"
+  },
+  "register": {
+    "subtitle": "Crear compte",
+    "name": "Nom",
+    "email": "Correu",
+    "password": "Contrasenya",
+    "confirm_password": "Repetir contrasenya",
+    "submit": "Registrar-se",
+    "have_account": "Ja tens compte?",
+    "signin_here": "Inicia sessió aquí",
+    "mismatch_error": "Les contrasenyes no coincideixen",
+    "generic_error": "No s'ha pogut completar el registre."
+  }
+  ,
+  "login": {
+    "subtitle": "Iniciar sessió",
+    "email": "Correu",
+    "password": "Contrasenya",
+    "submit": "Entrar",
+    "forgot_password": "He oblidat la contrasenya",
+    "signup_cta": "Encara no tinc un compte",
+    "error_401": "Correu o contrasenya incorrectes. Torna-ho a intentar.",
+    "error_server": "S'ha produït un error al servidor. Torna-ho més tard.",
+    "error_network": "No s'ha pogut connectar amb el servidor. Revisa la connexió.",
+    "error_unknown": "Error desconegut."
+  }
+  ,
+  "password": {
+    "subtitle": "Recuperar contrasenya",
+    "placeholder_email": "Escriu aquí el teu correu electrònic",
+    "submit": "Enviar enllaç de recuperació",
+    "no_account": "No tens compte?",
+    "create_account": "Crear compte",
+    "invalid_email": "Si us plau, introdueix un correu vàlid.",
+    "sent": "S'ha enviat un enllaç a {email}.",
+    "error_send": "Error en enviar el correu.",
+    "error_server": "Error en connectar amb el servidor."
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "app": { "title": "Aplikazioa" },
+  "nav": { "home": "Hasiera", "about": "Honi buruz" },
+  "actions": { "save": "Gorde", "cancel": "Ezeztatu" },
+  "language": { "label": "Hizkuntza", "change": "Hizkuntza aldatu" }
+}

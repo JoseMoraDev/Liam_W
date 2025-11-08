@@ -1,7 +1,7 @@
 <template>
   <div
     class="w-full min-h-screen bg-center bg-cover"
-    style="background-image: url('/img/ajustes.jpg')"
+    style="background-image: url('/img/menu.jpg')"
   >
     <!-- Capa translúcida -->
     <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>

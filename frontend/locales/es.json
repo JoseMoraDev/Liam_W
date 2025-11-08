@@ -1,0 +1,6 @@
+{
+  "app": { "title": "Aplicación" },
+  "nav": { "home": "Inicio", "about": "Acerca de" },
+  "actions": { "save": "Guardar", "cancel": "Cancelar" },
+  "language": { "label": "Idioma", "change": "Cambiar idioma" }
+}

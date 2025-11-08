@@ -24,7 +24,7 @@
         class="flex flex-col items-center justify-center w-2/3 mt-10 space-y-6 h-1/10"
       >
         <p class="mt-2 text-xl text-center text-gray-200 md:text-2xl">
-          Recuperar contraseña
+          {{ t('password.subtitle') }}
         </p>
       </div>
 
@@ -45,7 +45,7 @@
               type="email"
               v-model="email"
               required
-              placeholder="Escribe aquí tu correo electrónico"
+              :placeholder="t('password.placeholder_email')"
               class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
             />
           </div>
@@ -58,9 +58,9 @@
             />
             <button
               type="submit"
-              class="w-full py-2 font-bold text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
+              class="w-full py-2 pl-10 font-bold text-left text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
             >
-              Enviar enlace de recuperación
+              {{ t('password.submit') }}
             </button>
           </div>
 
@@ -70,7 +70,7 @@
               to="/register"
               class="w-full py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
             >
-              ¿No tienes cuenta? <br />Crear cuenta
+              {{ t('password.no_account') }} <br />{{ t('password.create_account') }}
             </NuxtLink>
           </div>
 
@@ -91,7 +91,7 @@
       <footer
         class="absolute w-full text-xs text-center text-gray-600 bottom-2"
       >
-        Foto por Danieljschwarz alojada en
+        {{ t('home.photo_credit') }}
         <a
           href="https://www.freepik.com/author/danieljschwarz"
           target="_blank"
@@ -105,39 +105,37 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import axios from "axios";
+import { axiosClient } from "~/axiosConfig";
+import { useI18n } from 'vue-i18n'
 
 const mounted = ref(false);
 const email = ref("");
 const message = ref("");
 const error = ref("");
+const { t } = useI18n()
 
 const sendResetEmail = async () => {
   message.value = "";
   error.value = "";
 
   if (!email.value.includes("@")) {
-    error.value = "Por favor, introduce un correo válido.";
+    error.value = t('password.invalid_email');
     return;
   }
 
   try {
-    const response = await axios.post(
-      "http://localhost:8000/api/recuperar-passwd",
-      {
-        email: email.value,
-      }
+    const response = await axiosClient.post(
+      "/recuperar-passwd",
+      { email: email.value }
     );
 
     if (response.data.success) {
-      message.value =
-        response.data.message || `Se ha enviado un enlace a ${email.value}.`;
+      message.value = t('password.sent', { email: email.value });
     } else {
-      error.value = response.data.message || "Error al enviar el correo.";
+      error.value = t('password.error_send');
     }
   } catch (err) {
-    error.value =
-      err.response?.data?.message || "Error al conectar con el servidor.";
+    error.value = t('password.error_server');
   }
 };
 

@@ -1,0 +1,65 @@
+{
+  "app": { "title": "Aplicación" },
+  "nav": {
+    "home": "Inicio",
+    "about": "Acerca de",
+    "login": "Acceder",
+    "register": "Crear cuenta",
+    "logout": "Cerrar sesión",
+    "forecasts": "Previsiones",
+    "settings": "Ajustes",
+    "advanced": "Avanzado",
+    "search_placeholder": "Buscar...",
+    "search_no_results": "No se encontraron términos para esta búsqueda"
+  },
+  "actions": { "save": "Guardar", "cancel": "Cancelar" },
+  "language": { "label": "Idioma", "change": "Cambiar idioma" },
+  "aria": { "open_menu": "Abrir menú", "search": "Buscar" },
+  "user": { "default_name": "Usuario" },
+  "home": {
+    "slogan_line1": "Hacemos tu día más claro",
+    "slogan_line2": "y tus viajes más fáciles",
+    "have_account": "¿Ya tienes cuenta?",
+    "yes": "Sí",
+    "no": "No",
+    "signup": "Registrarse",
+    "photo_credit": "Foto por Danieljschwarz alojada en"
+  },
+  "register": {
+    "subtitle": "Crear cuenta",
+    "name": "Nombre",
+    "email": "Correo",
+    "password": "Contraseña",
+    "confirm_password": "Repetir contraseña",
+    "submit": "Registrarse",
+    "have_account": "¿Ya tienes cuenta?",
+    "signin_here": "Inicia sesión aquí",
+    "mismatch_error": "Las contraseñas no coinciden",
+    "generic_error": "No se pudo completar el registro."
+  }
+  ,
+  "login": {
+    "subtitle": "Iniciar sesión",
+    "email": "Correo",
+    "password": "Contraseña",
+    "submit": "Entrar",
+    "forgot_password": "He olvidado la contraseña",
+    "signup_cta": "Aún no tengo una cuenta",
+    "error_401": "Correo o contraseña incorrectos. Inténtalo de nuevo.",
+    "error_server": "Ha ocurrido un error en el servidor. Inténtalo más tarde.",
+    "error_network": "No se pudo conectar con el servidor. Revisa tu conexión.",
+    "error_unknown": "Error desconocido."
+  }
+  ,
+  "password": {
+    "subtitle": "Recuperar contraseña",
+    "placeholder_email": "Escribe aquí tu correo electrónico",
+    "submit": "Enviar enlace de recuperación",
+    "no_account": "¿No tienes cuenta?",
+    "create_account": "Crear cuenta",
+    "invalid_email": "Por favor, introduce un correo válido.",
+    "sent": "Se ha enviado un enlace a {email}.",
+    "error_send": "Error al enviar el correo.",
+    "error_server": "Error al conectar con el servidor."
+  }
+}

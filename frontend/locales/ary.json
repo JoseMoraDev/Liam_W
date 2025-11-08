@@ -1,0 +1,45 @@
+{
+  "app": { "title": "التطبيق" },
+  "nav": { "home": "الرئيسية", "about": "حول" },
+  "actions": { "save": "حفظ", "cancel": "إلغاء" },
+  "language": { "label": "اللغة", "change": "تغيير اللغة" },
+  "user": { "default_name": "مستخدم" },
+  "home": {
+    "photo_credit": "الصورة من طرف Danieljschwarz على"
+  },
+  "register": {
+    "subtitle": "إنشاء حساب",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirm_password": "تأكيد كلمة المرور",
+    "submit": "تسجيل",
+    "have_account": "عندك حساب؟",
+    "signin_here": "سجل الدخول هنا",
+    "mismatch_error": "كلمات المرور غير متطابقة",
+    "generic_error": "تعذر إكمال التسجيل."
+  },
+  "login": {
+    "subtitle": "تسجيل الدخول",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "submit": "دخول",
+    "forgot_password": "نسيت كلمة المرور",
+    "signup_cta": "ليس لدي حساب بعد",
+    "error_401": "البريد الإلكتروني أو كلمة المرور غير صحيحة. حاول مرة أخرى.",
+    "error_server": "حدث خطأ في الخادم. حاول لاحقًا.",
+    "error_network": "تعذر الاتصال بالخادم. تحقق من اتصالك.",
+    "error_unknown": "خطأ غير معروف."
+  },
+  "password": {
+    "subtitle": "استرجاع كلمة المرور",
+    "placeholder_email": "اكتب هنا بريدك الإلكتروني",
+    "submit": "إرسال رابط الاسترجاع",
+    "no_account": "ما عندكش حساب؟",
+    "create_account": "إنشاء حساب",
+    "invalid_email": "من فضلك أدخل بريدًا إلكترونيًا صالحًا.",
+    "sent": "تّصيفط رابط لـ {email}.",
+    "error_send": "خطأ في إرسال البريد.",
+    "error_server": "خطأ في الاتصال بالخادم."
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "app": { "title": "Aplikazioa" },
+  "nav": {
+    "home": "Hasiera",
+    "about": "Honi buruz",
+    "login": "Sartu",
+    "register": "Kontua sortu",
+    "logout": "Saioa itxi",
+    "forecasts": "Iragarpenak",
+    "settings": "Ezarpenak",
+    "advanced": "Aurreratua",
+    "search_placeholder": "Bilatu...",
+    "search_no_results": "Ez da bilaketarako termino egokirik aurkitu"
+  },
+  "actions": { "save": "Gorde", "cancel": "Ezeztatu" },
+  "language": { "label": "Hizkuntza", "change": "Hizkuntza aldatu" },
+  "aria": { "open_menu": "Ireki menua", "search": "Bilatu" },
+  "user": { "default_name": "Erabiltzailea" },
+  "home": {
+    "slogan_line1": "Zure eguna argiago egiten dugu",
+    "slogan_line2": "eta zure bidaiak errazago",
+    "have_account": "Kontua baduzu?",
+    "yes": "Bai",
+    "no": "Ez",
+    "signup": "Erregistratu",
+    "photo_credit": "Argazkia: Danieljschwarz, hemen"
+  }
+  ,
+  "register": {
+    "subtitle": "Kontu berria sortu",
+    "name": "Izena",
+    "email": "Posta elektronikoa",
+    "password": "Pasahitza",
+    "confirm_password": "Pasahitza errepikatu",
+    "submit": "Erregistratu",
+    "have_account": "Kontua baduzu?",
+    "signin_here": "Hasi saioa hemen",
+    "mismatch_error": "Pasahitzak ez datoz bat",
+    "generic_error": "Erregistroa ezin izan da burutu."
+  }
+  ,
+  "login": {
+    "subtitle": "Saioa hasi",
+    "email": "Posta elektronikoa",
+    "password": "Pasahitza",
+    "submit": "Sartu",
+    "forgot_password": "Pasahitza ahaztu dut",
+    "signup_cta": "Oraindik ez dut konturik",
+    "error_401": "Posta edo pasahitza okerra. Saiatu berriro.",
+    "error_server": "Zerbitzariaren errore bat gertatu da. Saiatu geroago.",
+    "error_network": "Ezin izan da zerbitzarira konektatu. Egiaztatu zure konexioa.",
+    "error_unknown": "Errore ezezaguna."
+  }
+  ,
+  "password": {
+    "subtitle": "Pasahitza berreskuratu",
+    "placeholder_email": "Idatzi hemen zure posta elektronikoa",
+    "submit": "Berreskuratze esteka bidali",
+    "no_account": "Ez duzu konturik?",
+    "create_account": "Kontua sortu",
+    "invalid_email": "Mesedez, sartu baliozko posta elektronikoa.",
+    "sent": "Esteka bat bidali da helbidera: {email}.",
+    "error_send": "Errorea mezua bidaltzean.",
+    "error_server": "Zerbitzarira konektatzean errorea."
+  }
+}

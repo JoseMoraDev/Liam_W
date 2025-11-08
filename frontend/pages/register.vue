@@ -13,7 +13,7 @@
 
       <!-- Subtítulo -->
       <div class="flex flex-col items-center justify-center w-2/3 mt-10 space-y-6 h-1/10">
-        <p class="mt-2 text-xl text-center text-gray-200 md:text-2xl">Crear cuenta</p>
+        <p class="mt-2 text-xl text-center text-gray-200 md:text-2xl">{{ t('register.subtitle') }}</p>
       </div>
 
       <!-- Formulario -->
@@ -23,7 +23,7 @@
           <div class="relative w-full">
             <font-awesome-icon icon="fa-solid fa-user"
               class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none" />
-            <input id="name" v-model="name" type="text" required placeholder="Nombre"
+            <input id="name" v-model="name" type="text" required :placeholder="t('register.name')"
               class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400" />
           </div>
 
@@ -31,7 +31,7 @@
           <div class="relative w-full">
             <font-awesome-icon icon="fa-solid fa-envelope"
               class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none" />
-            <input id="email" v-model="email" type="email" required placeholder="Correo"
+            <input id="email" v-model="email" type="email" required :placeholder="t('register.email')"
               class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400" />
           </div>
 
@@ -39,7 +39,7 @@
           <div class="relative w-full">
             <font-awesome-icon icon="fa-solid fa-lock"
               class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none" />
-            <input id="password" v-model="password" type="password" required placeholder="Contraseña"
+            <input id="password" v-model="password" type="password" required :placeholder="t('register.password')"
               autocomplete="new-password"
               class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400" />
           </div>
@@ -49,7 +49,7 @@
             <font-awesome-icon icon="fa-solid fa-unlock"
               class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none" />
             <input id="confirmPassword" v-model="confirmPassword" type="password" required
-              placeholder="Repetir contraseña" autocomplete="new-password"
+              :placeholder="t('register.confirm_password')" autocomplete="new-password"
               class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400" />
           </div>
 
@@ -60,7 +60,7 @@
           <div class="flex justify-center !mt-8">
             <button type="submit"
               class="w-1/2 py-2 font-bold text-gray-200 transition-colors border border-gray-400 rounded-md bg-white/40 hover:bg-gray-400 hover:text-white">
-              Registrarse
+              {{ t('register.submit') }}
             </button>
           </div>
         </form>
@@ -70,7 +70,7 @@
       <div class="flex justify-center w-full !mt-20">
         <NuxtLink to="/login"
           class="w-full py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white">
-          ¿Ya tienes cuenta? <br />Inicia sesión aquí
+          {{ t('register.have_account') }} <br />{{ t('register.signin_here') }}
         </NuxtLink>
       </div>
 
@@ -78,7 +78,7 @@
 
       <!-- Footer -->
       <footer class="absolute w-full text-xs text-center text-gray-600 bottom-2">
-        Foto por Danieljschwarz alojada en
+        {{ t('home.photo_credit') }}
         <a href="https://www.freepik.com/author/danieljschwarz" target="_blank"
           class="underline hover:text-white">www.freepik.com</a>
       </footer>
@@ -90,6 +90,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { axiosClient } from "~/axiosConfig";
+import { useI18n } from 'vue-i18n'
 
 const mounted = ref(false);
 const router = useRouter();
@@ -99,12 +100,13 @@ const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 const error = ref("");
+const { t } = useI18n()
 
 async function submitRegister() {
   error.value = "";
 
   if (password.value !== confirmPassword.value) {
-    error.value = "Las contraseñas no coinciden";
+    error.value = t('register.mismatch_error');
     return;
   }
 
@@ -123,7 +125,7 @@ async function submitRegister() {
   } catch (err) {
     console.error("❌ Error en el registro:", err);
     error.value =
-      err.response?.data?.message || "No se pudo completar el registro.";
+      err.response?.data?.message || t('register.generic_error');
   }
 }
 

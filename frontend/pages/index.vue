@@ -28,8 +28,8 @@
         class="px-6 py-3 space-y-4 text-center shadow-inner mt-28 rounded-2xl bg-white/5 backdrop-blur-sm"
       >
         <p class="text-lg text-gray-200 md:text-base">
-          Hacemos tu día más claro <br />
-          y tus viajes más fáciles
+          {{ t('home.slogan_line1') }} <br />
+          {{ t('home.slogan_line2') }}
         </p>
 
         <p class="flex justify-center space-x-3 text-xl text-white">
@@ -46,7 +46,7 @@
       <div
         class="px-6 py-4 space-y-4 text-center shadow-inner mt-28 rounded-2xl bg-white/5 backdrop-blur-sm"
       >
-        <p class="font-medium text-white">¿Ya tienes cuenta?</p>
+        <p class="font-medium text-white">{{ t('home.have_account') }}</p>
 
         <div class="flex justify-center space-x-6">
           <!-- Botón SI -->
@@ -54,8 +54,8 @@
             to="/login"
             class="flex flex-col items-center justify-center w-24 h-20 font-bold text-gray-200 transition duration-300 rounded-xl bg-white/5 hover:bg-white/10 hover:text-white"
           >
-            <span class="text-lg">SI</span>
-            <span class="pb-1 text-xs font-thin text-gray-300">Login</span>
+            <span class="text-lg">{{ t('home.yes') }}</span>
+            <span class="pb-1 text-xs font-thin text-gray-300">{{ t('nav.login') }}</span>
           </NuxtLink>
 
           <!-- Botón NO -->
@@ -63,8 +63,8 @@
             to="/register"
             class="flex flex-col items-center justify-center w-24 h-20 font-bold text-gray-200 transition duration-300 rounded-xl bg-white/5 hover:bg-white/10 hover:text-white"
           >
-            <span class="text-lg">NO</span>
-            <span class="pb-1 text-xs font-thin text-gray-300">Sign up</span>
+            <span class="text-lg">{{ t('home.no') }}</span>
+            <span class="pb-1 text-xs font-thin text-gray-300">{{ t('home.signup') }}</span>
           </NuxtLink>
         </div>
       </div>
@@ -76,7 +76,7 @@
       <footer
         class="absolute w-full text-xs text-center text-gray-600 bottom-2"
       >
-        Foto por Danieljschwarz alojada en
+        {{ t('home.photo_credit') }}
         <a
           href="https://www.freepik.com/author/danieljschwarz"
           target="_blank"
@@ -90,8 +90,10 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
+import { useI18n } from 'vue-i18n'
 
 const mounted = ref(false);
+const { t } = useI18n()
 
 onMounted(() => {
   mounted.value = true;

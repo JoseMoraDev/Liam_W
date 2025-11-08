@@ -1,0 +1,45 @@
+{
+  "app": { "title": "Aplicación" },
+  "nav": { "home": "Inicio", "about": "Acerca de" },
+  "actions": { "save": "Gardar", "cancel": "Cancelar" },
+  "language": { "label": "Idioma", "change": "Cambiar idioma" },
+  "user": { "default_name": "Usuario" },
+  "home": {
+    "photo_credit": "Foto por Danieljschwarz aloxada en"
+  },
+  "register": {
+    "subtitle": "Crear conta",
+    "name": "Nome",
+    "email": "Correo",
+    "password": "Contrasinal",
+    "confirm_password": "Repetir contrasinal",
+    "submit": "Rexistrarse",
+    "have_account": "Tes conta?",
+    "signin_here": "Inicia sesión aquí",
+    "mismatch_error": "Os contrasinais non coinciden",
+    "generic_error": "Non se puido completar o rexistro."
+  },
+  "login": {
+    "subtitle": "Iniciar sesión",
+    "email": "Correo",
+    "password": "Contrasinal",
+    "submit": "Entrar",
+    "forgot_password": "Esquecín o contrasinal",
+    "signup_cta": "Aínda non teño unha conta",
+    "error_401": "Correo ou contrasinal incorrectos. Téntao de novo.",
+    "error_server": "Produciuse un erro no servidor. Téntao máis tarde.",
+    "error_network": "Non se puido conectar co servidor. Revisa a túa conexión.",
+    "error_unknown": "Erro descoñecido."
+  },
+  "password": {
+    "subtitle": "Recuperar contrasinal",
+    "placeholder_email": "Escribe aquí o teu correo electrónico",
+    "submit": "Enviar ligazón de recuperación",
+    "no_account": "Non tes conta?",
+    "create_account": "Crear conta",
+    "invalid_email": "Por favor, introduce un correo válido.",
+    "sent": "Enviouse unha ligazón a {email}.",
+    "error_send": "Erro ao enviar o correo.",
+    "error_server": "Erro ao conectar co servidor."
+  }
+}
