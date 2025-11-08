@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
+            'consume.free' => \App\Http\Middleware\ConsumeFreeQuota::class,
         ]);
         $middleware->validateCsrfTokens(
             except: ['api'],

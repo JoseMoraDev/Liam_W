@@ -86,5 +86,33 @@
   "settings": {
     "language": "اللغة",
     "change_language": "تبديل اللغة"
+  },
+  "admin": {
+    "users": {
+      "title": "إدارة المستخدمين",
+      "search_placeholder": "بحث بالاسم أو البريد",
+      "clear": "مسح النص",
+      "create": "إنشاء مستخدم",
+      "id": "المعرف",
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "role": "الدور",
+      "role_free": "free",
+      "role_premium": "premium",
+      "role_admin": "admin",
+      "quota": "الحصة/اليوم",
+      "blocked": "محظور",
+      "active": "نشط",
+      "yes": "نعم",
+      "no": "لا",
+      "actions": "إجراءات",
+      "save": "حفظ",
+      "delete": "حذف",
+      "no_results": "لا نتائج",
+      "modal_create": "إنشاء مستخدم",
+      "modal_edit": "تعديل مستخدم",
+      "password": "كلمة المرور (≥ 8)",
+      "close": "إغلاق"
+    }
   }
 }

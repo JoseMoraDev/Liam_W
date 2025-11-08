@@ -25,6 +25,7 @@ use App\Http\Controllers\TomTomController;
 use App\Http\Controllers\AqaPolenController;
 use App\Http\Controllers\UbicacionEndpointUsuarioController;
 use App\Http\Controllers\UserLocationPrefController;
+use App\Http\Controllers\AdminUserController;
 
 Route::post('/cambiar-passwd', function (Request $request) {
     $request->validate([
@@ -96,8 +97,8 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 
-//! middleware (SPA cookie-based): ensure web session + sanctum
-Route::middleware(['web', 'auth:sanctum'])->group(function () {
+//! middleware protegido por token Sanctum + throttle por rol + consumo de cupo (sin 'web' para evitar CSRF 419)
+Route::middleware(['auth:sanctum', 'throttle:api-per-user', 'consume.free'])->group(function () {
     // Auth
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -109,6 +110,17 @@ Route::middleware(['web', 'auth:sanctum'])->group(function () {
 
     // Preferencias de ubicación del usuario (última selección) [protegido por sesión]
     Route::get('/user/location-pref', [UserLocationPrefController::class, 'show']);
+
+    // Admin: gestión de usuarios (solo admin, validado en el controlador)
+    Route::prefix('admin')->group(function () {
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::post('/users', [AdminUserController::class, 'store']);
+        Route::get('/users/{id}', [AdminUserController::class, 'show']);
+        Route::put('/users/{id}', [AdminUserController::class, 'update']);
+        Route::delete('/users/{id}', [AdminUserController::class, 'destroy']);
+        Route::post('/users/{id}/role', [AdminUserController::class, 'setRole']);
+        Route::post('/users/{id}/block', [AdminUserController::class, 'block']);
+    });
 });
 
 // Ruta pública para guardar preferencia de ubicación (relajada por requerimiento)

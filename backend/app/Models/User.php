@@ -20,6 +20,11 @@ class User extends Authenticatable
         'last_location_latlon',
         'last_location_city',
         'last_location_updated_at',
+        'role',
+        'is_blocked',
+        'free_daily_quota',
+        'free_daily_used',
+        'free_daily_date',
     ];
 
     protected $hidden = [
@@ -32,6 +37,10 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_blocked' => 'boolean',
+            'free_daily_quota' => 'integer',
+            'free_daily_used' => 'integer',
+            'free_daily_date' => 'date',
         ];
     }
 

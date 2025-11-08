@@ -86,5 +86,33 @@
   "settings": {
     "language": "Hizkuntza",
     "change_language": "Hizkuntza aldatu"
+  },
+  "admin": {
+    "users": {
+      "title": "Erabiltzaileen Kudeaketa",
+      "search_placeholder": "Bilatu izen edo email bidez",
+      "clear": "Garbitu testua",
+      "create": "Erabiltzailea sortu",
+      "id": "ID",
+      "name": "Izena",
+      "email": "Emaila",
+      "role": "Rola",
+      "role_free": "free",
+      "role_premium": "premium",
+      "role_admin": "admin",
+      "quota": "Kuota/egun",
+      "blocked": "Blokeatuta",
+      "active": "Aktibo",
+      "yes": "Bai",
+      "no": "Ez",
+      "actions": "Ekintzak",
+      "save": "Gorde",
+      "delete": "Ezabatu",
+      "no_results": "Emaitzarik ez",
+      "modal_create": "Erabiltzailea sortu",
+      "modal_edit": "Erabiltzailea editatu",
+      "password": "Pasahitza (gutx. 8)",
+      "close": "Itxi"
+    }
   }
 }

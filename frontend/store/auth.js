@@ -6,12 +6,20 @@ export const userLoggedIn = () => useState("userLoggedIn", () => false);
 export const userData = () => useState("userData", () => null);
 
 // Login: guarda token y usuario
-export function login(user, token) {
+export async function login(user, token) {
   const tokenCookie = useCookie("token", { path: "/" });
   tokenCookie.value = token;
 
   userData().value = user;
   userLoggedIn().value = true;
+
+  // Hidratar con /me para incluir campos como role/is_blocked
+  try {
+    const me = await axiosClient.get("/me");
+    if (me?.data?.user) {
+      userData().value = me.data.user;
+    }
+  } catch {}
 }
 
 // Logout: limpia token y datos de usuario

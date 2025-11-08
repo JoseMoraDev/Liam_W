@@ -2,5 +2,32 @@
   "app": { "title": "Aplicación" },
   "nav": { "home": "Inicio", "about": "Acerca de" },
   "actions": { "save": "Guardar", "cancel": "Cancelar" },
-  "language": { "label": "Idioma", "change": "Cambiar idioma" }
+  "language": { "label": "Idioma", "change": "Cambiar idioma" },
+  "admin": {
+    "users": {
+      "title": "Gestión de Usuarios",
+      "search_placeholder": "Buscar por nombre o email",
+      "clear": "Borrar texto",
+      "create": "Crear usuario",
+      "id": "ID",
+      "name": "Nombre",
+      "email": "Email",
+      "role": "Rol",
+      "role_free": "free",
+      "role_premium": "premium",
+      "role_admin": "admin",
+      "quota": "Cupo/día",
+      "blocked": "Bloqueado",
+      "active": "Activo",
+      "yes": "Sí",
+      "no": "No",
+      "actions": "Acciones",
+      "save": "Guardar",
+      "delete": "Eliminar",
+      "no_results": "Sin resultados",
+      "modal_create": "Crear usuario",
+      "modal_edit": "Editar usuario",
+      "password": "Contraseña (min 8)"
+    }
+  }
 }

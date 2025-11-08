@@ -193,6 +193,7 @@
         </NuxtLink>
 
         <NuxtLink
+          v-if="currentUser?.role === 'admin'"
           to="/avanzado"
           class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg hover:bg-gray-200/30"
           @click="open = false"
@@ -208,7 +209,7 @@
 </template>
 
 <script setup>
-import { userLoggedIn, logout, userData } from "~/store/auth";
+import { userLoggedIn, logout, userData, checkAuth } from "~/store/auth";
 import { ref, onMounted, onBeforeUnmount, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
@@ -347,10 +348,14 @@ function handleClickOutside(e) {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener("click", handleClickOutside);
   refreshMunicipio();
   window.addEventListener("storage", refreshMunicipio);
+  // Hidratar datos del usuario (para disponer de role en el nav)
+  if (isLoggedIn.value) {
+    await checkAuth();
+  }
 });
 
 onBeforeUnmount(() => {
@@ -358,8 +363,11 @@ onBeforeUnmount(() => {
   window.removeEventListener("storage", refreshMunicipio);
 });
 
-watch(isLoggedIn, () => {
+watch(isLoggedIn, async () => {
   refreshMunicipio();
+  if (isLoggedIn.value) {
+    await checkAuth();
+  }
 });
 </script>
 

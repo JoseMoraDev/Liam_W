@@ -85,5 +85,33 @@
   "settings": {
     "language": "Idioma",
     "change_language": "Canviar idioma"
+  },
+  "admin": {
+    "users": {
+      "title": "Gestió d'Usuaris",
+      "search_placeholder": "Busca per nom o correu",
+      "clear": "Borrar text",
+      "create": "Crear usuari",
+      "id": "ID",
+      "name": "Nom",
+      "email": "Correu",
+      "role": "Rol",
+      "role_free": "free",
+      "role_premium": "premium",
+      "role_admin": "admin",
+      "quota": "Quota/dia",
+      "blocked": "Bloquejat",
+      "active": "Actiu",
+      "yes": "Sí",
+      "no": "No",
+      "actions": "Accions",
+      "save": "Guardar",
+      "delete": "Eliminar",
+      "no_results": "Sense resultats",
+      "modal_create": "Crear usuari",
+      "modal_edit": "Editar usuari",
+      "password": "Contrasenya (mín. 8)",
+      "close": "Tancar"
+    }
   }
 }

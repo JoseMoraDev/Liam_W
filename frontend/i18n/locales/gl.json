@@ -86,5 +86,33 @@
   "settings": {
     "language": "Idioma",
     "change_language": "Cambiar idioma"
+  },
+  "admin": {
+    "users": {
+      "title": "Xestión de Usuarios",
+      "search_placeholder": "Buscar por nome ou correo",
+      "clear": "Borrar texto",
+      "create": "Crear usuario",
+      "id": "ID",
+      "name": "Nome",
+      "email": "Correo",
+      "role": "Rol",
+      "role_free": "free",
+      "role_premium": "premium",
+      "role_admin": "admin",
+      "quota": "Cota/día",
+      "blocked": "Bloqueado",
+      "active": "Activo",
+      "yes": "Si",
+      "no": "Non",
+      "actions": "Accións",
+      "save": "Gardar",
+      "delete": "Eliminar",
+      "no_results": "Sen resultados",
+      "modal_create": "Crear usuario",
+      "modal_edit": "Editar usuario",
+      "password": "Contrasinal (mín. 8)",
+      "close": "Pechar"
+    }
   }
 }
