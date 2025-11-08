@@ -28,6 +28,30 @@
       "modal_create": "Erabiltzailea sortu",
       "modal_edit": "Erabiltzailea editatu",
       "password": "Pasahitza (gutx. 8)"
+    },
+    "metrics": {
+      "section_title": "Metrikak eta logak",
+      "open_logins": "Ikusi saio-hasieraren historia",
+      "open_errors": "Ikusi errore-logak",
+      "open_stats": "Ikusi estatistikak",
+      "logins_title": "Saio-hasieraren historia",
+      "errors_title": "Errore-logak",
+      "stats_title": "Estatistikak",
+      "close": "Itxi",
+      "no_data": "Daturik ez",
+      "stats_usage_title": "Eguneko erabilera",
+      "stats_calls": "Deiak",
+      "stats_users": "Erabiltzaileak",
+      "stats_avg": "Batezbestekoa",
+      "stats_max": "Gehienezkoa",
+      "stats_top_endpoints": "Endpoint onenak",
+      "stats_endpoint": "Endpoint",
+      "stats_hits": "Hits",
+      "stats_percent": "%",
+      "stats_top_users_by_endpoint": "Erabiltzaileak endpointaren arabera",
+      "stats_user": "Erabiltzailea",
+      "stats_email": "Emaila",
+      "stats_top_by_user": "Erabiltzaile bakoitzak gehien erabili duen endpointa"
     }
   }
 }

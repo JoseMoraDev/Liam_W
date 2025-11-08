@@ -106,12 +106,38 @@
       "no": "No",
       "actions": "Acciones",
       "save": "Guardar",
+      "cancel": "Cancelar",
       "delete": "Eliminar",
       "no_results": "Sin resultados",
       "modal_create": "Crear usuario",
       "modal_edit": "Editar usuario",
       "password": "Contraseña (min 8)",
       "close": "Cerrar"
+    }
+    ,
+    "metrics": {
+      "section_title": "Métricas y logs",
+      "open_logins": "Ver historial de logins",
+      "open_errors": "Ver logs de error",
+      "open_stats": "Ver estadísticas",
+      "logins_title": "Historial de logins",
+      "errors_title": "Logs de error",
+      "stats_title": "Estadísticas",
+      "close": "Cerrar",
+      "no_data": "Sin datos",
+      "stats_usage_title": "Uso diario",
+      "stats_calls": "Llamadas",
+      "stats_users": "Usuarios",
+      "stats_avg": "Media",
+      "stats_max": "Máximo",
+      "stats_top_endpoints": "Top endpoints",
+      "stats_endpoint": "Endpoint",
+      "stats_hits": "Hits",
+      "stats_percent": "%",
+      "stats_top_users_by_endpoint": "Top usuarios por endpoint",
+      "stats_user": "Usuario",
+      "stats_email": "Correo",
+      "stats_top_by_user": "Endpoint más usado por usuario"
     }
   }
 }

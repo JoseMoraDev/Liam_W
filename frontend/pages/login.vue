@@ -8,12 +8,12 @@
     <!-- Contenido principal -->
     <div
       :class="mounted ? 'opacity-100' : 'opacity-0'"
-      class="relative z-10 flex flex-col items-center w-full h-screen p-4 transition-opacity duration-300 md:p-8"
+      class="relative z-10 flex flex-col items-center w-full min-h-screen p-4 transition-opacity duration-300 sm:p-6 md:p-8"
     >
       <!-- Titulo -->
-      <div class="flex items-end justify-center w-3/4 h-2/10">
+      <div class="flex items-end justify-center w-full max-w-xl px-2">
         <h1
-          class="text-3xl font-bold leading-snug text-center text-white md:text-4xl"
+          class="text-2xl font-bold leading-snug text-center text-white sm:text-3xl md:text-4xl"
         >
           Live Ambience <br />Weather & Traffic
         </h1>
@@ -21,18 +21,18 @@
 
       <!-- sección -->
       <div
-        class="flex flex-col items-center justify-center w-2/3 mt-10 space-y-6 h-2/10"
+        class="flex flex-col items-center justify-center w-full max-w-xl mt-6 space-y-4 px-2"
       >
-        <p class="mt-2 text-xl text-center text-gray-200 md:text-2xl">
+        <p class="mt-2 text-base text-center text-gray-200 sm:text-lg md:text-xl">
           {{ t('login.subtitle') }}
         </p>
       </div>
 
       <!-- formulario -->
-      <div class="flex items-start justify-center w-10/12 mt-4 h-3/10">
+      <div class="flex items-start justify-center w-full max-w-md mt-4 px-2">
         <form
           @submit.prevent="submitLogin"
-          class="flex flex-col w-full max-w-sm space-y-4"
+          class="flex flex-col w-full space-y-4"
         >
           <!-- div correo -->
           <div class="relative w-full">
@@ -72,10 +72,10 @@
             />
           </div>
 
-          <div class="flex justify-center !mt-8">
+          <div class="flex justify-center !mt-6">
             <button
               type="submit"
-              class="w-1/2 py-2 font-bold text-gray-200 transition-colors border border-gray-400 rounded-md bg-white/30 hover:bg-gray-400 hover:text-white"
+              class="w-full sm:w-2/3 py-3 font-bold text-gray-200 transition-colors border border-gray-400 rounded-md bg-white/30 hover:bg-gray-400 hover:text-white"
             >
               {{ t('login.submit') }}
             </button>
@@ -90,11 +90,11 @@
         </form>
       </div>
 
-      <div class="flex justify-between w-full space-x-3">
+      <div class="grid w-full max-w-md grid-cols-1 gap-3 px-2 sm:grid-cols-2">
         <!-- Botón 1 -->
         <NuxtLink
           to="/password"
-          class="w-1/2 py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
+          class="w-full py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
         >
           {{ t('login.forgot_password') }}
         </NuxtLink>
@@ -102,7 +102,7 @@
         <!-- Botón 2 -->
         <NuxtLink
           to="/register"
-          class="w-1/2 py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
+          class="w-full py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
         >
           {{ t('login.signup_cta') }}
         </NuxtLink>
@@ -113,7 +113,7 @@
 
       <!-- Footer con atribución -->
       <footer
-        class="absolute w-full text-xs text-center text-gray-600 bottom-2"
+        class="w-full px-2 pb-2 text-[11px] text-center text-gray-300 sm:text-xs"
       >
         Foto por Danieljschwarz alojada en
         <a
@@ -137,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import { axiosClient } from "~/axiosConfig";
 import { useRouter } from "vue-router";
 import { login } from "~/store/auth";
@@ -177,7 +177,8 @@ async function submitLogin() {
     // ✅ Usar la función del store para guardar token y usuario globalmente
     await login(response.data.user, response.data.token);
 
-    // ✅ Redirigir tras login correcto
+    // ✅ Redirigir tras login correcto (esperar a que cookie/estado se apliquen)
+    await nextTick();
     router.push("/previsiones");
   } catch (error) {
     console.error("Error en login:", error);

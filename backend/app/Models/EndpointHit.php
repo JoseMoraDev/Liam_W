@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Endpoint extends Model
+class EndpointHit extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'tipo', 'url'];
+    protected $fillable = [
+        'endpoint_id',
+        'hits',
+    ];
 }

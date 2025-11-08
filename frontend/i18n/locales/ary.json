@@ -114,5 +114,30 @@
       "password": "كلمة المرور (≥ 8)",
       "close": "إغلاق"
     }
+    ,
+    "metrics": {
+      "section_title": "الإحصاءات واللوغات",
+      "open_logins": "عرض سجلّات الدخول",
+      "open_errors": "عرض لوغات الأخطاء",
+      "open_stats": "عرض الإحصاءات",
+      "logins_title": "سجلّات الدخول",
+      "errors_title": "لوغات الأخطاء",
+      "stats_title": "الإحصاءات",
+      "close": "إغلاق",
+      "no_data": "ما كايناش بيانات",
+      "stats_usage_title": "الاستخدام اليومي",
+      "stats_calls": "النداءات",
+      "stats_users": "المستخدمون",
+      "stats_avg": "المتوسط",
+      "stats_max": "الأقصى",
+      "stats_top_endpoints": "أكثر الـ endpoints استعمالاً",
+      "stats_endpoint": "Endpoint",
+      "stats_hits": "Hits",
+      "stats_percent": "%",
+      "stats_top_users_by_endpoint": "أفضل المستخدمين حسب الـ endpoint",
+      "stats_user": "المستخدم",
+      "stats_email": "البريد",
+      "stats_top_by_user": "أكثر endpoint استعمله كل مستخدم"
+    }
   }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\LoginLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -45,6 +46,14 @@ class AuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
+            // Log failed login
+            LoginLog::create([
+                'user_id' => optional($user)->id,
+                'email' => $request->email,
+                'ip' => $request->ip(),
+                'user_agent' => (string) $request->header('User-Agent'),
+                'success' => false,
+            ]);
             return response()->json([
                 'message' => 'Credenciales incorrectas'
             ], 401);
@@ -52,6 +61,15 @@ class AuthController extends Controller
 
         // Crear token con nombre único opcional
         $token = $user->createToken('api-token')->plainTextToken;
+
+        // Log successful login
+        LoginLog::create([
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'ip' => $request->ip(),
+            'user_agent' => (string) $request->header('User-Agent'),
+            'success' => true,
+        ]);
 
         return response()->json([
             'message' => 'Login correcto',

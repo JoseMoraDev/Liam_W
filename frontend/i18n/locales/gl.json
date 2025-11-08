@@ -113,6 +113,30 @@
       "modal_edit": "Editar usuario",
       "password": "Contrasinal (mín. 8)",
       "close": "Pechar"
+    },
+    "metrics": {
+      "section_title": "Métricas e logs",
+      "open_logins": "Ver historial de inicios de sesión",
+      "open_errors": "Ver logs de erro",
+      "open_stats": "Ver estatísticas",
+      "logins_title": "Historial de inicios de sesión",
+      "errors_title": "Logs de erro",
+      "stats_title": "Estatísticas",
+      "close": "Pechar",
+      "no_data": "Sen datos",
+      "stats_usage_title": "Uso diario",
+      "stats_calls": "Chamadas",
+      "stats_users": "Usuarios",
+      "stats_avg": "Media",
+      "stats_max": "Máximo",
+      "stats_top_endpoints": "Endpoints máis usados",
+      "stats_endpoint": "Endpoint",
+      "stats_hits": "Hits",
+      "stats_percent": "%",
+      "stats_top_users_by_endpoint": "Top usuarios por endpoint",
+      "stats_user": "Usuario",
+      "stats_email": "Correo",
+      "stats_top_by_user": "Endpoint máis usado por usuario"
     }
   }
 }

@@ -26,6 +26,7 @@ use App\Http\Controllers\AqaPolenController;
 use App\Http\Controllers\UbicacionEndpointUsuarioController;
 use App\Http\Controllers\UserLocationPrefController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminMetricsController;
 
 Route::post('/cambiar-passwd', function (Request $request) {
     $request->validate([
@@ -98,7 +99,8 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 
 //! middleware protegido por token Sanctum + throttle por rol + consumo de cupo (sin 'web' para evitar CSRF 419)
-Route::middleware(['auth:sanctum', 'throttle:api-per-user', 'consume.free'])->group(function () {
+Route::middleware(['auth:sanctum', 'throttle:api-per-user', 'consume.free', 'track.endpoint'])
+    ->group(function () {
     // Auth
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -120,6 +122,14 @@ Route::middleware(['auth:sanctum', 'throttle:api-per-user', 'consume.free'])->gr
         Route::delete('/users/{id}', [AdminUserController::class, 'destroy']);
         Route::post('/users/{id}/role', [AdminUserController::class, 'setRole']);
         Route::post('/users/{id}/block', [AdminUserController::class, 'block']);
+
+        // Admin metrics (admin-only enforced in controller)
+        Route::get('/metrics/endpoints-top', [AdminMetricsController::class, 'endpointsTop']);
+        Route::get('/metrics/stats', [AdminMetricsController::class, 'stats']);
+        Route::get('/metrics/logins', [AdminMetricsController::class, 'logins']);
+        Route::get('/metrics/errors', [AdminMetricsController::class, 'errors']);
+        Route::get('/metrics/user-endpoints-top', [AdminMetricsController::class, 'userEndpointsTop']);
+        Route::get('/metrics/user-top-endpoint', [AdminMetricsController::class, 'userTopEndpoint']);
     });
 });
 

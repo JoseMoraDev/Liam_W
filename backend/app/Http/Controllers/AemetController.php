@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Endpoint;
+use App\Models\UbicacionEndpointUsuario;
 
 class AemetController extends Controller
 {
@@ -34,41 +37,86 @@ class AemetController extends Controller
 
         $base_url = 'https://opendata.aemet.es/opendata/api';
 
-        // 1ª llamada para obtener las URLs
-        $initialResponse = Http::get($base_url . $endpoint, [
-            'api_key' => $token,
-        ]);
+        try {
+            // 1ª llamada para obtener las URLs
+            $initialResponse = Http::timeout(15)->get($base_url . $endpoint, [
+                'api_key' => $token,
+            ]);
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            return response()->json([
+                'error' => 'No se pudo conectar con AEMET (fase inicial)'.'',
+                'message' => $e->getMessage(),
+            ], 502);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => 'Fallo inesperado llamando a AEMET (fase inicial)'.'',
+                'message' => $e->getMessage(),
+            ], 502);
+        }
 
         if ($initialResponse->failed()) {
+            $body = $initialResponse->body();
+            $snippet = mb_substr(strip_tags((string)$body), 0, 400);
             return response()->json([
                 'error' => 'Error en llamada inicial AEMET',
-                'details' => $initialResponse->body()
-            ], 500);
+                'details' => $snippet,
+                'status' => $initialResponse->status(),
+            ], 502);
         }
 
         $body = $initialResponse->json();
-
+        if (!is_array($body)) {
+            $snippet = mb_substr(strip_tags((string)$initialResponse->body()), 0, 400);
+            return response()->json(['error' => 'Respuesta no JSON de AEMET en fase inicial', 'details' => $snippet], 502);
+        }
         if (!isset($body['datos'])) {
-            return response()->json(['error' => 'Respuesta inesperada de AEMET: falta "datos"'], 500);
+            return response()->json(['error' => 'Respuesta inesperada de AEMET: falta "datos"'], 502);
         }
 
         // 2ª llamada para obtener los datos reales
-        $dataResponse = Http::get($body['datos']);
+        try {
+            $dataResponse = Http::timeout(20)->get($body['datos']);
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            return response()->json([
+                'error' => 'No se pudo conectar con AEMET (fase datos)'.'',
+                'message' => $e->getMessage(),
+            ], 502);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'error' => 'Fallo inesperado llamando a AEMET (fase datos)'.'',
+                'message' => $e->getMessage(),
+            ], 502);
+        }
 
         if ($dataResponse->failed()) {
+            $body2 = $dataResponse->body();
+            $snippet2 = mb_substr(strip_tags((string)$body2), 0, 400);
             return response()->json([
                 'error' => 'Error al obtener datos reales de AEMET',
-                'details' => $dataResponse->body()
-            ], 500);
+                'details' => $snippet2,
+                'status' => $dataResponse->status(),
+            ], 502);
         }
 
         // AEMET a veces devuelve JSON y otras veces texto
-        $decoded = json_decode($dataResponse->body(), true);
+        $raw = (string)$dataResponse->body();
+        // Forzar UTF-8 si no lo es
+        if (!mb_detect_encoding($raw, 'UTF-8', true)) {
+            $raw = mb_convert_encoding($raw, 'UTF-8', 'ISO-8859-1, Windows-1252');
+        }
+        $decoded = json_decode($raw, true);
         if (json_last_error() === JSON_ERROR_NONE) {
-            return response()->json($decoded);
+            return response()->json($decoded, 200, ['Content-Type' => 'application/json; charset=UTF-8']);
         } else {
-            return response($dataResponse->body(), 200)
-                ->header('Content-Type', 'text/plain; charset=UTF-8');
+            // Evitar devolver HTML crudo: si parece HTML, devolver mensaje acotado
+            if (stripos($raw, '<html') !== false) {
+                $snippet = mb_substr(strip_tags($raw), 0, 400);
+                return response()->json([
+                    'warning' => 'AEMET devolvió HTML en lugar de JSON',
+                    'preview' => $snippet,
+                ], 502);
+            }
+            return response($raw, 200)->header('Content-Type', 'text/plain; charset=UTF-8');
         }
     }
 
@@ -609,7 +657,7 @@ class AemetController extends Controller
             };
             array_walk_recursive($result, $normalize);
 
-            return response()->json($result, 200, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE);
+            return response()->json($result, 200, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Error inesperado al procesar el XML.',
@@ -689,6 +737,7 @@ class AemetController extends Controller
 
         return response()->json($resultado, 200, [], JSON_UNESCAPED_UNICODE);
     }
+
 
 
     // public function prediccionHorariaMunicipio($municipioId)
@@ -886,10 +935,17 @@ class AemetController extends Controller
 
         $response = Http::get($baseUrl . $endpoint, ['api_key' => $token]);
         if ($response->failed() || !isset($response->json()['datos'])) {
-            return response()->json([
-                'error' => 'Error en llamada inicial AEMET o respuesta inesperada.',
-                'details' => $response->body()
-            ], 500);
+            $details = $response->body();
+            if (!mb_detect_encoding($details, 'UTF-8', true)) {
+                $details = mb_convert_encoding($details, 'UTF-8', 'ISO-8859-1, Windows-1252');
+            }
+            if (function_exists('iconv')) {
+                $tmp = @iconv('UTF-8', 'UTF-8//IGNORE', $details);
+                if ($tmp !== false) { $details = $tmp; }
+            }
+            $payload = ['error' => 'Error en llamada inicial AEMET o respuesta inesperada.', 'details' => $details];
+            $json = json_encode($payload, \JSON_UNESCAPED_UNICODE | \JSON_INVALID_UTF8_SUBSTITUTE);
+            return response($json, 500)->header('Content-Type', 'application/json; charset=UTF-8');
         }
 
         $dataUrl = $response->json()['datos'];
@@ -904,28 +960,47 @@ class AemetController extends Controller
         }
 
         if ($dataResponse->failed()) {
-            return response()->json([
-                'error' => 'Error al obtener datos reales de AEMET.',
-                'details' => $dataResponse->body()
-            ], 500);
+            $details = $dataResponse->body();
+            if (!mb_detect_encoding($details, 'UTF-8', true)) {
+                $details = mb_convert_encoding($details, 'UTF-8', 'ISO-8859-1, Windows-1252');
+            }
+            if (function_exists('iconv')) {
+                $tmp = @iconv('UTF-8', 'UTF-8//IGNORE', $details);
+                if ($tmp !== false) { $details = $tmp; }
+            }
+            $payload = ['error' => 'Error al obtener datos reales de AEMET.', 'details' => $details];
+            $json = json_encode($payload, \JSON_UNESCAPED_UNICODE | \JSON_INVALID_UTF8_SUBSTITUTE);
+            return response($json, 500)->header('Content-Type', 'application/json; charset=UTF-8');
         }
 
         $jsonString = mb_convert_encoding($dataResponse->body(), 'UTF-8', 'ISO-8859-1');
         $prediccion = json_decode($jsonString, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return response()->json([
+            $rawSafe = $jsonString;
+            if (!mb_detect_encoding($rawSafe, 'UTF-8', true)) {
+                $rawSafe = mb_convert_encoding($rawSafe, 'UTF-8', 'ISO-8859-1, Windows-1252');
+            }
+            if (function_exists('iconv')) {
+                $tmp = @iconv('UTF-8', 'UTF-8//IGNORE', $rawSafe);
+                if ($tmp !== false) { $rawSafe = $tmp; }
+            }
+            $payload = [
                 'error' => 'No se pudo decodificar el JSON.',
                 'json_error' => json_last_error_msg(),
-                'raw_response' => $jsonString
-            ], 500);
+                'raw_response' => $rawSafe
+            ];
+            $json = json_encode($payload, \JSON_UNESCAPED_UNICODE | \JSON_INVALID_UTF8_SUBSTITUTE);
+            return response($json, 500)->header('Content-Type', 'application/json; charset=UTF-8');
         }
 
         if (!is_array($prediccion) || !isset($prediccion[0]['prediccion']['dia'])) {
-            return response()->json([
+            $payload = [
                 'error' => 'La estructura de la respuesta de AEMET no es la esperada.',
                 'response' => $prediccion
-            ], 500);
+            ];
+            $json = json_encode($payload, \JSON_UNESCAPED_UNICODE | \JSON_INVALID_UTF8_SUBSTITUTE);
+            return response($json, 500)->header('Content-Type', 'application/json; charset=UTF-8');
         }
 
         $parteUtil = $prediccion[0]['prediccion']['dia'] ?? [];
@@ -998,18 +1073,79 @@ class AemetController extends Controller
             $nuevoParte[] = $nuevoDia;
         }
 
-        function utf8ize($mixed)
-        {
-            if (is_array($mixed)) {
-                foreach ($mixed as $key => $value) {
-                    $mixed[$key] = utf8ize($value);
+        // Normalizar recursivamente a UTF-8 para evitar 'Malformed UTF-8'
+        $normalize = function (&$item) {
+            if (is_string($item)) {
+                // Primero intentar detectar/convertir a UTF-8
+                if (!mb_detect_encoding($item, 'UTF-8', true)) {
+                    $item = mb_convert_encoding($item, 'UTF-8', 'ISO-8859-1, Windows-1252, UTF-8');
+                } else {
+                    $item = mb_convert_encoding($item, 'UTF-8', 'UTF-8');
                 }
-            } elseif (is_string($mixed)) {
-                return mb_convert_encoding($mixed, 'UTF-8', 'UTF-8');
+                // Luego purgar bytes inválidos si existieran
+                if (function_exists('iconv')) {
+                    $tmp = @iconv('UTF-8', 'UTF-8//IGNORE', $item);
+                    if ($tmp !== false) { $item = $tmp; }
+                }
             }
-            return $mixed;
+        };
+        array_walk_recursive($nuevoParte, $normalize);
+
+        // Usar sustitución de UTF-8 inválido por seguridad en el JSON final
+        $json = json_encode($nuevoParte, \JSON_UNESCAPED_UNICODE | \JSON_INVALID_UTF8_SUBSTITUTE);
+        if ($json === false) {
+            // Último recurso: convertir todo a string seguro
+            $fallback = ['error' => 'Encoding error', 'message' => json_last_error_msg()];
+            $json = json_encode($fallback, \JSON_UNESCAPED_UNICODE);
+        }
+        // Atribuir uso al usuario autenticado (si lo hay) para este endpoint de negocio
+        try {
+            $user = Auth::user();
+            // Route is public; try to resolve user from Sanctum bearer token if not authenticated by middleware
+            if (!$user) {
+                $bearer = request()->bearerToken();
+                if ($bearer && strpos($bearer, '|') !== false) {
+                    $parts = explode('|', $bearer, 2);
+                    $plain = $parts[1] ?? null;
+                    if ($plain) {
+                        $hash = hash('sha256', $plain);
+                        $pat = DB::table('personal_access_tokens')->where('token', $hash)->first();
+                        if ($pat && isset($pat->tokenable_type, $pat->tokenable_id) && $pat->tokenable_type === \App\Models\User::class) {
+                            $user = \App\Models\User::find($pat->tokenable_id);
+                        }
+                    }
+                }
+            }
+            if ($user) {
+                $route = request()->route();
+                $uri = null;
+                if ($route) {
+                    $uri = method_exists($route, 'uri') ? $route->uri() : ($route->uri ?? null);
+                }
+                $uri = $uri ?: 'api/prediccion/horaria/{municipioId}';
+                $ruta = '/' . ltrim($uri, '/');
+
+                $endpoint = Endpoint::firstOrCreate(
+                    ['url' => $ruta],
+                    ['name' => $ruta, 'tipo' => 'public', 'url' => $ruta]
+                );
+
+                $rec = UbicacionEndpointUsuario::firstOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'endpoint_id' => $endpoint->id,
+                        'tipo_ubicacion' => 'sin_ubicacion',
+                    ],
+                    [
+                        'usos' => 0,
+                    ]
+                );
+                $rec->increment('usos');
+            }
+        } catch (\Throwable $e) {
+            // no romper respuesta si falla el tracking
         }
 
-        return response()->json(utf8ize($nuevoParte), 200);
+        return response($json, 200)->header('Content-Type', 'application/json; charset=UTF-8');
     }
 }

@@ -13,61 +13,87 @@ class RegistrarConsumoEndpoint
     {
         $response = $next($request);
 
-        $user = Auth::user();
-        if (!$user) {
-            return $response; // Solo registramos si el usuario está autenticado
+        // Solo registramos si el usuario está autenticado y no es una petición preflight
+        if ($request->isMethod('OPTIONS')) {
+            return $response;
         }
 
-        // Buscar endpoint a partir de la URI solicitada
-        $ruta = '/' . $request->route()->uri();
-        $endpoint = Endpoint::where('url', $ruta)->first();
+        $user = Auth::user();
+        if (!$user) {
+            return $response;
+        }
 
-        if ($endpoint) {
-            $params = $request->all();
+        try {
+            $route = $request->route();
+            if (!$route) {
+                return $response;
+            }
+            $uri = method_exists($route, 'uri') ? $route->uri() : ($route->uri ?? null);
+            if (!$uri || !is_string($uri)) {
+                return $response;
+            }
+            $ruta = '/' . ltrim($uri, '/');
 
-            // Detectar tipo_ubicacion según los parámetros
-            $tipoUbicacion = 'sin_ubicacion';
-            $valores = [
-                'valor_lat' => $params['lat'] ?? null,
-                'valor_lon' => $params['lon'] ?? null,
-                'valor_id_municipio' => $params['municipio'] ?? null,
-                'valor_codigo_playa' => $params['codigo_playa'] ?? null,
-                'valor_codigo_montana' => $params['codigo_montana'] ?? null,
-                'valor_codigo_area' => $params['codigo_area'] ?? null,
-                'valor_codigo_zona' => $params['codigo_zona'] ?? null,
-            ];
-
-            if ($valores['valor_lat'] && $valores['valor_lon']) {
-                $tipoUbicacion = 'coordenadas';
-            } elseif ($valores['valor_id_municipio']) {
-                $tipoUbicacion = 'municipio';
-            } elseif ($valores['valor_codigo_playa']) {
-                $tipoUbicacion = 'codigo_playa';
-            } elseif ($valores['valor_codigo_montana']) {
-                $tipoUbicacion = 'codigo_montana';
+            $endpoint = Endpoint::where('url', $ruta)->first();
+            if (!$endpoint) {
+                // Crear endpoint si no existe para poder contabilizar usos
+                $endpoint = Endpoint::create([
+                    'name' => $ruta,
+                    'tipo' => 'auth',
+                    'url' => $ruta,
+                ]);
             }
 
-            // Buscar si ya existe registro para este usuario + endpoint + parámetros
-            $registro = UbicacionEndpointUsuario::where('user_id', $user->id)
-                ->where('endpoint_id', $endpoint->id)
-                ->where('tipo_ubicacion', $tipoUbicacion)
-                ->where(function ($q) use ($valores) {
-                    foreach ($valores as $campo => $valor) {
-                        $q->where($campo, $valor);
-                    }
-                })->first();
+            if ($endpoint) {
+                $params = $request->all();
 
-            if ($registro) {
-                $registro->increment('usos');
-            } else {
-                UbicacionEndpointUsuario::create(array_merge([
-                    'user_id' => $user->id,
-                    'endpoint_id' => $endpoint->id,
-                    'tipo_ubicacion' => $tipoUbicacion,
-                    'usos' => 1,
-                    'predeterminada' => 0,
-                ], $valores));
+                // Detectar tipo_ubicacion según los parámetros
+                $tipoUbicacion = 'sin_ubicacion';
+                $valores = [
+                    'valor_lat' => $params['lat'] ?? null,
+                    'valor_lon' => $params['lon'] ?? null,
+                    'valor_id_municipio' => $params['municipio'] ?? null,
+                    'valor_codigo_playa' => $params['codigo_playa'] ?? null,
+                    'valor_codigo_montana' => $params['codigo_montana'] ?? null,
+                    'valor_codigo_area' => $params['codigo_area'] ?? null,
+                    'valor_codigo_zona' => $params['codigo_zona'] ?? null,
+                ];
+
+                if ($valores['valor_lat'] && $valores['valor_lon']) {
+                    $tipoUbicacion = 'coordenadas';
+                } elseif ($valores['valor_id_municipio']) {
+                    $tipoUbicacion = 'municipio';
+                } elseif ($valores['valor_codigo_playa']) {
+                    $tipoUbicacion = 'codigo_playa';
+                } elseif ($valores['valor_codigo_montana']) {
+                    $tipoUbicacion = 'codigo_montana';
+                }
+
+                // Buscar si ya existe registro para este usuario + endpoint + parámetros
+                $registro = UbicacionEndpointUsuario::where('user_id', $user->id)
+                    ->where('endpoint_id', $endpoint->id)
+                    ->where('tipo_ubicacion', $tipoUbicacion)
+                    ->where(function ($q) use ($valores) {
+                        foreach ($valores as $campo => $valor) {
+                            $q->where($campo, $valor);
+                        }
+                    })->first();
+
+                if ($registro) {
+                    $registro->increment('usos');
+                } else {
+                    UbicacionEndpointUsuario::create(array_merge([
+                        'user_id' => $user->id,
+                        'endpoint_id' => $endpoint->id,
+                        'tipo_ubicacion' => $tipoUbicacion,
+                        'usos' => 1,
+                        'predeterminada' => 0,
+                    ], $valores));
+                }
             }
+        } catch (\Throwable $e) {
+            // No romper el flujo de la API por métricas
+            return $response;
         }
 
         return $response;

@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // CORS para peticiones desde frontend (Nuxt) en desarrollo
         $middleware->use([
             HandleCors::class,
+            \App\Http\Middleware\ContarHitsPublicos::class,
         ]);
         $middleware->group('login', [
             EnsureFrontendRequestsAreStateful::class,
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
             'consume.free' => \App\Http\Middleware\ConsumeFreeQuota::class,
+            'track.endpoint' => \App\Http\Middleware\RegistrarConsumoEndpoint::class,
         ]);
         $middleware->validateCsrfTokens(
             except: ['api'],

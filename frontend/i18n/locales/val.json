@@ -113,5 +113,30 @@
       "password": "Contrasenya (mín. 8)",
       "close": "Tancar"
     }
+    ,
+    "metrics": {
+      "section_title": "Mètriques i logs",
+      "open_logins": "Vore historial d'inicis de sessió",
+      "open_errors": "Vore logs d'error",
+      "open_stats": "Vore estadístiques",
+      "logins_title": "Historial d'inicis de sessió",
+      "errors_title": "Logs d'error",
+      "stats_title": "Estadístiques",
+      "close": "Tancar",
+      "no_data": "Sense dades",
+      "stats_usage_title": "Ús diari",
+      "stats_calls": "Cridades",
+      "stats_users": "Usuaris",
+      "stats_avg": "Mitjana",
+      "stats_max": "Màxim",
+      "stats_top_endpoints": "Endpoints més usats",
+      "stats_endpoint": "Endpoint",
+      "stats_hits": "Hits",
+      "stats_percent": "%",
+      "stats_top_users_by_endpoint": "Top usuaris per endpoint",
+      "stats_user": "Usuari",
+      "stats_email": "Correu",
+      "stats_top_by_user": "Endpoint més usat per usuari"
+    }
   }
 }
