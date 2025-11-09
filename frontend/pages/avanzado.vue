@@ -26,53 +26,75 @@
              class="fixed inset-0 flex items-center justify-center bg-black/50"
              style="position:fixed; inset:0; z-index:2147483646;"
              @click.self="themesOpen = false">
-          <div class="w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 bg-white rounded-2xl shadow-xl">
+          <div class="w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 rounded-2xl shadow-xl theme-surface theme-border border">
             <div class="flex items-center justify-between mb-3">
-              <h3 class="text-xl font-bold text-gray-900/90">Temas de colores</h3>
-              <button @click="themesOpen = false" class="px-3 py-1 text-gray-700 bg-gray-100 border rounded-md">Cerrar</button>
+              <h3 class="text-xl font-bold">Temas de colores</h3>
+              <button @click="themesOpen = false" class="px-3 py-1 rounded-md border theme-border">Cerrar</button>
             </div>
             <div class="grid gap-4 md:grid-cols-2">
-              <div class="p-4 bg-white border rounded-xl border-gray-200/60">
-                <h4 class="mb-3 font-semibold text-gray-800">Temas disponibles</h4>
+              <div class="p-4 rounded-xl theme-surface theme-border border">
+                <h4 class="mb-3 font-semibold">Temas disponibles</h4>
                 <ul class="space-y-2">
-                  <li v-for="t in themeList" :key="t.id" class="flex items-center justify-between p-2 border rounded-lg border-gray-200/60">
+                  <li v-for="t in themeList" :key="t.id" class="flex items-center justify-between p-2 border rounded-lg theme-border">
                     <div>
-                      <div class="font-medium text-gray-900">{{ t.name }}</div>
-                      <div class="text-xs text-gray-500">{{ t.id }}</div>
+                      <div class="font-medium">{{ t.name }}</div>
+                      <div class="text-xs theme-text-muted">{{ t.id }}</div>
                     </div>
                     <div class="flex items-center gap-2">
-                      <button class="px-3 py-1 text-sm bg-gray-900 text-white rounded-lg" @click="activate(t.id)">Activar</button>
-                      <button class="px-3 py-1 text-sm border rounded-lg border-gray-300/60" @click="edit(t)">Editar</button>
-                      <button class="px-3 py-1 text-sm text-white bg-red-600 rounded-lg" @click="remove(t.id)">Eliminar</button>
+                      <template v-if="t.id === activeId">
+                        <span class="px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-success)]">Activo</span>
+                      </template>
+                      <button v-else class="px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-primary)]" @click="activate(t.id)">Activar</button>
+                      <button class="px-3 py-1 text-sm border rounded-lg theme-border" @click="edit(t)">Editar</button>
+                      <button class="px-3 py-1 text-sm text-white rounded-lg bg-[color:var(--color-danger)]" :class="{ 'opacity-50 cursor-not-allowed': t.id === activeId }" :disabled="t.id === activeId" @click="remove(t.id)">Eliminar</button>
                     </div>
                   </li>
                   <li v-if="!themeList.length" class="p-3 text-center text-gray-500">No hay temas.</li>
                 </ul>
               </div>
 
-              <div class="p-4 bg-white border rounded-xl border-gray-200/60">
-                <h4 class="mb-3 font-semibold text-gray-800">{{ formMode === 'create' ? 'Crear tema' : 'Editar tema' }}</h4>
+              <div class="p-4 rounded-xl theme-surface theme-border border">
+                <h4 class="mb-3 font-semibold">{{ formMode === 'create' ? 'Crear tema' : 'Editar tema' }}</h4>
                 <div class="grid gap-3">
                   <label class="grid gap-1">
-                    <span class="text-sm text-gray-600">ID</span>
-                    <input v-model="form.id" class="px-3 py-2 border rounded-lg border-gray-300/60" placeholder="kebab-case" />
+                    <span class="text-sm theme-text-muted">ID</span>
+                    <input v-model="form.id" class="px-3 py-2 border rounded-lg theme-border bg-transparent" placeholder="kebab-case" />
                   </label>
                   <label class="grid gap-1">
-                    <span class="text-sm text-gray-600">Nombre</span>
-                    <input v-model="form.name" class="px-3 py-2 border rounded-lg border-gray-300/60" />
+                    <span class="text-sm theme-text-muted">Nombre</span>
+                    <input v-model="form.name" class="px-3 py-2 border rounded-lg theme-border bg-transparent" />
                   </label>
                   <details class="mt-2" open>
-                    <summary class="mb-2 font-medium text-gray-800">Colores</summary>
-                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <summary class="mb-2 font-medium">Colores</summary>
+                    <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4">
                       <div v-for="(v,k) in form.vars" :key="k" class="grid gap-1">
-                        <label class="text-xs text-gray-500">{{ k }}</label>
-                        <input :value="stripHash(form.vars[k])" @input="onInputColor(k, $event)" class="px-3 py-2 border rounded-lg border-gray-300/60" placeholder="e.g. 0b0f19" />
+                        <label class="text-xs theme-text-muted">{{ k }}</label>
+                        <div class="flex items-center gap-2 w-full">
+                          <!-- Preview externo (siempre oculto ahora) -->
+                          <span class="hidden w-6 h-6 rounded-md border theme-border shrink-0" :style="{ backgroundColor: '#' + stripHash(form.vars[k] || '') }"></span>
+                          <!-- Contenedor relativo para preview/botón internos en todas las resoluciones -->
+                          <div class="relative flex-1 min-w-0">
+                            <!-- Preview interno (todas las resoluciones) -->
+                            <span class="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded border theme-border" :style="{ backgroundColor: '#' + stripHash(form.vars[k] || '') }"></span>
+                            <input :value="stripHash(form.vars[k])"
+                                   @input="onInputColor(k, $event)"
+                                   class="w-full px-3 py-2 border rounded-lg theme-border bg-transparent pl-10 pr-24"
+                                   placeholder="e.g. 0b0f19" />
+                            <!-- Botón interno (todas las resoluciones) -->
+                            <button type="button"
+                                    class="inline-flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 text-sm rounded-md border theme-border whitespace-nowrap"
+                                    @click="openPicker($event)">Cambiar</button>
+                          </div>
+                          <!-- Botón externo (siempre oculto ahora) -->
+                          <button type="button" class="hidden px-3 py-1 text-sm rounded-md border theme-border whitespace-nowrap shrink-0" @click="openPicker($event)">Cambiar</button>
+                          <input type="color" class="hidden" :value="normalizeHex(form.vars[k])" @input="onPickColor(k, $event)" />
+                        </div>
                       </div>
                     </div>
                   </details>
                   <div class="flex gap-2 mt-2">
-                    <button class="px-3 py-2 text-white bg-gray-900 rounded-lg" @click="save">Guardar</button>
-                    <button class="px-3 py-2 border rounded-lg border-gray-300/60" @click="resetForm">Limpiar</button>
+                    <button class="px-3 py-2 text-white rounded-lg bg-[color:var(--color-primary)]" @click="save">Guardar</button>
+                    <button class="px-3 py-2 border rounded-lg theme-border" @click="resetForm">Limpiar</button>
                   </div>
                 </div>
               </div>
@@ -273,28 +295,31 @@
                  class="fixed inset-0 flex items-center justify-center bg-black/50"
                  style="position:fixed; inset:0; z-index:2147483647; opacity:1; visibility:visible; pointer-events:auto;"
                  @click.self="themesOpen = false" data-testid="themes-modal-overlay">
-              <div class="w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 bg-white rounded-2xl shadow-xl"
-                   style="opacity:1; visibility:visible; pointer-events:auto; z-index:2147483647;"
-                   data-testid="themes-modal">
+              <div class="w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 rounded-2xl shadow-xl theme-surface theme-border border"
+                       style="opacity:1; visibility:visible; pointer-events:auto; z-index:2147483647;"
+                       data-testid="themes-modal">
                 <div class="flex items-center justify-between mb-3">
-                  <h3 class="text-xl font-bold text-gray-900/90">Temas de colores</h3>
-                  <button @click="themesOpen = false" class="px-3 py-1 text-gray-700 bg-gray-100 border rounded-md">Cerrar</button>
+                  <h3 class="text-xl font-bold">Temas de colores</h3>
+                  <button @click="themesOpen = false" class="px-3 py-1 rounded-md border theme-border">Cerrar</button>
                 </div>
 
                 <div class="grid gap-4 md:grid-cols-2">
                   <!-- Lista de temas -->
-                  <div class="p-4 bg-white border rounded-xl border-gray-200/60">
-                    <h4 class="mb-3 font-semibold text-gray-800">Temas disponibles</h4>
+                  <div class="p-4 rounded-xl theme-surface theme-border border">
+                    <h4 class="mb-3 font-semibold">Temas disponibles</h4>
                     <ul class="space-y-2">
-                      <li v-for="t in themeList" :key="t.id" class="flex items-center justify-between p-2 border rounded-lg border-gray-200/60">
+                      <li v-for="t in themeList" :key="t.id" class="flex items-center justify-between p-2 border rounded-lg theme-border">
                         <div>
-                          <div class="font-medium text-gray-900">{{ t.name }}</div>
-                          <div class="text-xs text-gray-500">{{ t.id }}</div>
+                          <div class="font-medium">{{ t.name }}</div>
+                          <div class="text-xs theme-text-muted">{{ t.id }}</div>
                         </div>
                         <div class="flex items-center gap-2">
-                          <button class="px-3 py-1 text-sm bg-gray-900 text-white rounded-lg" @click="activate(t.id)">Activar</button>
-                          <button class="px-3 py-1 text-sm border rounded-lg border-gray-300/60" @click="edit(t)">Editar</button>
-                          <button class="px-3 py-1 text-sm text-white bg-red-600 rounded-lg" @click="remove(t.id)">Eliminar</button>
+                          <template v-if="t.id === activeId">
+                            <span class="px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-success)]">Activo</span>
+                          </template>
+                          <button v-else class="px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-primary)]" @click="activate(t.id)">Activar</button>
+                          <button class="px-3 py-1 text-sm border rounded-lg theme-border" @click="edit(t)">Editar</button>
+                          <button class="px-3 py-1 text-sm text-white rounded-lg bg-[color:var(--color-danger)]" :class="{ 'opacity-50 cursor-not-allowed': t.id === activeId }" :disabled="t.id === activeId" @click="remove(t.id)">Eliminar</button>
                         </div>
                       </li>
                       <li v-if="!themeList.length" class="p-3 text-center text-gray-500">No hay temas.</li>
@@ -302,31 +327,50 @@
                   </div>
 
                   <!-- Formulario -->
-                  <div class="p-4 bg-white border rounded-xl border-gray-200/60">
-                    <h4 class="mb-3 font-semibold text-gray-800">{{ formMode === 'create' ? 'Crear tema' : 'Editar tema' }}</h4>
+                  <div class="p-4 rounded-xl theme-surface theme-border border">
+                    <h4 class="mb-3 font-semibold">{{ formMode === 'create' ? 'Crear tema' : 'Editar tema' }}</h4>
                     <div class="grid gap-3">
                       <label class="grid gap-1">
-                        <span class="text-sm text-gray-600">ID</span>
-                        <input v-model="form.id" class="px-3 py-2 border rounded-lg border-gray-300/60" placeholder="kebab-case" />
+                        <span class="text-sm theme-text-muted">ID</span>
+                        <input v-model="form.id" class="px-3 py-2 border rounded-lg theme-border bg-transparent" placeholder="kebab-case" />
                       </label>
                       <label class="grid gap-1">
-                        <span class="text-sm text-gray-600">Nombre</span>
-                        <input v-model="form.name" class="px-3 py-2 border rounded-lg border-gray-300/60" />
+                        <span class="text-sm theme-text-muted">Nombre</span>
+                        <input v-model="form.name" class="px-3 py-2 border rounded-lg theme-border bg-transparent" />
                       </label>
 
                       <details class="mt-2" open>
-                        <summary class="mb-2 font-medium text-gray-800">Colores</summary>
-                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <summary class="mb-2 font-medium">Colores</summary>
+                        <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-4">
                           <div v-for="(v,k) in form.vars" :key="k" class="grid gap-1">
-                            <label class="text-xs text-gray-500">{{ k }}</label>
-                            <input :value="stripHash(form.vars[k])" @input="onInputColor(k, $event)" class="px-3 py-2 border rounded-lg border-gray-300/60" placeholder="e.g. 0b0f19" />
+                            <label class="text-xs theme-text-muted">{{ k }}</label>
+                            <div class="flex items-center gap-2 w-full">
+                              <!-- Preview externo (siempre oculto ahora) -->
+                              <span class="hidden w-6 h-6 rounded-md border theme-border shrink-0" :style="{ backgroundColor: '#' + stripHash(form.vars[k] || '') }"></span>
+                              <!-- Contenedor relativo para preview/botón internos en todas las resoluciones -->
+                              <div class="relative flex-1 min-w-0">
+                                <!-- Preview interno (todas las resoluciones) -->
+                                <span class="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded border theme-border" :style="{ backgroundColor: '#' + stripHash(form.vars[k] || '') }"></span>
+                                <input :value="stripHash(form.vars[k])"
+                                       @input="onInputColor(k, $event)"
+                                       class="w-full px-3 py-2 border rounded-lg theme-border bg-transparent pl-10 pr-24"
+                                       placeholder="e.g. 0b0f19" />
+                                <!-- Botón interno (todas las resoluciones) -->
+                                <button type="button"
+                                        class="inline-flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 text-sm rounded-md border theme-border whitespace-nowrap"
+                                        @click="openPicker($event)">Cambiar</button>
+                              </div>
+                              <!-- Botón externo (siempre oculto ahora) -->
+                              <button type="button" class="hidden px-3 py-1 text-sm rounded-md border theme-border whitespace-nowrap shrink-0" @click="openPicker($event)">Cambiar</button>
+                              <input type="color" class="hidden" :value="normalizeHex(form.vars[k])" @input="onPickColor(k, $event)" />
+                            </div>
                           </div>
                         </div>
                       </details>
 
                       <div class="flex gap-2 mt-2">
-                        <button class="px-3 py-2 text-white bg-gray-900 rounded-lg" @click="save">Guardar</button>
-                        <button class="px-3 py-2 border rounded-lg border-gray-300/60" @click="resetForm">Limpiar</button>
+                        <button class="px-3 py-2 text-white rounded-lg bg-[color:var(--color-primary)]" @click="save">Guardar</button>
+                        <button class="px-3 py-2 border rounded-lg theme-border" @click="resetForm">Limpiar</button>
                       </div>
                     </div>
                   </div>
@@ -543,14 +587,18 @@ const filteredUsers = computed(() => {
 // Temas de colores (CRUD modal)
 import { themes, activeThemeId, upsertTheme as upsertThemeStore, deleteTheme as deleteThemeStore, setActiveTheme as setActiveThemeStore } from '~/store/theme'
 const themesOpen = ref(false)
-const themeList = computed(() => Array.isArray(themes().value) ? themes().value : [])
+const themeList = computed(() => {
+  const list = Array.isArray(themes().value) ? [...themes().value] : []
+  return list.sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'es', { sensitivity: 'base' }))
+})
+const activeId = activeThemeId()
 const form = reactive({
   id: '',
   name: '',
   vars: {
     '--color-bg': '#0b0f19',
     '--color-surface': '#111827',
-    '--color-surface-weak': 'rgba(17,24,39,0.8)',
+    '--color-surface-weak': '#111827CC',
     '--color-text': '#e5e7eb',
     '--color-text-muted': '#9ca3af',
     '--color-border': '#374151',
@@ -560,8 +608,8 @@ const form = reactive({
     '--color-warning': '#f59e0b',
     '--color-danger': '#ef4444',
     '--color-info': '#06b6d4',
-    '--color-overlay-weak': 'rgba(255,255,255,0.05)',
-    '--color-overlay-strong': 'rgba(255,255,255,0.1)'
+    '--color-overlay-weak': '#FFFFFF0D',
+    '--color-overlay-strong': '#FFFFFF1A'
   }
 })
 const editing = ref(false)
@@ -616,11 +664,43 @@ function openAdminUsers(){
 }
 
 function normalizeHex(val){
-  const s = String(val || '').trim().replace(/^#/, '')
-  const hex = s.replace(/[^0-9a-fA-F]/g, '').slice(0, 6)
-  if (!hex) return '#000000'
-  if (hex.length === 3) return '#' + hex.split('').map(c => c + c).join('')
-  return '#' + hex.padEnd(6, hex[hex.length-1] || '0')
+  const raw = String(val ?? '').trim()
+  // rgba(r,g,b,a)
+  const mRgba = raw.match(/^rgba?\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*(\d*\.?\d+))?\s*\)$/i)
+  if (mRgba) {
+    const r = Math.max(0, Math.min(255, parseInt(mRgba[1], 10)))
+    const g = Math.max(0, Math.min(255, parseInt(mRgba[2], 10)))
+    const b = Math.max(0, Math.min(255, parseInt(mRgba[3], 10)))
+    const aFloat = mRgba[4] !== undefined ? Math.max(0, Math.min(1, parseFloat(mRgba[4]))) : undefined
+    const to2 = (n)=> n.toString(16).padStart(2, '0')
+    if (aFloat === undefined) return `#${to2(r)}${to2(g)}${to2(b)}`
+    const a = Math.round(aFloat * 255)
+    return `#${to2(r)}${to2(g)}${to2(b)}${to2(a)}`
+  }
+  // #RGB, #RRGGBB, #RGBA, #RRGGBBAA
+  if (raw.startsWith('#')) {
+    const s = raw.slice(1)
+    if (s.length === 3 || s.length === 4) {
+      const r = s[0], g = s[1], b = s[2], a = s[3]
+      return `#${r}${r}${g}${g}${b}${b}${a ? a + a : ''}`
+    }
+    if (s.length === 6 || s.length === 8) {
+      return `#${s}`
+    }
+    // Fallback: limpiar y recortar a 6
+    const hex = s.replace(/[^0-9a-fA-F]/g, '').slice(0, 6)
+    return `#${hex.padEnd(6, hex[hex.length-1] || '0')}`
+  }
+  // Valores sin # (p.ej. '0b0f19')
+  const cleaned = raw.replace(/[^0-9a-fA-F]/g, '')
+  if (!cleaned) return '#000000'
+  if (cleaned.length === 3 || cleaned.length === 4) {
+    const r = cleaned[0], g = cleaned[1], b = cleaned[2], a = cleaned[3]
+    return `#${r}${r}${g}${g}${b}${b}${a ? a + a : ''}`
+  }
+  if (cleaned.length === 6 || cleaned.length === 8) return `#${cleaned}`
+  const hex6 = cleaned.slice(0, 6)
+  return `#${hex6.padEnd(6, hex6[hex6.length-1] || '0')}`
 }
 
 function stripHash(val){
@@ -628,6 +708,18 @@ function stripHash(val){
 }
 function onInputColor(key, e){
   form.vars[key] = String(e?.target?.value || '').replace(/^#/, '')
+}
+
+function openPicker(e){
+  try {
+    const root = e?.target?.closest('div')
+    const el = root ? root.querySelector('input[type="color"]') : null
+    if (el) el.click()
+  } catch {}
+}
+function onPickColor(key, e){
+  const hex = String(e?.target?.value || '').replace(/^#/, '')
+  form.vars[key] = hex
 }
 
 // Métricas & logs state
