@@ -23,6 +23,6 @@ class AemetCapController extends Controller
 
         $datos = $this->aemetCapService->obtenerAvisoCap($endpoint);
 
-        return response()->json($datos);
+        return response()->json($datos, 200, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
     }
 }

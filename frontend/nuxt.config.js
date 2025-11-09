@@ -1,6 +1,6 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-09-04',
-  css: ['@/assets/css/tailwind.css'],
+  css: ['@/assets/css/tailwind.css', '@/assets/css/theme.css'],
   postcss: {
     plugins: {
       tailwindcss: {},

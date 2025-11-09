@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AQICNController extends Controller
 {
@@ -23,16 +24,27 @@ class AQICNController extends Controller
         }
 
         $url = 'https://api.waqi.info/feed/here/';
+        try {
+            $response = Http::retry(2, 800)
+                ->timeout(12)
+                ->connectTimeout(8)
+                ->get($url, [ 'token' => $token ]);
 
-        $response = Http::get($url, [
-            'token' => $token,
-        ]);
+            if ($response->failed()) {
+                Log::warning('[AQICN][feed-here] failed', ['status' => $response->status(), 'body' => $response->body()]);
+                return response()->json([
+                    'status' => 'error',
+                    'error' => 'Error en llamada AQICN feed/here',
+                    'details' => mb_substr($response->body(), 0, 400)
+                ], 502, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+            }
 
-        if ($response->failed()) {
-            return response()->json(['error' => 'Error en llamada AQICN feed/here', 'details' => $response->body()], 500);
+            $json = $response->json();
+            return response()->json($json, 200, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        } catch (\Throwable $e) {
+            Log::error('[AQICN][feed-here] exception', ['error' => $e->getMessage()]);
+            return response()->json(['status' => 'error', 'error' => 'Excepción al llamar AQICN', 'message' => $e->getMessage()], 502);
         }
-
-        return response()->json($response->json());
     }
 
     // Obtener calidad del aire según coordenadas GPS (feed/geo:lat;lon)
@@ -51,15 +63,26 @@ class AQICNController extends Controller
         }
 
         $url = "https://api.waqi.info/feed/geo:$lat;$lon/";
+        try {
+            $response = Http::retry(2, 800)
+                ->timeout(12)
+                ->connectTimeout(8)
+                ->get($url, [ 'token' => $token ]);
 
-        $response = Http::get($url, [
-            'token' => $token,
-        ]);
+            if ($response->failed()) {
+                Log::warning('[AQICN][feed-geo] failed', ['status' => $response->status(), 'body' => $response->body(), 'lat' => $lat, 'lon' => $lon]);
+                return response()->json([
+                    'status' => 'error',
+                    'error' => 'Error en llamada AQICN feed/geo',
+                    'details' => mb_substr($response->body(), 0, 400)
+                ], 502, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+            }
 
-        if ($response->failed()) {
-            return response()->json(['error' => 'Error en llamada AQICN feed/geo', 'details' => $response->body()], 500);
+            $json = $response->json();
+            return response()->json($json, 200, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        } catch (\Throwable $e) {
+            Log::error('[AQICN][feed-geo] exception', ['error' => $e->getMessage(), 'lat' => $lat, 'lon' => $lon]);
+            return response()->json(['status' => 'error', 'error' => 'Excepción al llamar AQICN', 'message' => $e->getMessage()], 502);
         }
-
-        return response()->json($response->json());
     }
 }

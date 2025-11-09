@@ -8,6 +8,12 @@ const cargando = ref(true);
 let map = null;
 const center = ref([40.4168, -3.7038]); // fallback Madrid
 
+// Helper para leer variables CSS del tema
+function css(name){
+  if (typeof window === 'undefined') return ''
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+}
+
 // Función para obtener descripción de la categoría
 function descripcionCategoria(iconCategory) {
   const categorias = {
@@ -24,20 +30,20 @@ function descripcionCategoria(iconCategory) {
   return categorias[iconCategory] || "Desconocido";
 }
 
-// Función para asignar color según categoría
+// Función para asignar color según categoría usando el tema
 function colorCategoria(iconCategory) {
   const colores = {
-    1: "red",
-    2: "orange",
-    3: "yellow",
-    4: "purple",
-    5: "blue",
-    6: "gray",
-    7: "pink",
-    8: "cyan",
-    14: "magenta",
+    1: css('--color-danger'),
+    2: css('--color-warning'),
+    3: css('--color-warning'),
+    4: css('--color-secondary'),
+    5: css('--color-info'),
+    6: css('--color-border'),
+    7: css('--color-primary'),
+    8: css('--color-info'),
+    14: css('--color-secondary'),
   };
-  return colores[iconCategory] || "white";
+  return colores[iconCategory] || css('--color-text');
 }
 
 // Inicializar Leaflet
@@ -121,7 +127,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen p-4 text-gray-200 bg-gray-900">
+  <div class="min-h-screen p-4 text-[color:var(--color-text)] bg-[color:var(--color-bg)]">
     <h1 class="mt-12 mb-6 text-2xl font-bold text-center">🚦 Incidencias de tráfico</h1>
 
     <div v-if="cargando" class="py-10 text-lg text-center">
@@ -135,7 +141,7 @@ onMounted(async () => {
       <!-- Mapa -->
       <div
         id="mapa"
-        class="w-full min-h-[500px] rounded-lg border border-gray-700 shadow-lg"
+        class="w-full min-h-[500px] rounded-lg border theme-border shadow-lg theme-surface"
       ></div>
 
       <!-- Lista de incidentes -->
@@ -144,7 +150,7 @@ onMounted(async () => {
         <div
           v-for="(incidente, index) in incidentes"
           :key="index"
-          class="p-4 transition bg-gray-800 border border-gray-700 rounded-lg shadow-md hover:bg-gray-700"
+          class="p-4 transition theme-surface border theme-border rounded-lg shadow-md hover:theme-surface-weak"
         >
           <div class="flex items-center justify-between mb-2">
             <span class="font-bold">
@@ -159,17 +165,17 @@ onMounted(async () => {
               }"
             ></span>
           </div>
-          <div class="mb-1 text-sm text-gray-300">
+          <div class="mb-1 text-sm theme-text-muted">
             <strong>Coordenadas inicio:</strong>
             {{ incidente.geometry.coordinates[0][1].toFixed(6) }},
             {{ incidente.geometry.coordinates[0][0].toFixed(6) }}
           </div>
-          <div class="mb-1 text-sm text-gray-300">
+          <div class="mb-1 text-sm theme-text-muted">
             <strong>Coordenadas fin:</strong>
             {{ incidente.geometry.coordinates.slice(-1)[0][1].toFixed(6) }},
             {{ incidente.geometry.coordinates.slice(-1)[0][0].toFixed(6) }}
           </div>
-          <div class="text-sm text-gray-300">
+          <div class="text-sm theme-text-muted">
             <strong>Número de puntos:</strong>
             {{ incidente.geometry.coordinates.length }}
           </div>

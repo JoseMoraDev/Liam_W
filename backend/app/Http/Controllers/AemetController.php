@@ -195,13 +195,26 @@ class AemetController extends Controller
                 }
             } while ($attempts < 3);
 
-            $step1 = json_decode($initialResponse->getBody()->getContents(), true);
+            // Evitar consumir el stream con getContents repetidas veces
+            $initialRaw = (string)$initialResponse->getBody();
+            $step1 = json_decode($initialRaw, true);
+
+            if ($step1 === null) {
+                // Respuesta no JSON (posible HTML 401/429/5xx). Devolver snippet para depurar
+                $snippet = mb_substr(strip_tags($initialRaw), 0, 300);
+                return response()->json([
+                    'error' => 'Respuesta inicial de AEMET no es JSON válido.',
+                    'status' => $initialResponse->getStatusCode(),
+                    'preview' => $snippet,
+                ], 502);
+            }
 
             if (!isset($step1['datos'])) {
                 return response()->json([
                     'error' => 'No se encontró la URL de datos en la respuesta de AEMET.',
                     'respuesta' => $step1,
-                ], 500);
+                    'status' => $initialResponse->getStatusCode(),
+                ], 502);
             }
 
             // 2ª llamada: obtener los datos reales (también con reintentos)
@@ -374,8 +387,15 @@ class AemetController extends Controller
             'dia' => $dia_montana,
             'boletin' => $boletin
         ];
+        // Normalizar payload completo a UTF-8 por seguridad
+        $normalize = function (&$item) {
+            if (is_string($item) && !mb_detect_encoding($item, 'UTF-8', true)) {
+                $item = mb_convert_encoding($item, 'UTF-8', 'ISO-8859-1, Windows-1252');
+            }
+        };
+        array_walk_recursive($payload, $normalize);
 
-        return response()->json($payload, 200, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE);
+        return response()->json($payload, 200, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
         } catch (\Throwable $e) {
             Log::error('[AEMET][Montaña] excepción inesperada', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return response()->json(['error' => 'Error inesperado en prediccionMontana', 'message' => $e->getMessage()], 500);

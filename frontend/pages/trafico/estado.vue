@@ -38,6 +38,33 @@ const coords = ref([]);
 
 let leafletMap = null; // guardamos el objeto real del mapa
 
+// Helpers de tema
+function css(name) {
+  if (typeof window === 'undefined') return ''
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+}
+
+function hexToRgba(input, alpha = 1) {
+  if (!input) return `rgba(0,0,0,${alpha})`
+  const v = input.trim()
+  if (v.startsWith('rgba')) {
+    // Reemplaza el canal alpha
+    return v.replace(/rgba\(([^,]+),\s*([^,]+),\s*([^,]+),\s*[^)]+\)/, `rgba($1,$2,$3,${alpha})`)
+  }
+  if (v.startsWith('rgb(')) {
+    return v.replace(/rgb\(([^,]+),\s*([^,]+),\s*[^)]+\)/, `rgba($1,$2,$3,${alpha})`)
+  }
+  // Hex #RRGGBB o #RGB
+  let hex = v.replace('#','')
+  if (hex.length === 3) {
+    hex = hex.split('').map(c => c + c).join('')
+  }
+  const r = parseInt(hex.substring(0,2), 16)
+  const g = parseInt(hex.substring(2,4), 16)
+  const b = parseInt(hex.substring(4,6), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 // 💡 CORRECCIÓN SSR/LEAFLET: Mover la redefinición de íconos.
 // El código de la corrección de íconos no debe estar en el alcance global del script
 // para evitar el error 'window is not defined' en entornos SSR/Nuxt/Vite.
@@ -105,12 +132,12 @@ onMounted(async () => {
           {
             label: "Actual",
             data: [datos.value.currentSpeed],
-            backgroundColor: "rgba(239, 68, 68, 0.7)", // rojo
+            backgroundColor: hexToRgba(css('--color-danger'), 0.7), // rojo tema
           },
           {
             label: "Libre",
             data: [datos.value.freeFlowSpeed],
-            backgroundColor: "rgba(34, 197, 94, 0.7)", // verde
+            backgroundColor: hexToRgba(css('--color-success'), 0.7), // verde tema
           },
         ],
       };
@@ -122,12 +149,12 @@ onMounted(async () => {
           {
             label: "Actual",
             data: [Math.round(datos.value.currentTravelTime / 60)],
-            backgroundColor: "rgba(59, 130, 246, 0.7)", // azul
+            backgroundColor: hexToRgba(css('--color-primary'), 0.7), // primario tema
           },
           {
             label: "Libre",
             data: [Math.round(datos.value.freeFlowTravelTime / 60)],
-            backgroundColor: "rgba(168, 85, 247, 0.7)", // morado
+            backgroundColor: hexToRgba(css('--color-secondary'), 0.7), // secundario tema
           },
         ],
       };
@@ -143,7 +170,7 @@ onMounted(async () => {
         datasets: [
           {
             data: [congestion, 100 - congestion],
-            backgroundColor: ["#f59e0b", "#1f2937"], // naranja y gris oscuro
+            backgroundColor: [css('--color-warning'), css('--color-border')], // tema
           },
         ],
       };
@@ -174,15 +201,15 @@ const onMapReady = (map) => {
 </script>
 
 <template>
-  <div class="min-h-screen p-4 text-gray-200 bg-gray-900">
+  <div class="min-h-screen p-4 text-[color:var(--color-text)] bg-[color:var(--color-bg)]">
     <h1 class="mb-4 text-xl font-bold">🚦 Estado del tráfico</h1>
 
     <div v-if="!datos">Cargando tráfico...</div>
 
     <div v-else class="flex flex-col gap-6">
-      <div class="flex flex-col gap-4 p-4 bg-gray-800 shadow-md rounded-xl">
+      <div class="flex flex-col gap-4 p-4 shadow-md rounded-xl theme-surface">
         <div
-          class="flex items-center justify-between pb-2 border-b border-gray-700"
+          class="flex items-center justify-between pb-2 border-b theme-border"
         >
           <span class="font-semibold">Velocidad actual</span>
           <span
@@ -201,19 +228,19 @@ const onMapReady = (map) => {
           </span>
         </div>
         <div
-          class="flex items-center justify-between pb-2 border-b border-gray-700"
+          class="flex items-center justify-between pb-2 border-b theme-border"
         >
           <span class="font-semibold">Velocidad libre</span>
-          <span class="text-gray-300">{{ datos.freeFlowSpeed }} km/h</span>
+          <span class="theme-text-muted">{{ datos.freeFlowSpeed }} km/h</span>
         </div>
         <div
-          class="flex items-center justify-between pb-2 border-b border-gray-700"
+          class="flex items-center justify-between pb-2 border-b theme-border"
         >
           <span class="font-semibold">Tiempo de viaje actual</span>
           <span>{{ Math.round(datos.currentTravelTime / 60) }} min</span>
         </div>
         <div
-          class="flex items-center justify-between pb-2 border-b border-gray-700"
+          class="flex items-center justify-between pb-2 border-b theme-border"
         >
           <span class="font-semibold">Tiempo en condiciones libres</span>
           <span>{{ Math.round(datos.freeFlowTravelTime / 60) }} min</span>
@@ -224,14 +251,14 @@ const onMapReady = (map) => {
         </div>
         <div
           v-if="datos.roadClosure"
-          class="p-3 mt-4 font-bold text-center bg-red-700 rounded-lg"
+          class="p-3 mt-4 font-bold text-center rounded-lg text-white bg-[color:var(--color-danger)]"
         >
           ⚠️ Carretera cerrada
         </div>
       </div>
 
       <div class="grid grid-cols-1 gap-4">
-        <div class="p-3 bg-gray-800 rounded-lg">
+        <div class="p-3 rounded-lg theme-surface">
           <h2 class="mb-2 text-sm font-semibold">Velocidad</h2>
           <div style="height: 200px; width: 100%">
             <Bar
@@ -242,18 +269,18 @@ const onMapReady = (map) => {
                 maintainAspectRatio: false,
                 indexAxis: 'x',
                 plugins: {
-                  legend: { position: 'top', labels: { color: '#ddd' } },
+                  legend: { position: 'top', labels: { color: css('--color-text') } },
                 },
                 scales: {
-                  x: { ticks: { color: '#aaa' } },
-                  y: { ticks: { color: '#aaa' }, beginAtZero: true },
+                  x: { ticks: { color: css('--color-text-muted') } },
+                  y: { ticks: { color: css('--color-text-muted') }, beginAtZero: true },
                 },
               }"
             />
           </div>
         </div>
 
-        <div class="p-3 bg-gray-800 rounded-lg">
+        <div class="p-3 rounded-lg theme-surface">
           <h2 class="mb-2 text-sm font-semibold">Tiempo</h2>
           <div style="height: 200px; width: 100%">
             <Bar
@@ -264,18 +291,18 @@ const onMapReady = (map) => {
                 maintainAspectRatio: false,
                 indexAxis: 'x',
                 plugins: {
-                  legend: { position: 'top', labels: { color: '#ddd' } },
+                  legend: { position: 'top', labels: { color: css('--color-text') } },
                 },
                 scales: {
-                  x: { ticks: { color: '#aaa' } },
-                  y: { ticks: { color: '#aaa' }, beginAtZero: true },
+                  x: { ticks: { color: css('--color-text-muted') } },
+                  y: { ticks: { color: css('--color-text-muted') }, beginAtZero: true },
                 },
               }"
             />
           </div>
         </div>
 
-        <div class="p-3 bg-gray-800 rounded-lg">
+        <div class="p-3 rounded-lg theme-surface">
           <h2 class="mb-2 text-sm font-semibold">Congestión</h2>
           <div style="height: 200px; width: 100%">
             <Doughnut
@@ -285,7 +312,7 @@ const onMapReady = (map) => {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                  legend: { position: 'bottom', labels: { color: '#ddd' } },
+                  legend: { position: 'bottom', labels: { color: css('--color-text') } },
                 },
               }"
             />
@@ -303,7 +330,7 @@ const onMapReady = (map) => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; OpenStreetMap"
           />
-          <LPolyline :lat-lngs="coords" color="red" :weight="5" />
+          <LPolyline :lat-lngs="coords" :color="css('--color-danger')" :weight="5" />
           <LMarker :lat-lng="coords[0]" />
         </LMap>
       </client-only>

@@ -8,7 +8,7 @@
       class="relative z-10 flex flex-col items-center w-full min-h-screen p-6 mt-5 space-y-8 overflow-y-auto transition-opacity duration-300 md:p-8">
       <!-- Título principal -->
       <div class="w-full max-w-3xl p-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md">
-        <h1 class="text-2xl font-bold text-center text-gray-900/90">Ajustes</h1>
+        <h1 class="text-2xl font-bold text-center text-gray-900/90">Opciones avanzadas</h1>
       </div>
 
       <!-- Administración (solo admin) -->
@@ -16,8 +16,74 @@
         <div class="w-full max-w-3xl p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md">
           <h2 class="text-xl font-bold text-center text-gray-900/90">Administración de usuarios</h2>
           <div class="grid grid-cols-1 gap-4">
-            <button @click="adminOpen = true" class="sub-card">CRUD de usuarios con bloqueos, roles, y cupos de
+            <button @click="openAdminUsers" class="sub-card">CRUD de usuarios con bloqueos, roles, y cupos de
               llamadas</button>
+          </div>
+        </div>
+
+        <!-- Modal de respaldo inline (sin Teleport) -->
+        <div v-show="themesOpen"
+             class="fixed inset-0 flex items-center justify-center bg-black/50"
+             style="position:fixed; inset:0; z-index:2147483646;"
+             @click.self="themesOpen = false">
+          <div class="w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 bg-white rounded-2xl shadow-xl">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-xl font-bold text-gray-900/90">Temas de colores</h3>
+              <button @click="themesOpen = false" class="px-3 py-1 text-gray-700 bg-gray-100 border rounded-md">Cerrar</button>
+            </div>
+            <div class="grid gap-4 md:grid-cols-2">
+              <div class="p-4 bg-white border rounded-xl border-gray-200/60">
+                <h4 class="mb-3 font-semibold text-gray-800">Temas disponibles</h4>
+                <ul class="space-y-2">
+                  <li v-for="t in themeList" :key="t.id" class="flex items-center justify-between p-2 border rounded-lg border-gray-200/60">
+                    <div>
+                      <div class="font-medium text-gray-900">{{ t.name }}</div>
+                      <div class="text-xs text-gray-500">{{ t.id }}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button class="px-3 py-1 text-sm bg-gray-900 text-white rounded-lg" @click="activate(t.id)">Activar</button>
+                      <button class="px-3 py-1 text-sm border rounded-lg border-gray-300/60" @click="edit(t)">Editar</button>
+                      <button class="px-3 py-1 text-sm text-white bg-red-600 rounded-lg" @click="remove(t.id)">Eliminar</button>
+                    </div>
+                  </li>
+                  <li v-if="!themeList.length" class="p-3 text-center text-gray-500">No hay temas.</li>
+                </ul>
+              </div>
+
+              <div class="p-4 bg-white border rounded-xl border-gray-200/60">
+                <h4 class="mb-3 font-semibold text-gray-800">{{ formMode === 'create' ? 'Crear tema' : 'Editar tema' }}</h4>
+                <div class="grid gap-3">
+                  <label class="grid gap-1">
+                    <span class="text-sm text-gray-600">ID</span>
+                    <input v-model="form.id" class="px-3 py-2 border rounded-lg border-gray-300/60" placeholder="kebab-case" />
+                  </label>
+                  <label class="grid gap-1">
+                    <span class="text-sm text-gray-600">Nombre</span>
+                    <input v-model="form.name" class="px-3 py-2 border rounded-lg border-gray-300/60" />
+                  </label>
+                  <details class="mt-2" open>
+                    <summary class="mb-2 font-medium text-gray-800">Colores</summary>
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div v-for="(v,k) in form.vars" :key="k" class="grid gap-1">
+                        <label class="text-xs text-gray-500">{{ k }}</label>
+                        <input :value="stripHash(form.vars[k])" @input="onInputColor(k, $event)" class="px-3 py-2 border rounded-lg border-gray-300/60" placeholder="e.g. 0b0f19" />
+                      </div>
+                    </div>
+                  </details>
+                  <div class="flex gap-2 mt-2">
+                    <button class="px-3 py-2 text-white bg-gray-900 rounded-lg" @click="save">Guardar</button>
+                    <button class="px-3 py-2 border rounded-lg border-gray-300/60" @click="resetForm">Limpiar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full max-w-3xl p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md">
+          <h2 class="text-xl font-bold text-center text-gray-900/90">Temas de colores</h2>
+          <div class="grid grid-cols-1 gap-4">
+            <button @click.prevent="openThemes" class="sub-card">CRUD de temas de colores</button>
           </div>
         </div>
 
@@ -199,6 +265,76 @@
                   </div>
                 </div>
               </transition>
+
+        <!-- Modal: CRUD de temas de colores (Teleport) -->
+        <client-only>
+        <Teleport to="body">
+            <div v-show="themesOpen"
+                 class="fixed inset-0 flex items-center justify-center bg-black/50"
+                 style="position:fixed; inset:0; z-index:2147483647; opacity:1; visibility:visible; pointer-events:auto;"
+                 @click.self="themesOpen = false" data-testid="themes-modal-overlay">
+              <div class="w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 bg-white rounded-2xl shadow-xl"
+                   style="opacity:1; visibility:visible; pointer-events:auto; z-index:2147483647;"
+                   data-testid="themes-modal">
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-xl font-bold text-gray-900/90">Temas de colores</h3>
+                  <button @click="themesOpen = false" class="px-3 py-1 text-gray-700 bg-gray-100 border rounded-md">Cerrar</button>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <!-- Lista de temas -->
+                  <div class="p-4 bg-white border rounded-xl border-gray-200/60">
+                    <h4 class="mb-3 font-semibold text-gray-800">Temas disponibles</h4>
+                    <ul class="space-y-2">
+                      <li v-for="t in themeList" :key="t.id" class="flex items-center justify-between p-2 border rounded-lg border-gray-200/60">
+                        <div>
+                          <div class="font-medium text-gray-900">{{ t.name }}</div>
+                          <div class="text-xs text-gray-500">{{ t.id }}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <button class="px-3 py-1 text-sm bg-gray-900 text-white rounded-lg" @click="activate(t.id)">Activar</button>
+                          <button class="px-3 py-1 text-sm border rounded-lg border-gray-300/60" @click="edit(t)">Editar</button>
+                          <button class="px-3 py-1 text-sm text-white bg-red-600 rounded-lg" @click="remove(t.id)">Eliminar</button>
+                        </div>
+                      </li>
+                      <li v-if="!themeList.length" class="p-3 text-center text-gray-500">No hay temas.</li>
+                    </ul>
+                  </div>
+
+                  <!-- Formulario -->
+                  <div class="p-4 bg-white border rounded-xl border-gray-200/60">
+                    <h4 class="mb-3 font-semibold text-gray-800">{{ formMode === 'create' ? 'Crear tema' : 'Editar tema' }}</h4>
+                    <div class="grid gap-3">
+                      <label class="grid gap-1">
+                        <span class="text-sm text-gray-600">ID</span>
+                        <input v-model="form.id" class="px-3 py-2 border rounded-lg border-gray-300/60" placeholder="kebab-case" />
+                      </label>
+                      <label class="grid gap-1">
+                        <span class="text-sm text-gray-600">Nombre</span>
+                        <input v-model="form.name" class="px-3 py-2 border rounded-lg border-gray-300/60" />
+                      </label>
+
+                      <details class="mt-2" open>
+                        <summary class="mb-2 font-medium text-gray-800">Colores</summary>
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <div v-for="(v,k) in form.vars" :key="k" class="grid gap-1">
+                            <label class="text-xs text-gray-500">{{ k }}</label>
+                            <input :value="stripHash(form.vars[k])" @input="onInputColor(k, $event)" class="px-3 py-2 border rounded-lg border-gray-300/60" placeholder="e.g. 0b0f19" />
+                          </div>
+                        </div>
+                      </details>
+
+                      <div class="flex gap-2 mt-2">
+                        <button class="px-3 py-2 text-white bg-gray-900 rounded-lg" @click="save">Guardar</button>
+                        <button class="px-3 py-2 border rounded-lg border-gray-300/60" @click="resetForm">Limpiar</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </Teleport>
+        </client-only>
 
             </div>
           </div>
@@ -384,7 +520,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, reactive, nextTick } from 'vue'
 import { navigateTo } from '#app'
 import { axiosClient } from '~/axiosConfig'
 import { useI18n } from 'vue-i18n'
@@ -403,6 +539,96 @@ const filteredUsers = computed(() => {
     String(u.email || '').toLowerCase().includes(q)
   )
 })
+
+// Temas de colores (CRUD modal)
+import { themes, activeThemeId, upsertTheme as upsertThemeStore, deleteTheme as deleteThemeStore, setActiveTheme as setActiveThemeStore } from '~/store/theme'
+const themesOpen = ref(false)
+const themeList = computed(() => Array.isArray(themes().value) ? themes().value : [])
+const form = reactive({
+  id: '',
+  name: '',
+  vars: {
+    '--color-bg': '#0b0f19',
+    '--color-surface': '#111827',
+    '--color-surface-weak': 'rgba(17,24,39,0.8)',
+    '--color-text': '#e5e7eb',
+    '--color-text-muted': '#9ca3af',
+    '--color-border': '#374151',
+    '--color-primary': '#3b82f6',
+    '--color-secondary': '#a855f7',
+    '--color-success': '#22c55e',
+    '--color-warning': '#f59e0b',
+    '--color-danger': '#ef4444',
+    '--color-info': '#06b6d4',
+    '--color-overlay-weak': 'rgba(255,255,255,0.05)',
+    '--color-overlay-strong': 'rgba(255,255,255,0.1)'
+  }
+})
+const editing = ref(false)
+const formMode = computed(() => editing.value ? 'edit' : 'create')
+function edit(t){
+  form.id = t.id
+  form.name = t.name
+  form.vars = { ...t.vars }
+  editing.value = true
+}
+function resetForm(){
+  form.id = ''
+  form.name = ''
+  editing.value = false
+}
+function save(){
+  if (!form.id || !form.name) return
+  // Normalizar todos los colores a HEX con '#'
+  const normVars = { ...form.vars }
+  Object.keys(normVars).forEach(k => {
+    normVars[k] = normalizeHex(normVars[k])
+  })
+  upsertThemeStore({ id: form.id, name: form.name, vars: normVars })
+  editing.value = false
+}
+function remove(id){
+  deleteThemeStore(id)
+  if (id === activeThemeId().value) setActiveThemeStore(themeList.value[0]?.id)
+}
+function activate(id){
+  setActiveThemeStore(id)
+}
+
+async function openThemes(){
+  // Cerrar otros modales para evitar superposición
+  adminOpen.value = false
+  showLogins.value = false
+  showErrors.value = false
+  showStats.value = false
+  themesOpen.value = true
+  console.log('[Avanzado] themesOpen ->', themesOpen.value)
+  await nextTick()
+  // Sin navegación de fallback: el modal debe abrirse localmente
+}
+
+function openAdminUsers(){
+  themesOpen.value = false
+  showLogins.value = false
+  showErrors.value = false
+  showStats.value = false
+  adminOpen.value = true
+}
+
+function normalizeHex(val){
+  const s = String(val || '').trim().replace(/^#/, '')
+  const hex = s.replace(/[^0-9a-fA-F]/g, '').slice(0, 6)
+  if (!hex) return '#000000'
+  if (hex.length === 3) return '#' + hex.split('').map(c => c + c).join('')
+  return '#' + hex.padEnd(6, hex[hex.length-1] || '0')
+}
+
+function stripHash(val){
+  return String(val || '').replace(/^#/, '')
+}
+function onInputColor(key, e){
+  form.vars[key] = String(e?.target?.value || '').replace(/^#/, '')
+}
 
 // Métricas & logs state
 const showLogins = ref(false)

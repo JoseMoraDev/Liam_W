@@ -1,0 +1,29 @@
+:root{
+  --color-bg: #0b0f19; /* dark background */
+  --color-surface: #111827; /* panels */
+  --color-surface-weak: rgba(17,24,39,0.8);
+  --color-text: #e5e7eb; /* gray-200 */
+  --color-text-muted: #9ca3af; /* gray-400 */
+  --color-border: #374151; /* gray-700 */
+
+  --color-primary: #3b82f6; /* blue-500 */
+  --color-secondary: #a855f7; /* purple-500 */
+  --color-success: #22c55e; /* green-500 */
+  --color-warning: #f59e0b; /* amber-500 */
+  --color-danger: #ef4444; /* red-500 */
+  --color-info: #06b6d4; /* cyan-500 */
+
+  --color-overlay-weak: rgba(255,255,255,0.05);
+  --color-overlay-strong: rgba(255,255,255,0.1);
+}
+
+/* Utilidades mínimas para interoperar con Tailwind mediante valores arbitrarios */
+html, body { background-color: var(--color-bg); color: var(--color-text); }
+
+.theme-surface { background-color: var(--color-surface); }
+.theme-surface-weak { background-color: var(--color-surface-weak); }
+.theme-border { border-color: var(--color-border); }
+.theme-text { color: var(--color-text); }
+.theme-text-muted { color: var(--color-text-muted); }
+.theme-primary { color: var(--color-primary); }
+.theme-danger { color: var(--color-danger); }
