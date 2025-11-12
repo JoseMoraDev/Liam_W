@@ -232,7 +232,7 @@ watch(
             <template v-else>
               <div class="mt-3">
                 <input ref="municipioSearchEl" v-model="municipioSearch" type="text" placeholder="Buscar municipio..."
-                  class="w-full px-3 py-2 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                  class="w-full px-3 py-2 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-[color:var(--color-surface)] text-[color:var(--color-text)] placeholder-[color:var(--color-text-muted)] border-[color:var(--color-border)]" />
               </div>
               <div class="mt-3 overflow-y-auto max-h-80">
                 <div v-if="!municipios.length" class="px-2 py-3 text-sm text-gray-500">

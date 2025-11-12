@@ -1,12 +1,29 @@
 <template>
-  <div v-if="open" class="fixed inset-0 z-50 flex items-center justify-center">
+  <div v-if="open" class="fixed inset-0 z-50 flex items-end justify-center p-4">
     <div class="absolute inset-0 bg-black/40" @click="onClose" />
     <div
-      class="relative z-10 w-full max-w-3xl p-4 mx-4 border rounded-2xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-white/30 dark:border-zinc-700/40">
-      <header class="flex items-center justify-between mb-3">
+      ref="panelEl"
+      class="relative z-10 w-full max-w-2xl p-4 mb-5 border rounded-2xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-white/30 dark:border-zinc-700/40 max-h-[85vh] overflow-y-auto">
+      <div class="mx-auto mb-2 h-1.5 w-12 rounded-full bg-black/20 dark:bg-white/20"></div>
+      <header class="sticky top-0 z-10 flex items-center justify-between pb-2 mb-3 bg-white/80 dark:bg-zinc-900/80 backdrop-blur">
         <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Selecciona una playa</h2>
-        <button @click="onClose" class="px-2 py-1 text-sm rounded-md bg-black/10 dark:bg-white/10">Cerrar</button>
+        <div class="flex items-center gap-2">
+          <button :disabled="props.saving" @click="onClose"
+            class="px-3 py-2 text-sm rounded-md bg-black/10 dark:bg-white/10 disabled:opacity-50">Cancelar</button>
+          <button :disabled="!sel || props.saving" @click="confirmar"
+            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md disabled:opacity-50 hover:bg-blue-700">
+            <span v-if="props.saving"
+              class="inline-block w-4 h-4 border-2 rounded-full border-white/80 border-t-transparent animate-spin"></span>
+            <span>{{ props.saving ? 'Guardando…' : 'Guardar' }}</span>
+          </button>
+        </div>
       </header>
+
+      <!-- Mapa preview (arriba para que siempre se vea) -->
+      <div class="mt-2">
+        <h3 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Mapa</h3>
+        <div ref="mapEl" class="w-full h-64 min-h-[16rem] overflow-hidden border rounded-xl border-white/30 dark:border-zinc-700/40 bg-[#dbeafe]"></div>
+      </div>
 
       <div class="mt-4 space-y-6">
         <!-- Playas del municipio (siempre visibles) -->
@@ -15,9 +32,10 @@
             || 'tu municipio' }}</h3>
           <div class="grid grid-cols-1 gap-2 pr-1 overflow-auto md:grid-cols-2 max-h-72">
             <button v-for="p in playasMunicipio" :key="p.id_playa" @click="!props.saving && select(p)"
-              :class="['w-full text-left px-3 py-2 rounded-md border', sel?.id_playa === p.id_playa ? 'border-blue-500 bg-blue-50/60 dark:bg-blue-500/10' : 'border-white/40 dark:border-zinc-700/40 bg-white/60 dark:bg-black/30']">
+              :class="['w-full text-left px-3 py-2 rounded-md border', sel?.id_playa === p.id_playa ? 'border-blue-400 bg-blue-500/8 dark:bg-blue-400/12' : 'border-white/40 dark:border-zinc-700/40 bg-white/60 dark:bg-black/30']">
               <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ p.nombre_playa }}</div>
-              <div class="text-xs text-gray-600 dark:text-gray-400">{{ p.nombre_municipio }} · {{ p.nombre_provincia }}
+              <div class="text-xs italic text-gray-900 dark:text-gray-100">{{ p.nombre_municipio }} · {{
+                p.nombre_provincia }}
               </div>
             </button>
             <p v-if="!playasMunicipio.length" class="text-sm text-gray-500">Sin resultados.</p>
@@ -36,15 +54,15 @@
             </select>
           </div>
           <div class="mb-2">
-            <label class="block mb-1 text-sm text-gray-600 dark:text-gray-300">Buscador</label>
-            <input v-model="q" @input="debouncedBuscar" type="text" placeholder="Nombre de playa"
+            <input v-model="q" @input="debouncedBuscar" type="text" placeholder="Busca aquí tu playa"
               class="w-full px-3 py-2 border rounded-md bg-white/70 dark:bg-black/30 border-white/40 dark:border-zinc-700/40" />
           </div>
-          <div class="grid grid-cols-1 gap-2 pr-1 overflow-auto sm:grid-cols-2 md:grid-cols-2 max-h-72">
+          <div ref="provListEl" class="grid grid-cols-1 gap-2 pr-1 overflow-auto sm:grid-cols-2 md:grid-cols-2 max-h-48">
             <button v-for="p in playasProvinciaFiltradas" :key="p.id_playa" @click="!props.saving && select(p)"
-              :class="['w-full text-left px-3 py-2 rounded-md border', sel?.id_playa === p.id_playa ? 'border-blue-500 bg-blue-50/60 dark:bg-blue-500/10' : 'border-white/40 dark:border-zinc-700/40 bg-white/60 dark:bg-black/30']">
+              :class="['w-full text-left px-3 py-2 rounded-md border', sel?.id_playa === p.id_playa ? 'border-blue-400 bg-blue-500/8 dark:bg-blue-400/12' : 'border-white/40 dark:border-zinc-700/40 bg-white/60 dark:bg-black/30']">
               <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ p.nombre_playa }}</div>
-              <div class="text-xs text-gray-600 dark:text-gray-400">{{ p.nombre_municipio }} · {{ p.nombre_provincia }}
+              <div class="text-xs italic text-gray-900 dark:text-gray-100">{{ p.nombre_municipio }} · {{
+                p.nombre_provincia }}
               </div>
             </button>
             <p v-if="!playasProvinciaFiltradas.length" class="text-sm text-gray-500">Sin resultados.</p>
@@ -52,23 +70,9 @@
         </section>
       </div>
 
-      <!-- Mapa preview -->
-      <div class="mt-5">
-        <h3 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Mapa</h3>
-        <div ref="mapEl" class="w-full h-64 overflow-hidden border rounded-xl border-white/30 dark:border-zinc-700/40">
-        </div>
-      </div>
+      <!-- Mapa preview (movido arriba) -->
 
-      <footer class="flex justify-end gap-2 mt-5">
-        <button :disabled="props.saving" @click="onClose"
-          class="px-3 py-2 text-sm rounded-md bg-black/10 dark:bg-white/10 disabled:opacity-50">Cancelar</button>
-        <button :disabled="!sel || props.saving" @click="confirmar"
-          class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md disabled:opacity-50 hover:bg-blue-700">
-          <span v-if="props.saving"
-            class="inline-block w-4 h-4 border-2 rounded-full border-white/80 border-t-transparent animate-spin"></span>
-          <span>{{ props.saving ? 'Guardando…' : 'Guardar' }}</span>
-        </button>
-      </footer>
+      <!-- Footer eliminado: acciones movidas al header -->
     </div>
   </div>
 </template>
@@ -100,10 +104,12 @@ let Llib = null
 let resizeHandler = null
 let ro = null
 const mapEl = ref(null)
+const panelEl = ref(null)
 const resolvedMunicipioId = ref(null) // código concatenado resuelto dinámicamente
+const loadingLists = ref(false)
 
 function onClose() { emit('close') }
-async function computeMunicipioMid(){
+async function computeMunicipioMid() {
   // 1) Si ya está normalizado o previamente resuelto, úsalo
   if (normalizedMunicipioId.value) return normalizedMunicipioId.value
   if (resolvedMunicipioId.value) return resolvedMunicipioId.value
@@ -120,33 +126,45 @@ async function computeMunicipioMid(){
         const mid = String(first.id_municipio)
         resolvedMunicipioId.value = mid
         if (!provSel.value && first.id_provincia) {
-          provSel.value = String(first.id_provincia).padStart(2,'0')
+          provSel.value = String(first.id_provincia).padStart(2, '0')
         }
         return mid
       }
-    } catch(e) { /* ignore */ }
+    } catch (e) { /* ignore */ }
   }
 
   // 4) Resolver por nombre (Elx/Elche) y tomar id_municipio (5 dígitos)
   if (props.municipioName) {
-    try{
-      const byName = await axiosClient.get('/playas', { params: { municipio_nombre: `%${props.municipioName}%`, fields: 'id_municipio,id_provincia', limit: 1 } })
+    try {
+      const params = { municipio_nombre: `%${props.municipioName}%`, fields: 'id_municipio,id_provincia', limit: 1 }
+      if (props.cpro != null) params.id_provincia = String(props.cpro).padStart(2, '0')
+      const byName = await axiosClient.get('/playas', { params })
       const first = Array.isArray(byName.data) && byName.data[0] ? byName.data[0] : null
       if (first && first.id_municipio) {
         const mid = String(first.id_municipio)
         resolvedMunicipioId.value = mid
         if (!provSel.value && first.id_provincia) {
-          provSel.value = String(first.id_provincia).padStart(2,'0')
+          provSel.value = String(first.id_provincia).padStart(2, '0')
         }
         return mid
       }
-    }catch(e){ /* ignore */ }
+    } catch (e) { /* ignore */ }
   }
   return null
 }
 
 async function select(p) {
   sel.value = p
+  // Alinear provincia inferior con la playa seleccionada arriba
+  try {
+    if (p && p.id_provincia != null) {
+      const nextProv = String(p.id_provincia).padStart(2, '0')
+      if (provSel.value !== nextProv) {
+        provSel.value = nextProv
+        await fetchProvincia()
+      }
+    }
+  } catch (e) { }
   // Actualizar el mapa inmediatamente tras seleccionar
   try {
     if (!map && props.open) { await initMap() }
@@ -179,10 +197,15 @@ const playasProvinciaFiltradas = computed(() => {
   const idsMun = new Set(playasMunicipio.value.map(p => p.id_playa))
   return playasProvincia.value.filter(p => !idsMun.has(p.id_playa))
 })
+// Limitar a ~3 filas: 6 elementos (2 columnas en sm/md). En móvil (1 col), serán 3 elementos.
+const playasProvinciaLimited = computed(() => {
+  const arr = playasProvinciaFiltradas.value || []
+  return arr.slice(0, 6)
+})
 
 async function fetchProvincias() {
+  loadingLists.value = true
   try {
-    // Derivar provincias desde listado agregado si no hay endpoint propio
     const { data } = await axiosClient.get('/playas', { params: { fields: 'id_provincia,nombre_provincia', limit: 5000 } })
     const map = new Map()
     for (const r of data) {
@@ -190,23 +213,18 @@ async function fetchProvincias() {
       map.set(pid, r.nombre_provincia)
     }
     provincias.value = Array.from(map, ([id_provincia, nombre_provincia]) => ({ id_provincia, nombre_provincia })).sort((a, b) => a.nombre_provincia.localeCompare(b.nombre_provincia))
-    // Preselección: provincia guardada en localStorage tiene prioridad
-    try {
-      const saved = typeof window !== 'undefined' ? window.localStorage.getItem(LS_KEY) : null
-      if (saved && map.has(saved)) {
-        provSel.value = saved
-      }
-    } catch (e) { /* ignore */ }
   } catch (e) { /* ignore */ }
+  finally { loadingLists.value = false }
 }
 
 async function fetchMunicipio() {
   // Requiere municipio concatenado. Si no se puede construir, vacía.
+  loadingLists.value = true
   const mid = await computeMunicipioMid()
   if (!mid) { playasMunicipio.value = []; return }
   // Formar variables solicitadas de forma dinámica
-  const codigo_provincia = mid.slice(0,2)
-  const codigo_municipio = mid.slice(2,5)
+  const codigo_provincia = mid.slice(0, 2)
+  const codigo_municipio = mid.slice(2, 5)
   // Asegurar selección de provincia por defecto
   if (!provSel.value) { provSel.value = codigo_provincia }
   const params = { municipio: mid, fields: 'id_playa,nombre_playa,nombre_municipio,nombre_provincia,id_provincia,lat,lon', limit: 2000 }
@@ -225,9 +243,11 @@ async function fetchMunicipio() {
   }
   // Tras tener datos municipales, si el modal está abierto, asegurar mapa
   if (props.open) { await initMap(); updateMarker() }
+  loadingLists.value = false
 }
 
 async function fetchProvincia() {
+  loadingLists.value = true
   if (!provSel.value) { playasProvincia.value = []; return }
   const excl = (await computeMunicipioMid()) || undefined
   const params = { provincia: String(provSel.value).padStart(2, '0'), exclude_municipio: excl, fields: 'id_playa,nombre_playa,nombre_municipio,nombre_provincia,lat,lon', limit: 2000 }
@@ -239,22 +259,24 @@ async function fetchProvincia() {
   if (!sel.value && !playasMunicipio.value.length && playasProvincia.value.length) {
     sel.value = playasProvincia.value[0]
   }
+  // Resetear scroll de la lista de provincia al principio
+  try {
+    if (provListEl && provListEl.value) {
+      provListEl.value.scrollTop = 0
+    }
+  } catch (e) { /* ignore */ }
 }
 
 function debouncedBuscar() {
   clearTimeout(t); t = setTimeout(async () => { await fetchProvincia() }, 250)
 }
 
-// init: fijar provSel desde cpro si llega, cargar provincias, luego municipio y por último provincia
+// init: cargar provincias, resolver municipio y fijar provincia en ese orden
+await fetchProvincias()
 if (props.cpro) {
   provSel.value = String(props.cpro).padStart(2, '0')
 }
-// await fetchProvincias()
-// await fetchMunicipio()
-// await fetchProvincia()
-
 await fetchMunicipio()
-await fetchProvincias()
 await fetchProvincia()
 
 
@@ -298,7 +320,8 @@ async function initMap() {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap'
   }).addTo(map)
-  marker = Llib.marker(center).addTo(map)
+  // Usar circleMarker para evitar dependencia de iconos externos
+  marker = Llib.circleMarker(center, { radius: 6, color: '#3b82f6', weight: 2, fillColor: '#60a5fa', fillOpacity: 0.9 }).addTo(map)
   // Invalidate size tras abrir para corregir cálculos en contenedores ocultos
   requestAnimationFrame(() => { try { map && map.invalidateSize() } catch (e) { } })
   setTimeout(() => { try { map && map.invalidateSize() } catch (e) { } }, 120)
@@ -316,36 +339,48 @@ function updateMarker() {
   if (!map) return
   const center = getFirstCoords()
   map.setView(center, map.getZoom() || 10)
-  if (marker) { marker.setLatLng(center) } else { marker = Llib.marker(center).addTo(map) }
+  if (marker) { marker.setLatLng(center) } else { marker = Llib.circleMarker(center, { radius: 6, color: '#3b82f6', weight: 2, fillColor: '#60a5fa', fillOpacity: 0.9 }).addTo(map) }
+}
+
+async function ensureMapReady() {
+  await nextTick()
+  const el = mapEl.value
+  if (!el) return
+  if (!map) { await initMap() }
+  try {
+    const r = el.getBoundingClientRect()
+    if (r.width < 50 || r.height < 50) {
+      setTimeout(() => { try { map && map.invalidateSize() } catch (e) { } }, 60)
+      setTimeout(() => { try { map && map.invalidateSize() } catch (e) { } }, 140)
+    } else {
+      try { map && map.invalidateSize() } catch (e) { }
+    }
+  } catch (e) { }
+  updateMarker()
 }
 
 watch(() => props.open, async (v) => {
   if (v) {
+    q.value = ''
+    try { if (panelEl && panelEl.value) panelEl.value.scrollTop = 0 } catch (e) { }
+    await ensureMapReady()
+    await fetchProvincias()
+    if (props.cpro) provSel.value = String(props.cpro).padStart(2, '0')
     await fetchMunicipio()
     await fetchProvincia()
-    await initMap();
-    updateMarker();
-    setTimeout(() => { try { map && map.invalidateSize() } catch (e) { } }, 100)
+    await ensureMapReady()
   } else {
     try { if (map) { map.remove(); map = null; marker = null } } catch (e) { }
   }
 })
-watch([sel, playasMunicipio, playasProvincia], async () => { if (props.open) { if (!map) { await initMap() } updateMarker() } })
+watch([sel, playasMunicipio, playasProvincia], async () => { if (props.open) { await ensureMapReady() } })
 
 // Reaccionar a cambios de props del padre (usuarios nuevos, cambio de ubicación)
 watch(() => props.cpro, async (val) => {
   if (val) {
-    // Solo sobreescribir si no hay preferencia guardada en localStorage
-    try {
-      const saved = typeof window !== 'undefined' ? window.localStorage.getItem(LS_KEY) : null
-      if (!saved) {
-        provSel.value = String(val).padStart(2, '0')
-        await fetchProvincia()
-      }
-    } catch (e) {
-      provSel.value = String(val).padStart(2, '0')
-      await fetchProvincia()
-    }
+    provSel.value = String(val).padStart(2, '0')
+    q.value = ''
+    await fetchProvincia()
   }
 })
 watch(() => props.municipioId, async () => {
@@ -360,7 +395,12 @@ watch(() => props.municipioName, async () => {
 })
 
 onMounted(async () => {
-  if (props.open) { await initMap(); updateMarker() }
+  if (props.open) { await ensureMapReady() }
+  // Reajustar en scroll del panel (por si cambia el layout)
+  try {
+    const handler = () => { try { map && map.invalidateSize() } catch (e) { } }
+    if (panelEl && panelEl.value) panelEl.value.addEventListener('scroll', handler, { passive: true })
+  } catch (e) { }
 })
 
 onBeforeUnmount(() => {
@@ -369,8 +409,25 @@ onBeforeUnmount(() => {
   try { if (ro && mapEl.value) { ro.disconnect(); ro = null } } catch (e) { }
 })
 
-// Guardar provincia al cambiar
-watch(provSel, (val) => {
-  try { if (val && typeof window !== 'undefined') { window.localStorage.setItem(LS_KEY, String(val)) } } catch (e) { }
+// Guardar provincia al cambiar y limpiar búsqueda para evitar filtros residuales
+watch(provSel, async (val, oldVal) => {
+  if (val !== oldVal) { q.value = '' }
 })
 </script>
+
+<style scoped>
+.spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: 4px solid color-mix(in srgb, white 75%, var(--color-primary) 25%);
+  border-top-color: color-mix(in srgb, white 30%, var(--color-primary) 70%);
+  animation: spin 1s linear infinite;
+}
+.loader-text {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: color-mix(in srgb, black 30%, var(--color-primary) 70%);
+}
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+</style>
