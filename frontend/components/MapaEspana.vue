@@ -8,25 +8,25 @@
 
       <div class="flex flex-row flex-wrap items-start justify-center gap-6">
         <div class="flex flex-col items-start gap-1">
-          <span class="text-xs font-semibold text-gray-600">Selecciona Comunidad Autónoma</span>
+          <span class="text-xs font-semibold chip-label">Selecciona Comunidad Autónoma</span>
           <select id="ccaa" v-model="internalValue" @change="onSelectChange"
             class="px-3 py-2 text-sm text-gray-900 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             :class="{ 'text-gray-400': !internalValue }" ref="ccaaSelectEl" :style="{ width: selectWidth }">
-          <!-- Placeholder -->
-          <option value="" disabled hidden class="text-gray-400">
-            Selecciona CCAA
-          </option>
+            <!-- Placeholder -->
+            <option value="" disabled hidden class="text-gray-400">
+              Selecciona CCAA
+            </option>
 
-          <!-- Lista real -->
-          <option v-for="c in ccaaList" :key="c.id" :value="c.id">
-            {{ regionNamesEs[c.name] || c.name }}
-          </option>
+            <!-- Lista real -->
+            <option v-for="c in ccaaList" :key="c.id" :value="c.id">
+              {{ regionNamesEs[c.name] || c.name }}
+            </option>
           </select>
         </div>
 
         <!-- Select de provincia -->
         <div class="flex flex-col items-start gap-1">
-          <span class="text-xs font-semibold text-gray-600">Selecciona Provincia</span>
+          <span class="text-xs font-semibold text-gray-600 chip-label">Selecciona Provincia</span>
           <select v-model="selectedProvince"
             class="px-3 py-2 text-sm text-gray-900 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 peer"
             :class="{ 'text-gray-400': !selectedProvince }" :style="{ width: selectWidth }" :disabled="!internalValue">
@@ -44,14 +44,11 @@
 
         <!-- Select de Municipio -->
         <div class="flex flex-col items-start gap-1">
-          <span class="text-xs font-semibold text-gray-600">Selecciona Municipio</span>
-          <select
-            v-model="localMunicipioId"
+          <span class="text-xs font-semibold text-gray-600 chip-label">Selecciona Municipio</span>
+          <select v-model="localMunicipioId"
             class="px-3 py-2 text-sm text-gray-900 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            :class="{ 'text-gray-400': !localMunicipioId }"
-            :style="{ width: selectWidth }"
-            :disabled="!selectedProvince"
-          >
+            :class="{ 'text-gray-400': !localMunicipioId }" :style="{ width: selectWidth }"
+            :disabled="!selectedProvince">
             <option value="" disabled hidden class="text-gray-400">Selecciona municipio</option>
             <option v-for="m in municipioOptions" :key="m.id" :value="m.id">{{ m.name }}</option>
           </select>
@@ -59,10 +56,11 @@
 
         <!-- Select de Área montañosa (solo nombre) -->
         <div class="flex flex-col items-start gap-1">
-          <span class="text-xs font-semibold text-gray-600">Selecciona Zona Montañosa</span>
+          <span class="text-xs font-semibold text-gray-600 chip-label">Selecciona Zona Montañosa</span>
           <select v-model="selectedAreaCode"
             class="px-3 py-2 text-sm text-gray-900 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            :class="{ 'text-gray-400': !selectedAreaCode }" :style="{ width: selectWidth }" :disabled="montanosasOptions.length === 0">
+            :class="{ 'text-gray-400': !selectedAreaCode }" :style="{ width: selectWidth }"
+            :disabled="montanosasOptions.length === 0">
             <option value="" disabled hidden class="text-gray-400">
               Selecciona área montañosa
             </option>
@@ -75,11 +73,9 @@
         <!-- Botón Guardar -->
         <div class="flex items-end">
           <button
-            class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded shadow disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700"
-            :disabled="!canSave || saving"
-            @click="saveNow"
-            :title="canSave ? (saving ? 'Guardando...' : 'Guardar ubicación') : 'Completa todas las selecciones'"
-          >
+            class="px-3 py-2 text-sm font-semibold rounded shadow disabled:opacity-50 disabled:cursor-not-allowed guardar-btn"
+            :disabled="!canSave || saving" @click="saveNow" :style="{ width: selectWidth }"
+            :title="canSave ? (saving ? 'Guardando...' : 'Guardar ubicación') : 'Completa todas las selecciones'">
             <span v-if="!saving">Guardar</span>
             <span v-else class="inline-flex items-center gap-2">
               <svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -403,9 +399,9 @@
             </div>
             <div class="mt-3 overflow-y-auto max-h-80">
               <template v-if="(selectedProvinces || []).length">
-                <ul class="divide-y divide-gray-200 text-left">
-                  <li v-for="p in selectedProvinces" :key="p.cpro" class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 text-left"
-                    @click="onProvincePick(p.cpro)">
+                <ul class="text-left divide-y divide-gray-200">
+                  <li v-for="p in selectedProvinces" :key="p.cpro"
+                    class="px-3 py-2 text-sm text-left cursor-pointer hover:bg-gray-50" @click="onProvincePick(p.cpro)">
                     {{ p.nombre }}
                   </li>
                 </ul>
@@ -455,7 +451,7 @@ async function saveNow() {
       const apiBase = axiosClient.defaults.baseURL || '';
       const root = apiBase.replace(/\/?api\/?$/, '');
       await axios.get(`${root}/sanctum/csrf-cookie`, { withCredentials: true });
-    } catch (_) {}
+    } catch (_) { }
     const m = (props.municipios || []).find(
       (mm) => String(mm.id) === String(localMunicipioId.value)
     );
@@ -485,7 +481,7 @@ async function saveNow() {
       localStorage.setItem('locpref_ccaa_id', String(ccaa));
       // Forzar actualización de GlassNav en esta pestaña
       window.dispatchEvent(new Event('storage'));
-    } catch {}
+    } catch { }
     console.log("[MapaEspana] Preferencia guardada", payload);
     // Redirigir a previsiones
     navigateTo('/previsiones');
@@ -776,7 +772,7 @@ onMounted(() => {
   try {
     watch(() => userLoggedIn().value, (v) => { isAuthed.value = !!v; });
     watch(() => userData().value, (ud) => { userId.value = ud?.id ?? null; });
-  } catch (_) {}
+  } catch (_) { }
 });
 
 const municipioOptions = computed(() =>
@@ -831,13 +827,13 @@ function lsGet(base) {
   try { return localStorage.getItem(nsKey(base)); } catch { return null; }
 }
 function lsSet(base, val) {
-  try { localStorage.setItem(nsKey(base), String(val ?? '')); } catch {}
+  try { localStorage.setItem(nsKey(base), String(val ?? '')); } catch { }
 }
 function lsRemoveLegacyGuestKeys() {
   // Remove non-namespaced keys to avoid cross-user leakage
   try {
-    ['ccaa','cpro','area'].forEach(k => localStorage.removeItem(`locpref_${k}`));
-  } catch {}
+    ['ccaa', 'cpro', 'area'].forEach(k => localStorage.removeItem(`locpref_${k}`));
+  } catch { }
 }
 
 // Datos de comunidades_provincias y área montañosa
@@ -873,7 +869,7 @@ onMounted(async () => {
       isAuthed.value = true;
       userId.value = ud?.id ?? null;
     }
-  } catch (_) {}
+  } catch (_) { }
   try {
     const me = await axiosClient.get('me');
     if (me && me.status === 200) {
@@ -904,10 +900,10 @@ onMounted(async () => {
           if (data.area_code) {
             selectedAreaCode.value = String(data.area_code);
           }
-        } catch (_) {}
+        } catch (_) { }
       }
     }
-  } catch (_) {}
+  } catch (_) { }
 
   // Invitado: restaurar desde localStorage solo si no se suprime
   if (!authed && !props.suppressRestore) {
@@ -933,7 +929,7 @@ onMounted(async () => {
       if (savedArea) {
         selectedAreaCode.value = savedArea;
       }
-    } catch {}
+    } catch { }
   }
 
   // Si se suprime restauración, asegurar estado vacío visible
@@ -1134,5 +1130,51 @@ svg path[name] {
 svg path[name]:hover {
   /* Light/glow and slight zoom */
   filter: brightness(1.15);
+}
+</style>
+
+<style scoped>
+/* Chips encima de los selects */
+.chip-label {
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 600;
+  backdrop-filter: blur(2px);
+}
+
+@media (prefers-color-scheme: light) {
+  .chip-label {
+    background-color: color-mix(in srgb, var(--color-bg) 95%, var(--color-primary) 5%);
+    color: var(--color-text);
+    border: 1px solid color-mix(in srgb, var(--color-bg) 90%, var(--color-primary) 10%);
+  }
+
+  .guardar-btn {
+    background-color: color-mix(in srgb, var(--color-bg) 95%, var(--color-primary) 5%);
+    color: var(--color-text);
+    border: 1px solid color-mix(in srgb, var(--color-bg) 90%, var(--color-primary) 10%);
+  }
+
+  .guardar-btn:hover {
+    background-color: color-mix(in srgb, var(--color-bg) 92%, var(--color-primary) 8%);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .chip-label {
+    background-color: color-mix(in srgb, var(--color-bg) 62%, var(--color-primary) 38%);
+    color: var(--color-text);
+    border: 1px solid color-mix(in srgb, var(--color-bg) 58%, var(--color-primary) 42%);
+  }
+
+  .guardar-btn {
+    background-color: color-mix(in srgb, var(--color-bg) 62%, var(--color-primary) 38%);
+    color: var(--color-text);
+    border: 1px solid color-mix(in srgb, var(--color-bg) 58%, var(--color-primary) 42%);
+  }
+
+  .guardar-btn:hover {
+    background-color: color-mix(in srgb, var(--color-bg) 58%, var(--color-primary) 42%);
+  }
 }
 </style>

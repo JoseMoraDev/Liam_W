@@ -1,7 +1,7 @@
 :root{
   --color-bg: #0b0f19; /* dark background */
   --color-surface: #111827; /* panels */
-  --color-surface-weak: rgba(17,24,39,0.8);
+  --color-surface-weak: #111827CC;
   --color-text: #e5e7eb; /* gray-200 */
   --color-text-muted: #9ca3af; /* gray-400 */
   --color-border: #374151; /* gray-700 */
@@ -13,8 +13,8 @@
   --color-danger: #ef4444; /* red-500 */
   --color-info: #06b6d4; /* cyan-500 */
 
-  --color-overlay-weak: rgba(255,255,255,0.05);
-  --color-overlay-strong: rgba(255,255,255,0.1);
+  --color-overlay-weak: #FFFFFF0D;
+  --color-overlay-strong: #FFFFFF1A;
 }
 
 /* Utilidades mínimas para interoperar con Tailwind mediante valores arbitrarios */
@@ -27,3 +27,128 @@ html, body { background-color: var(--color-bg); color: var(--color-text); }
 .theme-text-muted { color: var(--color-text-muted); }
 .theme-primary { color: var(--color-primary); }
 .theme-danger { color: var(--color-danger); }
+
+/* Capa de compatibilidad: adaptar utilidades comunes de Tailwind a las variables del tema */
+/* Fondos claros -> superficie del tema */
+[class*="bg-white"],
+[class*="bg-gray-50"],
+[class*="bg-gray-100"],
+[class*="bg-gray-200"],
+[class*="bg-slate-50"],
+[class*="bg-slate-100"],
+[class*="bg-neutral-50"],
+[class*="bg-neutral-100"] {
+  background-color: var(--color-surface) !important;
+}
+
+/* Texto grises oscuros -> texto del tema */
+[class*="text-gray-900"],
+[class*="text-gray-800"],
+[class*="text-gray-700"],
+[class*="text-slate-900"],
+[class*="text-slate-800"] {
+  color: var(--color-text) !important;
+}
+
+/* Texto gris medio -> texto tenue del tema */
+[class*="text-gray-500"],
+[class*="text-gray-600"],
+[class*="text-slate-600"],
+[class*="text-neutral-600"] {
+  color: var(--color-text-muted) !important;
+}
+
+/* Bordes claros -> borde del tema */
+[class*="border-gray-200"],
+[class*="border-gray-300"],
+[class*="border-slate-200"],
+[class*="border-neutral-200"] {
+  border-color: var(--color-border) !important;
+}
+
+/* Colores de acción -> paleta del tema */
+/* Fondo para bg-* */
+[class*="bg-blue-"] { background-color: var(--color-primary) !important; color: var(--color-text) !important; }
+[class*="bg-purple-"] { background-color: var(--color-secondary) !important; color: var(--color-text) !important; }
+[class*="bg-green-"] { background-color: var(--color-success) !important; color: var(--color-text) !important; }
+[class*="bg-amber-"],
+[class*="bg-yellow-"] { background-color: var(--color-warning) !important; color: var(--color-text) !important; }
+[class*="bg-red-"] { background-color: var(--color-danger) !important; color: var(--color-text) !important; }
+[class*="bg-cyan-"],
+[class*="bg-teal-"] { background-color: var(--color-info) !important; color: var(--color-text) !important; }
+
+/* Solo color de texto para text-* */
+[class*="text-blue-"] { color: var(--color-primary) !important; }
+[class*="text-purple-"] { color: var(--color-secondary) !important; }
+[class*="text-green-"] { color: var(--color-success) !important; }
+[class*="text-amber-"],
+[class*="text-yellow-"] { color: var(--color-warning) !important; }
+[class*="text-red-"] { color: var(--color-danger) !important; }
+[class*="text-cyan-"],
+[class*="text-teal-"] { color: var(--color-info) !important; }
+
+/* Utilidades globales de vidrio temático (consistentes entre temas) */
+.glass-panel {
+  /* Panel de sección: mezcla primario/surface + overlay negro sutil */
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-primary) 26%, var(--color-surface) 74%),
+      color-mix(in srgb, var(--color-primary) 26%, var(--color-surface) 74%)
+    ),
+    linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.22));
+  background-blend-mode: multiply, normal;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--color-text);
+}
+
+.glass-card {
+  /* Botones/cards: ligeramente más saturado que panel */
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-primary) 32%, var(--color-surface) 68%),
+      color-mix(in srgb, var(--color-primary) 32%, var(--color-surface) 68%)
+    ),
+    linear-gradient(rgba(0,0,0,0.24), rgba(0,0,0,0.24));
+  background-blend-mode: multiply, normal;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--color-text);
+}
+
+.glass-card:hover {
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-primary) 42%, var(--color-surface) 58%),
+      color-mix(in srgb, var(--color-primary) 42%, var(--color-surface) 58%)
+    ),
+    linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30));
+}
+
+.glass-btn {
+  /* Botón compacto de acción (p.ej. Cambiar) */
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-primary) 28%, var(--color-surface) 72%),
+      color-mix(in srgb, var(--color-primary) 28%, var(--color-surface) 72%)
+    ),
+    linear-gradient(rgba(0,0,0,0.22), rgba(0,0,0,0.22));
+  background-blend-mode: multiply, normal;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--color-text);
+}
+
+.glass-btn:hover {
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-primary) 38%, var(--color-surface) 62%),
+      color-mix(in srgb, var(--color-primary) 38%, var(--color-surface) 62%)
+    ),
+    linear-gradient(rgba(0,0,0,0.30), rgba(0,0,0,0.30));
+}

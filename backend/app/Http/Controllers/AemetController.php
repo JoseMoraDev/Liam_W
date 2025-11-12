@@ -32,7 +32,7 @@ class AemetController extends Controller
     {
         $token = $this->getToken();
         if (!$token) {
-            return response()->json(['error' => 'Token AEMET no encontrado'], 500);
+            return response()->json(['error' => 'Token AEMET no encontrado'], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
         }
 
         $base_url = 'https://opendata.aemet.es/opendata/api';
@@ -129,29 +129,116 @@ class AemetController extends Controller
             return response()->json(['error' => 'Parámetro area_nivologica inválido. Solo 0 o 1'], 400);
         }
 
-        $endpoint = "/prediccion/especifica/nivologica/{$area_nivologica}";
+        try {
+            $token = $this->getToken();
+            if (!$token) {
+                return response()->json(['error' => 'Token AEMET no encontrado'], 500);
+            }
 
-        $response = $this->fetchAemetData($endpoint);
+            $baseUrl = 'https://opendata.aemet.es/opendata/api';
+            $endpoint = "/prediccion/especifica/nivologica/{$area_nivologica}";
 
-        if ($response->status() !== 200) {
-            return $response;
+            // Cachear por 10 minutos para evitar rate limit
+            $cacheKey = "aemet.nivologica." . $area_nivologica;
+            if (Cache::has($cacheKey)) {
+                $cached = Cache::get($cacheKey);
+                return response()->json($cached, 200, [], JSON_UNESCAPED_UNICODE);
+            }
+
+            // Cliente Guzzle con timeout y User-Agent
+            $client = new \GuzzleHttp\Client([
+                'timeout' => 20,
+                'headers' => [
+                    'User-Agent' => 'AEMET-Client/1.0 (+https://tuapp.local)'
+                ]
+            ]);
+
+            // 1ª llamada (manejo 429 con reintentos cortos)
+            $attempts = 0; $initialResponse = null;
+            do {
+                $attempts++;
+                try {
+                    $initialResponse = $client->get($baseUrl . $endpoint, [ 'query' => ['api_key' => $token] ]);
+                } catch (\GuzzleHttp\Exception\RequestException $e) {
+                    $initialResponse = $e->getResponse();
+                    if (!$initialResponse) throw $e;
+                }
+                if ($initialResponse->getStatusCode() == 429) {
+                    $retryAfter = (int)($initialResponse->getHeaderLine('Retry-After') ?: 2);
+                    sleep(min(max($retryAfter, 1), 5));
+                } else {
+                    break;
+                }
+            } while ($attempts < 3);
+
+            $initialRaw = (string)$initialResponse->getBody();
+            $step1 = json_decode($initialRaw, true);
+            if ($step1 === null) {
+                $snippet = mb_substr(strip_tags($initialRaw), 0, 300);
+                return response()->json([
+                    'error' => 'Respuesta inicial de AEMET no es JSON válido.',
+                    'status' => $initialResponse->getStatusCode(),
+                    'preview' => $snippet,
+                ], $initialResponse->getStatusCode() == 429 ? 429 : 502);
+            }
+
+            if (!isset($step1['datos'])) {
+                return response()->json([
+                    'error' => 'No se encontró la URL de datos en la respuesta de AEMET.',
+                    'respuesta' => $step1,
+                    'status' => $initialResponse->getStatusCode(),
+                ], $initialResponse->getStatusCode() == 429 ? 429 : 502);
+            }
+
+            // 2ª llamada: datos reales (también con manejo 429)
+            $attempts = 0; $dataResponse = null;
+            do {
+                $attempts++;
+                try {
+                    $dataResponse = $client->get($step1['datos']);
+                } catch (\GuzzleHttp\Exception\RequestException $e) {
+                    $resp = $e->getResponse();
+                    if ($resp && $resp->getStatusCode() == 429) {
+                        $retryAfter = (int)($resp->getHeaderLine('Retry-After') ?: 2);
+                        sleep(min(max($retryAfter, 1), 5));
+                        continue;
+                    }
+                    throw $e;
+                }
+                if ($dataResponse->getStatusCode() == 429) {
+                    $retryAfter = (int)($dataResponse->getHeaderLine('Retry-After') ?: 2);
+                    sleep(min(max($retryAfter, 1), 5));
+                } else {
+                    break;
+                }
+            } while ($attempts < 3);
+
+            $raw = (string)$dataResponse->getBody();
+            // Normalizar a UTF-8 si es necesario
+            if (!mb_detect_encoding($raw, 'UTF-8', true)) {
+                $raw = mb_convert_encoding($raw, 'UTF-8', 'ISO-8859-1, Windows-1252');
+            }
+
+            // AEMET puede devolver JSON o texto plano
+            $decoded = json_decode($raw, true);
+            $boletin = $decoded !== null ? $decoded : $raw;
+
+            $zona = $area_nivologica === '0' ? 'Pirineo Catalán' : 'Pirineo Navarro y Aragonés';
+            $payload = [ 'zona' => $zona, 'boletin' => $boletin ];
+
+            // Cachear
+            Cache::put($cacheKey, $payload, now()->addMinutes(10));
+
+            return response()->json($payload, 200, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        } catch (\Throwable $e) {
+            // Fallback a cache si existe
+            $cacheKey = "aemet.nivologica." . $area_nivologica;
+            if (Cache::has($cacheKey)) {
+                return response()->json(array_merge(['cached' => true], Cache::get($cacheKey)), 200, [], JSON_UNESCAPED_UNICODE);
+            }
+            Log::error('[AEMET][Nivologica] excepción inesperada', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Error inesperado en prediccionNivologica', 'message' => $e->getMessage()], 500);
         }
-
-        $contenido = $response->getContent();
-        // Conversión de ISO-8859-1 a UTF-8 si es texto plano
-        $contentType = $response->headers->get('Content-Type');
-        if (str_contains($contentType, 'text/plain')) {
-            $contenido = mb_convert_encoding($contenido, 'UTF-8', 'ISO-8859-1');
-        } else {
-            $contenido = json_decode($contenido, true);
-        }
-
-        $zona = $area_nivologica === '0' ? 'Pirineo Catalán' : 'Pirineo Navarro y Aragonés';
-
-        return response()->json([
-            'zona' => $zona,
-            'boletin' => $contenido,
-        ]);
     }
 
     /**
@@ -522,21 +609,37 @@ class AemetController extends Controller
         ]);
 
         if ($response->failed()) {
-            return response()->json(['error' => 'Error en llamada inicial AEMET', 'details' => $response->body()], 500);
+            $errBody = $response->body();
+            if (is_string($errBody)) {
+                $enc = mb_detect_encoding($errBody, ['UTF-8','ISO-8859-1','Windows-1252'], true) ?: 'UTF-8';
+                if ($enc !== 'UTF-8') { $errBody = mb_convert_encoding($errBody, 'UTF-8', $enc); }
+            }
+            return response()->json([
+                'error' => 'Error en llamada inicial AEMET',
+                'details' => is_string($errBody) ? mb_substr($errBody, 0, 500) : $errBody,
+            ], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
         }
 
         $body = $response->json();
         if (!isset($body['datos'])) {
-            return response()->json(['error' => 'Respuesta inesperada de AEMET, falta "datos"', 'response' => $body], 500);
+            return response()->json([
+                'error' => 'Respuesta inesperada de AEMET, falta "datos"',
+                'response' => $body
+            ], 500, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
         }
 
         // 2ª llamada (obtiene el XML o ZIP)
         $dataResponse = Http::get($body['datos']);
         if ($dataResponse->failed()) {
+            $errBody2 = $dataResponse->body();
+            if (is_string($errBody2)) {
+                $enc2 = mb_detect_encoding($errBody2, ['UTF-8','ISO-8859-1','Windows-1252'], true) ?: 'UTF-8';
+                if ($enc2 !== 'UTF-8') { $errBody2 = mb_convert_encoding($errBody2, 'UTF-8', $enc2); }
+            }
             return response()->json([
                 'error' => 'La API devolvió un error o contenido no válido',
-                'response' => $dataResponse->body()
-            ], 500);
+                'response' => is_string($errBody2) ? mb_substr($errBody2, 0, 500) : $errBody2
+            ], 500, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
         }
 
         $data = $dataResponse->body();
@@ -556,10 +659,13 @@ class AemetController extends Controller
                 unlink($tmpFile);
 
                 if (!$xmlContent) {
-                    return response()->json(['error' => 'ZIP recibido pero sin contenido XML'], 500);
+                    return response()->json(['error' => 'ZIP recibido pero sin contenido XML'], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
                 }
             } catch (Exception $e) {
-                return response()->json(['error' => 'Error al procesar el archivo ZIP.', 'message' => $e->getMessage()], 500);
+                return response()->json([
+                    'error' => 'Error al procesar el archivo ZIP.',
+                    'message' => $e->getMessage()
+                ], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
             }
         } else {
             // Si no es un ZIP, asumimos que es el XML directamente
@@ -573,14 +679,14 @@ class AemetController extends Controller
         return $this->sintetizarAvisosCap($xmlContent);
     }
 
-    private function sintetizarAvisosCap(string $xml_data): \Illuminate\Http\JsonResponse
+    private function sintetizarAvisosCap(string $xml_data)
     {
         try {
             // Paso clave de limpieza: Elimina caracteres no imprimibles y el encabezado.
             $start_pos = strpos($xml_data, '<');
 
             if ($start_pos === false) {
-                return response()->json(['error' => 'No se encontró la etiqueta de inicio XML (<).'], 500);
+                return response()->json(['error' => 'No se encontró la etiqueta de inicio XML (<).'], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
             }
 
             $cleaned_xml_data = substr($xml_data, $start_pos);
@@ -591,7 +697,7 @@ class AemetController extends Controller
             }
 
             if (empty($cleaned_xml_data)) {
-                return response()->json(['error' => 'La respuesta XML está vacía después de la limpieza.'], 500);
+                return response()->json(['error' => 'La respuesta XML está vacía después de la limpieza.'], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
             }
 
             libxml_use_internal_errors(true);
@@ -606,7 +712,7 @@ class AemetController extends Controller
                     'error' => 'Error al parsear el XML del aviso.',
                     'message' => 'El XML no es válido.',
                     'parser_errors' => $error_messages
-                ], 500);
+                ], 200, [], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
             }
 
             // Extracción y filtro de la información
@@ -677,7 +783,9 @@ class AemetController extends Controller
             };
             array_walk_recursive($result, $normalize);
 
-            return response()->json($result, 200, ['Content-Type' => 'application/json; charset=UTF-8'], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+            // Opción A: devolver el JSON como texto para evitar el wrapper de JsonResponse
+            $rawJson = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+            return response($rawJson, 200)->header('Content-Type', 'application/json; charset=UTF-8');
         } catch (Exception $e) {
             return response()->json([
                 'error' => 'Error inesperado al procesar el XML.',

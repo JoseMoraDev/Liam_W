@@ -11,7 +11,7 @@
               <div class="font-medium">{{ t.name }}</div>
               <div class="text-xs theme-text-muted">{{ t.id }}</div>
             </div>
-            <button class="px-3 py-1 text-sm rounded-lg bg-[color:var(--color-primary)] text-white" @click="activate(t.id)">Usar</button>
+            <button class="px-3 py-1 text-sm rounded-lg bg-[color:var(--color-primary)] text-white" @click="activate(t.id)">Activar</button>
           </li>
         </ul>
       </div>
@@ -35,7 +35,10 @@
 import { computed } from 'vue'
 import { themes, setActiveTheme } from '~/store/theme'
 
-const list = computed(() => themes().value)
+const list = computed(() => {
+  const arr = Array.isArray(themes().value) ? [...themes().value] : []
+  return arr.sort((a,b) => String(a.name||'').localeCompare(String(b.name||''), 'es', { sensitivity: 'base' }))
+})
 
 function activate(id){
   setActiveTheme(id)

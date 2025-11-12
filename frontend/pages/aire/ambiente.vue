@@ -47,8 +47,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen p-4 text-gray-200 bg-gray-900">
-    <h1 class="mb-4 text-xl font-bold">🌍 Calidad del aire</h1>
+  <div class="relative w-full min-h-screen bg-center bg-cover" style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
+    <div class="absolute inset-0 bg-black/40"></div>
+
+    <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
+      <h1 class="mb-4 text-xl font-bold">🌍 Calidad del aire</h1>
 
     <div v-if="loading">Cargando datos...</div>
     <div v-else-if="error" class="text-red-400">⚠️ {{ error }}</div>
@@ -136,6 +139,7 @@ onMounted(async () => {
         </table>
       </div>
       <div v-else class="text-slate-400">No hay pronóstico disponible.</div>
+    </div>
     </div>
   </div>
 </template>

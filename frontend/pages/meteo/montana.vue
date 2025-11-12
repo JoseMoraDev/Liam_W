@@ -1,5 +1,8 @@
 <template>
-  <div class="max-w-5xl p-6 mx-auto space-y-10">
+  <div class="relative w-full min-h-screen bg-center bg-cover" style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
+    <div class="absolute inset-0 bg-black/40"></div>
+
+    <div class="relative z-10 max-w-5xl p-6 mx-auto space-y-10">
     <!-- Título -->
     <div class="text-center">
       <h1
@@ -114,6 +117,7 @@
         >AEMET</a
       >
     </footer>
+    </div>
   </div>
 </template>
 

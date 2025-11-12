@@ -1,22 +1,43 @@
 // Estado global de temas
 export const themes = () =>
-  useState('themes', () => [
+  useState('themes', () => {
+    const initial = [
     {
-      id: 'dark-default',
-      name: 'Oscuro',
+      id: 'dark-magenta',
+      name: 'Oscuro Magenta',
       vars: {
-        '--color-bg': '#0b0f19',
-        '--color-surface': '#111827',
-        '--color-surface-weak': '#111827CC',
-        '--color-text': '#e5e7eb',
-        '--color-text-muted': '#9ca3af',
-        '--color-border': '#374151',
-        '--color-primary': '#3b82f6',
-        '--color-secondary': '#a855f7',
+        '--color-bg': '#100414',
+        '--color-surface': '#16061b',
+        '--color-surface-weak': '#16061bCC',
+        '--color-text': '#f5f3f7',
+        '--color-text-muted': '#e9d5ff',
+        '--color-border': '#3c0f45',
+        '--color-primary': '#c026d3',
+        '--color-secondary': '#e11d48',
         '--color-success': '#22c55e',
         '--color-warning': '#f59e0b',
         '--color-danger': '#ef4444',
-        '--color-info': '#06b6d4',
+        '--color-info': '#a21caf',
+        '--color-overlay-weak': '#FFFFFF0D',
+        '--color-overlay-strong': '#FFFFFF1A'
+      }
+    },
+    {
+      id: 'dark-navy',
+      name: 'Oscuro Navy',
+      vars: {
+        '--color-bg': '#0b1220',
+        '--color-surface': '#0f172a',
+        '--color-surface-weak': '#0f172aCC',
+        '--color-text': '#e5e7eb',
+        '--color-text-muted': '#94a3b8',
+        '--color-border': '#1e293b',
+        '--color-primary': '#1e3a8a',
+        '--color-secondary': '#7c3aed',
+        '--color-success': '#22c55e',
+        '--color-warning': '#f59e0b',
+        '--color-danger': '#ef4444',
+        '--color-info': '#0ea5e9',
         '--color-overlay-weak': '#FFFFFF0D',
         '--color-overlay-strong': '#FFFFFF1A'
       }
@@ -100,37 +121,60 @@ export const themes = () =>
         '--color-overlay-weak': '#FFFFFF0D',
         '--color-overlay-strong': '#FFFFFF1A'
       }
-    },
-    {
-      id: 'one-dark',
-      name: 'One Dark',
-      vars: {
-        '--color-bg': '#282c34',
-        '--color-surface': '#21252b',
-        '--color-surface-weak': '#21252BCC',
-        '--color-text': '#abb2bf',
-        '--color-text-muted': '#7f848e',
-        '--color-border': '#3a3f4b',
-        '--color-primary': '#61afef',
-        '--color-secondary': '#c678dd',
-        '--color-success': '#98c379',
-        '--color-warning': '#e5c07b',
-        '--color-danger': '#e06c75',
-        '--color-info': '#56b6c2',
-        '--color-overlay-weak': '#FFFFFF0D',
-        '--color-overlay-strong': '#FFFFFF1A'
-      }
     }
-  ]);
+    ]
+    // Intentar cargar desde localStorage y filtrar 'one-dark'
+    if (process.client) {
+      try {
+        const saved = JSON.parse(localStorage.getItem('themes') || '[]')
+        const filtered = Array.isArray(saved) && saved.length
+          ? saved.filter(t => t && t.id !== 'one-dark')
+          : null
+        if (filtered) {
+          localStorage.setItem('themes', JSON.stringify(filtered))
+          return filtered
+        }
+      } catch { }
+    }
+    return initial
+  });
 
-export const activeThemeId = () => useState('activeThemeId', () => 'dark-default');
+export const activeThemeId = () => useState('activeThemeId', () => 'dark-magenta');
+export const previewThemeId = () => useState('previewThemeId', () => '');
 
 export function setActiveTheme(id) {
+  // Bloquear 'one-dark'
+  if (id === 'one-dark') id = 'dark-magenta'
   activeThemeId().value = id;
   if (process.client) localStorage.setItem('activeThemeId', id);
+  // Aplicación inmediata de variables (fallback al watcher del plugin)
+  if (process.client) {
+    try {
+      const t = getThemeById(id)
+      if (t && t.vars) {
+        const root = document.documentElement
+        Object.entries(t.vars).forEach(([k, v]) => root.style.setProperty(k, v))
+      }
+    } catch { }
+  }
+}
+
+export function setPreviewTheme(id) {
+  previewThemeId().value = id || '';
+}
+
+export function clearPreviewTheme() {
+  previewThemeId().value = '';
 }
 
 export function upsertTheme(theme) {
+  // Never allow 'one-dark' to be (re)added
+  if (!theme || theme.id === 'one-dark') {
+    // Also purge if present
+    themes().value = themes().value.filter(t => t.id !== 'one-dark')
+    if (process.client) localStorage.setItem('themes', JSON.stringify(themes().value));
+    return;
+  }
   const list = themes().value;
   const index = list.findIndex(t => t.id === theme.id);
   if (index >= 0) list[index] = theme; else list.push(theme);
@@ -146,4 +190,9 @@ export function deleteTheme(id) {
 export function getActiveTheme() {
   const id = activeThemeId().value;
   return themes().value.find(t => t.id === id) || themes().value[0];
+}
+
+export function getThemeById(id) {
+  if (id === 'one-dark') return undefined;
+  return themes().value.find(t => t.id === id);
 }

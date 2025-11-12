@@ -121,9 +121,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen p-4 text-gray-100 bg-gray-900">
-    <!-- Encabezado -->
-    <div class="mb-6">
+  <div class="relative w-full min-h-screen bg-center bg-cover" style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
+    <div class="absolute inset-0 bg-black/40"></div>
+
+    <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
+      <!-- Encabezado -->
+      <div class="mb-6">
       <h1 class="text-2xl font-bold">🌿 Niveles de polen</h1>
       <p class="text-gray-400">Ubicación: Elche (Alicante) · Datos horarios</p>
     </div>
@@ -171,6 +174,7 @@ onMounted(async () => {
         </div>
         <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
       </div>
+    </div>
     </div>
   </div>
 </template>

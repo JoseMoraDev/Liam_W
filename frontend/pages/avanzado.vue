@@ -1,23 +1,24 @@
 <template>
-  <div class="w-full min-h-screen bg-center bg-cover" style="background-image: url('/img/menu.jpg')">
-    <!-- Capa translúcida -->
-    <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+  <div class="absolute inset-0 w-full h-screen bg-center bg-cover mt-14" style="background-image: url('/img/menu.jpg')">
+    <!-- Capa oscura -->
+    <div class="absolute inset-0 bg-black/10"></div>
 
     <!-- Contenido -->
     <div :class="mounted ? 'opacity-100' : 'opacity-0'"
       class="relative z-10 flex flex-col items-center w-full min-h-screen p-6 mt-5 space-y-8 overflow-y-auto transition-opacity duration-300 md:p-8">
       <!-- Título principal -->
-      <div class="w-full max-w-3xl p-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md">
-        <h1 class="text-2xl font-bold text-center text-gray-900/90">Opciones avanzadas</h1>
+      <div class="w-full max-w-md p-4 border rounded-2xl frost-panel border-white/15">
+        <h1 class="text-2xl font-bold text-center text-[color:var(--color-text)]">Opciones avanzadas</h1>
       </div>
 
       <!-- Administración (solo admin) -->
       <template v-if="isAdmin">
-        <div class="w-full max-w-3xl p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md">
-          <h2 class="text-xl font-bold text-center text-gray-900/90">Administración de usuarios</h2>
-          <div class="grid grid-cols-1 gap-4">
-            <button @click="openAdminUsers" class="sub-card">CRUD de usuarios con bloqueos, roles, y cupos de
-              llamadas</button>
+        <div class="w-full max-w-md p-4 space-y-4 border rounded-2xl frost-panel border-white/15">
+          <h2 class="text-xl font-bold text-center text-[color:var(--color-text)]">Administración de usuarios</h2>
+          <div class="w-full max-w-md mx-auto">
+            <div class="grid grid-cols-1 gap-4">
+              <button @click="openAdminUsers" class="frost-card border border-white/15">CRUD de usuarios con bloqueos, roles, y cupos de llamadas</button>
+            </div>
           </div>
         </div>
 
@@ -35,18 +36,21 @@
               <div class="p-4 rounded-xl theme-surface theme-border border">
                 <h4 class="mb-3 font-semibold">Temas disponibles</h4>
                 <ul class="space-y-2">
-                  <li v-for="t in themeList" :key="t.id" class="flex items-center justify-between p-2 border rounded-lg theme-border">
+                  <li v-for="t in themeList" :key="t.id"
+                      class="flex items-center justify-between p-2 border rounded-lg theme-border cursor-pointer hover:bg-[color:var(--color-overlay-weak)]"
+                      :class="{ 'bg-[color:var(--color-overlay-weak)] border-[color:var(--color-primary)]': t.id === activeId }"
+                      @click="activate(t.id)">
                     <div>
                       <div class="font-medium">{{ t.name }}</div>
                       <div class="text-xs theme-text-muted">{{ t.id }}</div>
                     </div>
                     <div class="flex items-center gap-2">
                       <template v-if="t.id === activeId">
-                        <span class="px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-success)]">Activo</span>
+                        <span class="inline-flex items-center justify-center h-8 min-w-[88px] px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-success)]">Activo</span>
                       </template>
-                      <button v-else class="px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-primary)]" @click="activate(t.id)">Activar</button>
+                      <button v-else class="inline-flex items-center justify-center h-8 min-w-[88px] px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-primary)]" @click.stop="activate(t.id)">Activar</button>
                       <button class="px-3 py-1 text-sm border rounded-lg theme-border" @click="edit(t)">Editar</button>
-                      <button class="px-3 py-1 text-sm text-white rounded-lg bg-[color:var(--color-danger)]" :class="{ 'opacity-50 cursor-not-allowed': t.id === activeId }" :disabled="t.id === activeId" @click="remove(t.id)">Eliminar</button>
+                      <button class="px-3 py-1 text-sm text-white rounded-lg bg-[color:var(--color-danger)]" :class="{ 'opacity-50 cursor-not-allowed': t.id === activeId }" :disabled="t.id === activeId" @click.stop="remove(t.id)">Eliminar</button>
                     </div>
                   </li>
                   <li v-if="!themeList.length" class="p-3 text-center text-gray-500">No hay temas.</li>
@@ -102,20 +106,24 @@
           </div>
         </div>
 
-        <div class="w-full max-w-3xl p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md">
-          <h2 class="text-xl font-bold text-center text-gray-900/90">Temas de colores</h2>
-          <div class="grid grid-cols-1 gap-4">
-            <button @click.prevent="openThemes" class="sub-card">CRUD de temas de colores</button>
+        <div class="w-full max-w-md p-4 space-y-4 border rounded-2xl frost-panel border-white/15">
+          <h2 class="text-xl font-bold text-center text-[color:var(--color-text)]">Temas de colores</h2>
+          <div class="w-full max-w-md mx-auto">
+            <div class="grid grid-cols-1 gap-4">
+              <button @click.prevent="openThemes" class="frost-card border border-white/15">CRUD de temas de colores</button>
+            </div>
           </div>
         </div>
 
         <!-- Métricas y logs -->
-        <div class="w-full max-w-3xl p-4 space-y-4 shadow-inner rounded-2xl bg-gray-200/20 backdrop-blur-md">
-          <h2 class="text-xl font-bold text-center text-gray-900/90">{{ t('admin.metrics.section_title') }}</h2>
-          <div class="grid grid-cols-1 gap-3">
-            <button @click="openLogins" class="w-full sub-card">{{ t('admin.metrics.open_logins') }}</button>
-            <button @click="openErrors" class="w-full sub-card">{{ t('admin.metrics.open_errors') }}</button>
-            <button @click="openStats" class="w-full sub-card">{{ t('admin.metrics.open_stats') }}</button>
+        <div class="w-full max-w-md p-4 space-y-4 border rounded-2xl frost-panel border-white/15">
+          <h2 class="text-xl font-bold text-center text-[color:var(--color-text)]">{{ t('admin.metrics.section_title') }}</h2>
+          <div class="w-full max-w-md mx-auto">
+            <div class="grid grid-cols-1 gap-3">
+              <button @click="openLogins" class="w-full frost-card border border-white/15">{{ t('admin.metrics.open_logins') }}</button>
+              <button @click="openErrors" class="w-full frost-card border border-white/15">{{ t('admin.metrics.open_errors') }}</button>
+              <button @click="openStats" class="w-full frost-card border border-white/15">{{ t('admin.metrics.open_stats') }}</button>
+            </div>
           </div>
         </div>
 
@@ -125,14 +133,14 @@
             @click.self="adminOpen = false">
             <div class="w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 bg-white rounded-2xl shadow-xl">
               <div class="flex items-center justify-between mb-3">
-                <h3 class="text-xl font-bold text-gray-900/90">{{ t('admin.users.title') }}</h3>
+                <h3 class="text-xl font-bold text-[color:var(--color-text)]">{{ t('admin.users.title') }}</h3>
                 <button @click="adminOpen = false" class="px-3 py-1 text-gray-700 bg-gray-100 border rounded-md">{{
                   t('admin.users.close') }}</button>
               </div>
               <!-- Gestión de usuarios -->
               <div class="w-full p-0 space-y-4">
                 <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <h2 class="text-lg font-semibold text-gray-900/90">{{ t('admin.users.title') }}</h2>
+                  <h2 class="text-lg font-semibold text-[color:var(--color-text)]">{{ t('admin.users.title') }}</h2>
                   <div class="flex flex-col w-full gap-2 sm:flex-row sm:w-auto sm:items-center">
                     <input v-model="search" @input="onSearchInput" type="text"
                       :placeholder="t('admin.users.search_placeholder')"
@@ -308,18 +316,21 @@
                   <div class="p-4 rounded-xl theme-surface theme-border border">
                     <h4 class="mb-3 font-semibold">Temas disponibles</h4>
                     <ul class="space-y-2">
-                      <li v-for="t in themeList" :key="t.id" class="flex items-center justify-between p-2 border rounded-lg theme-border">
+                      <li v-for="t in themeList" :key="t.id"
+                          class="flex items-center justify-between p-2 border rounded-lg theme-border cursor-pointer hover:bg-[color:var(--color-overlay-weak)]"
+                          :class="{ 'bg-[color:var(--color-overlay-weak)] border-[color:var(--color-primary)]': t.id === activeId }"
+                          @click="activate(t.id)">
                         <div>
                           <div class="font-medium">{{ t.name }}</div>
                           <div class="text-xs theme-text-muted">{{ t.id }}</div>
                         </div>
                         <div class="flex items-center gap-2">
                           <template v-if="t.id === activeId">
-                            <span class="px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-success)]">Activo</span>
+                            <span class="inline-flex items-center justify-center h-8 min-w-[88px] px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-success)]">Activo</span>
                           </template>
-                          <button v-else class="px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-primary)]" @click="activate(t.id)">Activar</button>
-                          <button class="px-3 py-1 text-sm border rounded-lg theme-border" @click="edit(t)">Editar</button>
-                          <button class="px-3 py-1 text-sm text-white rounded-lg bg-[color:var(--color-danger)]" :class="{ 'opacity-50 cursor-not-allowed': t.id === activeId }" :disabled="t.id === activeId" @click="remove(t.id)">Eliminar</button>
+                          <button v-else class="inline-flex items-center justify-center h-8 min-w-[88px] px-3 py-1 text-sm rounded-lg text-white bg-[color:var(--color-primary)]" @click.stop="activate(t.id)">Activar</button>
+                          <button class="px-3 py-1 text-sm border rounded-lg theme-border" @click.stop="edit(t)">Editar</button>
+                          <button class="px-3 py-1 text-sm text-white rounded-lg bg-[color:var(--color-danger)]" :class="{ 'opacity-50 cursor-not-allowed': t.id === activeId }" :disabled="t.id === activeId" @click.stop="remove(t.id)">Eliminar</button>
                         </div>
                       </li>
                       <li v-if="!themeList.length" class="p-3 text-center text-gray-500">No hay temas.</li>
@@ -389,7 +400,7 @@
           <div v-if="showLogins" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50" @click.self="showLogins = false">
             <div class="w-full max-w-3xl max-h-[80vh] overflow-y-auto p-4 bg-white rounded-2xl shadow-xl">
               <div class="flex items-center justify-between mb-3">
-                <h3 class="text-xl font-bold text-gray-900/90">{{ t('admin.metrics.logins_title') }}</h3>
+                <h3 class="text-xl font-bold text-[color:var(--color-text)]">{{ t('admin.metrics.logins_title') }}</h3>
                 <button @click="showLogins = false" class="px-3 py-1 text-gray-700 bg-gray-100 border rounded-md">{{ t('admin.metrics.close') }}</button>
               </div>
               <ul class="space-y-2 max-h-[70vh] overflow-y-auto pr-1">
@@ -412,7 +423,7 @@
                   @click.self="showErrors = false">
                   <div class="w-full max-w-5xl max-h-[80vh] overflow-y-auto p-4 bg-white rounded-2xl shadow-xl">
                     <div class="flex items-center justify-between mb-3">
-                      <h3 class="text-xl font-bold text-gray-900/90">{{ t('admin.metrics.errors_title') }}</h3>
+                      <h3 class="text-xl font-bold text-[color:var(--color-text)]">{{ t('admin.metrics.errors_title') }}</h3>
                       <button @click="showErrors = false"
                         class="px-3 py-1 text-gray-700 bg-gray-100 border rounded-md">{{
                           t('admin.metrics.close') }}</button>
@@ -431,7 +442,7 @@
                   @click.self="showStats = false">
                   <div class="w-full max-w-3xl max-h-[80vh] overflow-y-auto p-4 bg-white rounded-2xl shadow-xl">
                     <div class="flex items-center justify-between mb-3">
-                      <h3 class="text-xl font-bold text-gray-900/90">{{ t('admin.metrics.stats_title') }}</h3>
+                      <h3 class="text-xl font-bold text-[color:var(--color-text)]">{{ t('admin.metrics.stats_title') }}</h3>
                       <button @click="showStats = false"
                         class="px-3 py-1 text-gray-700 bg-gray-100 border rounded-md">{{
                           t('admin.metrics.close') }}</button>
@@ -891,8 +902,60 @@ function formatLoginTime(raw) {
 </script>
 
 <style scoped>
-.sub-card {
-  @apply flex items-center justify-center p-4 text-sm font-semibold text-center text-gray-900/90 transition-colors rounded-xl bg-gray-100/20 backdrop-blur-md hover:bg-gray-200/30 shadow-inner;
+/* Ultra frosted glass (consistente con Ajustes) */
+.frost-panel {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 3%, transparent),
+      color-mix(in srgb, var(--color-primary) 3%, transparent)),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-bg) 10%, transparent),
+      color-mix(in srgb, var(--color-bg) 10%, transparent)
+    );
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.frost-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem; /* py-2 px-3 */
+  font-size: 0.875rem; /* text-sm */
+  line-height: 1.25rem;
+  font-weight: 600; /* font-semibold */
+  border-radius: 0.75rem; /* rounded-xl */
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-duration: 150ms; /* transition-colors */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.06); /* shadow-inner */
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 5%, transparent),
+      color-mix(in srgb, var(--color-primary) 5%, transparent)),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent)
+    );
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+}
+
+.frost-card:hover {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 7%, transparent),
+      color-mix(in srgb, var(--color-primary) 7%, transparent)),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-bg) 14%, transparent),
+      color-mix(in srgb, var(--color-bg) 14%, transparent)
+    );
 }
 
 .fade-enter-active,

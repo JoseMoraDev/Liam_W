@@ -1,78 +1,46 @@
 <!-- TODO: cuando el usuario se loguea no se actualiza esto -->
 <template>
-  <nav
-    class="fixed inset-x-0 top-0 z-[9999] h-16 flex items-center bg-gray-100/40 backdrop-blur-md border-b border-gray-300/40 shadow-sm"
-  >
+  <nav class="fixed inset-x-0 top-0 z-[9999] h-16 flex items-center nav-glass border-b border-white/15 shadow-sm">
     <div class="w-full px-3 mx-auto max-w-7xl sm:px-6">
       <div class="flex items-center gap-3 px-3 py-2 rounded-2xl">
         <!-- Botón menú -->
-        <button
-          v-if="isLoggedIn"
-          ref="menuButtonRef"
-          @click="open = !open"
-          class="inline-flex items-center justify-center w-10 h-10 text-gray-700 transition border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
-          :aria-label="t('aria.open_menu')"
-        >
-          <client-only
-            ><font-awesome-icon icon="fa-solid fa-bars"
-          /></client-only>
+        <button v-if="isLoggedIn" ref="menuButtonRef" @click="open = !open"
+          class="inline-flex items-center justify-center w-10 h-10 border frost-icon border-white/15"
+          :aria-label="t('aria.open_menu')">
+          <client-only><font-awesome-icon icon="fa-solid fa-bars" /></client-only>
         </button>
         <div v-else class="w-10 h-10"></div>
 
         <!-- Marca -->
-        <NuxtLink
-          to="/"
-          class="hidden font-semibold tracking-wide text-gray-800 sm:block"
-        >
+        <NuxtLink to="/" class="hidden font-semibold tracking-wide text-[color:var(--color-text)] sm:block">
           Live Ambience
         </NuxtLink>
 
-        <NuxtLink
-          to="/ubicacion"
-          class="hidden px-2 py-1 ml-2 text-sm text-gray-800 border rounded-lg sm:inline-flex items-center gap-2 border-gray-300/60 bg-white/50 hover:bg-white/70"
-        >
+        <NuxtLink to="/ubicacion"
+          class="items-center hidden gap-2 px-2 py-1 ml-2 text-sm border sm:inline-flex frost-card border-white/15">
           <client-only><font-awesome-icon icon="fa-solid fa-location-dot" class="w-4 h-4" /></client-only>
           <span>{{ municipioDisplay }}</span>
         </NuxtLink>
 
         <!-- Buscador -->
-        <form
-          v-if="isLoggedIn"
-          @submit.prevent="onSearch"
-          class="flex items-center justify-center flex-1"
-        >
-          <div class="relative w-full max-w-xl">
-            <input
-              v-model="q"
-              type="search"
-              :placeholder="t('nav.search_placeholder')"
-              class="w-full pl-4 text-gray-800 border rounded-full h-11 pr-11 border-gray-300/50 bg-gray-50/50 placeholder:italic placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300/50 focus:border-gray-300/50"
-              @input="onInput"
-              @focus="showSuggestions = true"
-              @blur="onBlur"
-            />
-            <button
-              type="submit"
-              class="absolute inset-y-0 right-0 flex items-center justify-center text-gray-700 border-l rounded-r-full w-11 border-gray-300/50 hover:bg-gray-200/20"
-              :aria-label="t('aria.search')"
-            >
-              <client-only
-                ><font-awesome-icon icon="fa-solid fa-magnifying-glass"
-              /></client-only>
+        <form v-if="isLoggedIn" @submit.prevent="onSearch" class="flex items-center justify-center flex-1">
+          <div
+            class="relative w-full max-w-xl overflow-hidden border rounded-full border-gray-300/50 bg-gray-50/50 focus-within:ring-2 focus-within:ring-gray-300/50">
+            <input v-model="q" type="search" :placeholder="t('nav.search_placeholder')"
+              class="w-full pl-4 text-gray-800 bg-transparent border-0 outline-none h-11 pr-11 placeholder:italic placeholder:text-gray-500"
+              @input="onInput" @focus="showSuggestions = true" @blur="onBlur" />
+            <button type="submit"
+              class="absolute inset-y-0 right-0 flex items-center justify-center text-gray-700 w-11 hover:bg-gray-200/20"
+              :aria-label="t('aria.search')">
+              <client-only><font-awesome-icon icon="fa-solid fa-magnifying-glass" /></client-only>
             </button>
 
-            <div
-              v-if="showSuggestions && q"
-              class="absolute z-50 w-full mt-1 overflow-hidden bg-white border rounded-lg shadow-lg"
-            >
+            <div v-if="showSuggestions && q"
+              class="absolute z-50 w-full mt-1 overflow-hidden bg-white border rounded-lg shadow-lg">
               <template v-if="filteredTerms.length">
                 <ul class="py-1 divide-y divide-gray-100">
-                  <li
-                    v-for="t in filteredTerms"
-                    :key="t"
-                    class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50"
-                    @mousedown.prevent="selectTerm(t)"
-                  >
+                  <li v-for="t in filteredTerms" :key="t" class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50"
+                    @mousedown.prevent="selectTerm(t)">
                     {{ t }}
                   </li>
                 </ul>
@@ -90,16 +58,10 @@
         <!-- Acciones -->
         <div class="items-center hidden gap-2 ml-auto sm:flex">
           <template v-if="!isLoggedIn">
-            <NuxtLink
-              to="/login"
-              class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
-            >
+            <NuxtLink to="/login" class="inline-flex items-center h-10 px-3 border frost-card border-white/15">
               {{ t('nav.login') }}
             </NuxtLink>
-            <NuxtLink
-              to="/register"
-              class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
-            >
+            <NuxtLink to="/register" class="inline-flex items-center h-10 px-3 border frost-card border-white/15">
               {{ t('nav.register') }}
             </NuxtLink>
           </template>
@@ -107,100 +69,80 @@
             <span class="px-3 text-gray-700">
               {{ currentUser?.name || t('user.default_name') }}
             </span>
-            <button
-              @click="handleLogout"
-              class="inline-flex items-center h-10 px-3 text-gray-700 border rounded-xl border-gray-300/50 hover:bg-gray-200/20"
-            >
+            <button @click="handleLogout" class="inline-flex items-center h-10 px-3 border frost-card border-white/15">
               {{ t('nav.logout') }}
             </button>
           </template>
           <div class="relative">
-            <button
-              @click="langOpen = !langOpen"
-              class="inline-flex items-center h-10 px-2 text-sm text-gray-700 border rounded-xl border-gray-300/50 bg-white/50 hover:bg-white/70"
-              aria-haspopup="listbox"
-              :aria-expanded="langOpen ? 'true' : 'false'"
-            >
-              <img
-                :src="activeLocale.flag"
-                :alt="activeLocale.name"
-                class="w-5 h-5 mr-2 rounded-sm object-cover"
-              />
+            <button @click="langOpen = !langOpen"
+              class="inline-flex items-center h-10 px-2 text-sm border frost-card border-white/15"
+              aria-haspopup="listbox" :aria-expanded="langOpen ? 'true' : 'false'">
+              <img :src="activeLocale.flag" :alt="activeLocale.name" class="object-cover w-5 h-5 mr-2 rounded-sm" />
               <span>{{ activeLocale.name }}</span>
             </button>
-            <div
-              v-if="langOpen"
+            <div v-if="langOpen"
               class="absolute right-0 z-[10000] mt-1 w-44 overflow-hidden bg-white border rounded-lg shadow-lg"
-              role="listbox"
-            >
-              <button
-                v-for="l in locales"
-                :key="l.code"
-                class="flex items-center w-full px-2 py-2 text-left text-sm hover:bg-gray-50"
-                @click="selectLocale(l.code)"
-                role="option"
-              >
-                <img :src="l.flag" :alt="l.name" class="w-5 h-5 mr-2 rounded-sm object-cover" />
+              role="listbox">
+              <button v-for="l in locales" :key="l.code"
+                class="flex items-center w-full px-2 py-2 text-sm text-left hover:bg-gray-50"
+                @click="selectLocale(l.code)" role="option">
+                <img :src="l.flag" :alt="l.name" class="object-cover w-5 h-5 mr-2 rounded-sm" />
                 <span>{{ l.name }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tema -->
+          <div class="relative">
+            <button @click="themeOpen = !themeOpen"
+              class="inline-flex items-center h-10 px-2 text-sm border frost-card border-white/15"
+              aria-haspopup="listbox" :aria-expanded="themeOpen ? 'true' : 'false'">
+              <span>Tema</span>
+            </button>
+            <div v-if="themeOpen"
+              class="absolute right-0 z-[10000] mt-1 w-48 overflow-hidden frost-panel border border-white/15 rounded-lg shadow-lg"
+              role="listbox">
+              <button v-for="t in themeList" :key="t.id"
+                class="flex items-center w-full px-3 py-2 text-left text-sm hover:bg-[color:var(--color-overlay-weak)]"
+                :class="{ 'opacity-60 cursor-not-allowed': t.id === activeId }"
+                :disabled="t.id === activeId"
+                @click="activateTheme(t.id); themeOpen = false" role="option">
+                <span class="truncate">{{ t.name }}</span>
               </button>
             </div>
           </div>
         </div>
 
         <!-- Móvil -->
-        <NuxtLink
-          to="/login"
-          class="inline-flex items-center justify-center w-10 h-10 text-gray-700 border sm:hidden rounded-xl border-gray-300/50 hover:bg-gray-200/20"
-          :aria-label="t('nav.login')"
-        >
-          <client-only
-            ><font-awesome-icon icon="fa-regular fa-user"
-          /></client-only>
+        <NuxtLink to="/login"
+          class="inline-flex items-center justify-center w-10 h-10 border sm:hidden frost-card border-white/15"
+          :aria-label="t('nav.login')">
+          <client-only><font-awesome-icon icon="fa-regular fa-user" /></client-only>
         </NuxtLink>
       </div>
     </div>
 
     <!-- Panel móvil -->
     <transition name="fade">
-      <div
-        v-if="isLoggedIn && open"
-        ref="menuRef"
-        class="absolute p-4 space-y-2 text-gray-800 rounded-lg shadow-lg top-16 left-4 bg-gray-50/90 backdrop-blur-md w-max"
-      >
+      <div v-if="isLoggedIn && open" ref="menuRef"
+        class="fixed p-4 space-y-2 text-gray-800 rounded-xl shadow-lg frost-panel w-max z-[10000] border border-white/15"
+        :style="panelStyle">
         <!-- Menú de un solo nivel -->
-        <NuxtLink
-          to="/previsiones"
-          class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg hover:bg-gray-200/30"
-          @click="open = false"
-        >
-          <client-only
-            ><font-awesome-icon
-              icon="fa-solid fa-cloud-sun"
-              class="w-4 h-4 mr-2"
-          /></client-only>
+        <NuxtLink to="/previsiones" class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg menu-btn"
+          @click="open = false">
+          <client-only><font-awesome-icon icon="fa-solid fa-cloud-sun" class="w-4 h-4 mr-2" /></client-only>
           {{ t('nav.forecasts') }}
         </NuxtLink>
 
-        <NuxtLink
-          to="/ajustes"
-          class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg hover:bg-gray-200/30"
-          @click="open = false"
-        >
-          <client-only
-            ><font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4 mr-2"
-          /></client-only>
+        <NuxtLink to="/ajustes" class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg menu-btn"
+          @click="open = false">
+          <client-only><font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4 mr-2" /></client-only>
           {{ t('nav.settings') }}
         </NuxtLink>
 
-        <NuxtLink
-          v-if="currentUser?.role === 'admin'"
-          to="/avanzado"
-          class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg hover:bg-gray-200/30"
-          @click="open = false"
-        >
-          <client-only
-            ><font-awesome-icon icon="fa-solid fa-cogs" class="w-4 h-4 mr-2"
-          /></client-only>
+        <NuxtLink v-if="currentUser?.role === 'admin'" to="/avanzado"
+          class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg menu-btn" @click="open = false">
+          <client-only><font-awesome-icon icon="fa-solid fa-cogs" class="w-4 h-4 mr-2" /></client-only>
           {{ t('nav.advanced') }}
         </NuxtLink>
       </div>
@@ -210,8 +152,9 @@
 
 <script setup>
 import { userLoggedIn, logout, userData, checkAuth } from "~/store/auth";
-import { ref, onMounted, onBeforeUnmount, computed } from "vue";
+import { ref, onMounted, onBeforeUnmount, computed, watch, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
+import { themes as themesState, activeThemeId as activeThemeIdState, setActiveTheme } from "~/store/theme";
 
 const open = ref(false);
 const q = ref("");
@@ -254,6 +197,19 @@ const filteredTerms = computed(() => {
   return allowlist.filter((t) => norm(t).includes(query));
 });
 
+const themeList = computed(() => {
+  const list = Array.isArray(themesState().value) ? [...themesState().value] : []
+  list.sort((a, b) => String(a?.name || '').localeCompare(String(b?.name || ''), undefined, { sensitivity: 'base' }))
+  return list
+})
+const activeId = computed(() => activeThemeIdState().value)
+function activateTheme(id){
+  if (!id || id === activeId.value) return
+  setActiveTheme(id)
+}
+
+const themeOpen = ref(false)
+
 // Idiomas
 const { t, locale, setLocale } = useI18n();
 const locales = [
@@ -294,6 +250,23 @@ function selectTerm(t) {
 // Referencias al menú
 const menuRef = ref(null);
 const menuButtonRef = ref(null);
+
+// Posicionamiento del panel bajo el botón hamburguesa
+const panelStyle = ref({ left: '0px', top: '0px' })
+function updatePanelPos() {
+  try {
+    const btn = menuButtonRef.value
+    if (!btn) return
+    const rect = btn.getBoundingClientRect()
+    panelStyle.value = {
+      left: `${Math.round(rect.left)}px`,
+      top: `${Math.round(rect.bottom + 14)}px`,
+    }
+  } catch { }
+}
+watch(() => open.value, async (v) => { if (v) { await nextTick(); updatePanelPos() } })
+function onResize() { updatePanelPos() }
+function onScroll() { updatePanelPos() }
 
 // Computed reactivos (enlazan directamente con el store)
 const isLoggedIn = computed(() => userLoggedIn().value);
@@ -356,11 +329,15 @@ onMounted(async () => {
   if (isLoggedIn.value) {
     await checkAuth();
   }
+  window.addEventListener('resize', onResize)
+  window.addEventListener('scroll', onScroll, { passive: true })
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener("click", handleClickOutside);
   window.removeEventListener("storage", refreshMunicipio);
+  window.removeEventListener('resize', onResize)
+  window.removeEventListener('scroll', onScroll)
 });
 
 watch(isLoggedIn, async () => {
@@ -372,10 +349,135 @@ watch(isLoggedIn, async () => {
 </script>
 
 <style scoped>
+.nav-glass {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 3%, transparent),
+      color-mix(in srgb, var(--color-primary) 3%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.frost-panel {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 14%, transparent),
+      color-mix(in srgb, var(--color-primary) 14%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 28%, transparent),
+      color-mix(in srgb, var(--color-bg) 28%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  /* Prevent backdrop-filter tiling seams */
+  overflow: hidden;
+  contain: paint;
+  isolation: isolate;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+.frost-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  /* py-2 px-3 */
+  font-size: 0.875rem;
+  /* text-sm */
+  line-height: 1.25rem;
+  font-weight: 600;
+  /* font-semibold */
+  border-radius: 0.75rem;
+  /* rounded-xl */
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-duration: 150ms;
+  /* transition-colors */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.06);
+  /* shadow-inner */
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 5%, transparent),
+      color-mix(in srgb, var(--color-primary) 5%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+}
+
+.frost-card:hover {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 7%, transparent),
+      color-mix(in srgb, var(--color-primary) 7%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 14%, transparent),
+      color-mix(in srgb, var(--color-bg) 14%, transparent));
+}
+
+/* Dropdown menu buttons: follow active theme (same model as frost-card) */
+.menu-btn {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 16%, transparent),
+      color-mix(in srgb, var(--color-primary) 16%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 28%, transparent),
+      color-mix(in srgb, var(--color-bg) 28%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  color: var(--color-text, inherit);
+  /* Avoid composition artifacts on hover repaint */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: background-image;
+}
+
+.menu-btn:hover {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 20%, transparent),
+      color-mix(in srgb, var(--color-primary) 20%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 32%, transparent),
+      color-mix(in srgb, var(--color-bg) 32%, transparent));
+}
+
+.frost-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem; /* rounded-xl */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 6%, transparent),
+      color-mix(in srgb, var(--color-primary) 6%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 14%, transparent),
+      color-mix(in srgb, var(--color-bg) 14%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.06);
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.18s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;

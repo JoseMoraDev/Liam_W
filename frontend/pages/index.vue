@@ -95,7 +95,9 @@ import { useI18n } from 'vue-i18n'
 const mounted = ref(false);
 const { t } = useI18n()
 
+
 onMounted(() => {
+  // Si no hubo redirección, mostramos la home normalmente
   mounted.value = true;
 });
 </script>

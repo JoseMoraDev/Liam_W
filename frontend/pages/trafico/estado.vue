@@ -201,8 +201,11 @@ const onMapReady = (map) => {
 </script>
 
 <template>
-  <div class="min-h-screen p-4 text-[color:var(--color-text)] bg-[color:var(--color-bg)]">
-    <h1 class="mb-4 text-xl font-bold">🚦 Estado del tráfico</h1>
+  <div class="relative w-full min-h-screen bg-center bg-cover" style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
+    <div class="absolute inset-0 bg-black/40"></div>
+
+    <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
+      <h1 class="mb-4 text-xl font-bold">🚦 Estado del tráfico</h1>
 
     <div v-if="!datos">Cargando tráfico...</div>
 
@@ -334,6 +337,7 @@ const onMapReady = (map) => {
           <LMarker :lat-lng="coords[0]" />
         </LMap>
       </client-only>
+    </div>
     </div>
   </div>
 </template>
