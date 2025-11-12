@@ -1,15 +1,13 @@
 <template>
-  <div
-    class="relative w-full min-h-screen px-4 bg-center bg-cover"
-    style="background-image: url('/img/menu.jpg'); background-attachment: fixed;"
-  >
+  <div class="relative w-full min-h-screen px-4 bg-center bg-cover"
+    style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
     <!-- Capa oscura -->
     <div class="absolute inset-0 bg-black/40"></div>
 
     <!-- Contenido principal -->
     <div :class="mounted ? 'opacity-100' : 'opacity-0'"
       class="relative z-10 flex flex-col items-center w-full min-h-screen p-4 transition-opacity duration-300 md:p-8">
-      <h1 class="mb-4 text-3xl font-extrabold tracking-tight text-center md:text-4xl page-title">Avisos meteorológicos</h1>
+      <h1 class="mb-4 text-3xl font-bold tracking-tight text-center page-title">Avisos meteorológicos</h1>
       <div class="mt-8"></div>
 
       <!-- Loader mientras carga -->
@@ -216,11 +214,20 @@ function levelClass(level) {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
+
 /* Título en blanco como en horaria/diaria */
-.page-title { color: #ffffff !important; }
+.page-title {
+  color: #ffffff !important;
+}
+
 /* Glass muy sutil para paneles (alineado con horaria/diaria) */
 .frost-card {
   backdrop-filter: blur(10px);

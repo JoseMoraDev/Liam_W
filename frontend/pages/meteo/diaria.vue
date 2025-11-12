@@ -32,7 +32,7 @@ onMounted(async () => {
     <div class="absolute inset-0 bg-black/40"></div>
 
     <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)] pt-16 mx-4">
-      <h1 class="mb-6 text-3xl font-extrabold tracking-tight text-center md:text-4xl page-title">
+      <h1 class="mb-6 text-3xl font-bold tracking-tight text-center page-title">
         Pronóstico diario</h1>
 
       <div v-if="!datos" class="flex items-center justify-center min-h-[40vh]">

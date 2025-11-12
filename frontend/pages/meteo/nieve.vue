@@ -7,7 +7,7 @@
     <!-- Contenido -->
     <div :class="mounted ? 'opacity-100' : 'opacity-0'"
       class="relative z-10 flex flex-col items-center w-full min-h-screen p-6 mt-5 space-y-8 transition-opacity duration-300 md:p-8">
-      <h1 class="mb-2 text-3xl font-extrabold tracking-tight text-center md:text-4xl page-title">Nivología</h1>
+      <h1 class="mb-2 text-3xl font-bold tracking-tight text-center page-title">Nivología</h1>
       <!-- Loader -->
       <div v-if="loading" class="flex items-center justify-center w-full min-h-[40vh]">
         <div class="flex flex-col items-center gap-3 loader">

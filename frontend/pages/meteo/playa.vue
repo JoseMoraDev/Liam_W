@@ -20,10 +20,13 @@ const error = ref(null);
 // Coordenadas y mapa
 const lat = ref(null);
 const lon = ref(null);
+// Playa seleccionada como fuente de verdad para el mapa
+const selPlaya = ref(null);
 const mapEl = ref(null);
 let map = null;
 let marker = null;
 let Llib = null;
+let predSeq = 0; // single-flight sequence for cargarPrediccion
 
 function parseCoord(v) {
   if (v == null) return NaN;
@@ -46,7 +49,7 @@ function normalizeCoords(la, lo, cpro) {
     // Si ya es negativa (Oeste), no tocar.
     if (lonN >= 0) {
       // España: permitir positivo sólo en Balears (07) y Cataluña (08,17,43,25)
-      const cp = String(cpro || '').padStart(2,'0');
+      const cp = String(cpro || '').padStart(2, '0');
       const allowPositive = (cp === '07' || cp === '08' || cp === '17' || cp === '43' || cp === '25');
       if (!allowPositive && lonN > 0) { lonN = -Math.abs(lonN); }
     }
@@ -78,7 +81,11 @@ async function initMap() {
   if (!mapEl.value || !hasCoords()) return;
   await ensureLeaflet();
   await nextTick();
-  let [la, lo] = normalizeCoords(parseCoord(lat.value), parseCoord(lon.value), playaProvCpro.value);
+  // Preferir coords de la playa seleccionada si están presentes
+  let baseLat = selPlaya.value?.lat != null ? parseCoord(selPlaya.value.lat) : parseCoord(lat.value);
+  let baseLon = selPlaya.value?.lon != null ? parseCoord(selPlaya.value.lon) : parseCoord(lon.value);
+  let [la, lo] = normalizeCoords(baseLat, baseLon, playaProvCpro.value);
+  try { console.debug('[MeteoPlaya] initMap center', { la, lo, cpro: playaProvCpro.value, fromSel: !!selPlaya.value }); } catch (e) { }
   const center = [la, lo];
   if (!map) {
     map = Llib.map(mapEl.value, { zoomControl: true }).setView(center, 12);
@@ -90,12 +97,12 @@ async function initMap() {
       subdomains: ['a', 'b', 'c'],
       style: 'mapbox://styles/mapbox/streets-v11'
     }).addTo(map);
-    const content = `${nombrePlaya.value || 'Playa seleccionada'}<br><small>${la.toFixed(6)}, ${lo.toFixed(6)}</small>`;
+    const content = `${nombrePlaya.value || 'Playa seleccionada'}`;
     marker = Llib.circleMarker(center, { radius: 6, color: '#3b82f6', weight: 2, fillColor: '#60a5fa', fillOpacity: 0.9 }).addTo(map).bindPopup(content, { closeButton: false });
     try { marker.openPopup(); } catch (e) { }
   } else {
     map.setView(center, map.getZoom() || 13);
-    const content = `${nombrePlaya.value || 'Playa seleccionada'}<br><small>${la.toFixed(6)}, ${lo.toFixed(6)}</small>`;
+    const content = `${nombrePlaya.value || 'Playa seleccionada'}`;
     if (marker) { marker.setLatLng(center).bindPopup(content); try { marker.openPopup(); } catch (e) { } }
     else { marker = Llib.circleMarker(center, { radius: 6, color: '#3b82f6', weight: 2, fillColor: '#60a5fa', fillOpacity: 0.9 }).addTo(map).bindPopup(content); try { marker.openPopup(); } catch (e) { } }
   }
@@ -105,7 +112,7 @@ function updateCoordsFromResponse(playa) {
   const la = playa?.lat ?? playa?.Lat ?? playa?.latitude ?? playa?.Latitud ?? playa?.latitud;
   const lo = playa?.lon ?? playa?.lng ?? playa?.Lon ?? playa?.longitude ?? playa?.Longitud ?? playa?.longitud;
   const prov = playa?.id_provincia ?? playa?.cpro ?? playa?.provincia;
-  if (prov != null) playaProvCpro.value = String(prov).padStart(2,'0');
+  if (prov != null) playaProvCpro.value = String(prov).padStart(2, '0');
   let pLa = parseCoord(la); let pLo = parseCoord(lo);
   ;[pLa, pLo] = normalizeCoords(pLa, pLo, playaProvCpro.value);
   if (Number.isFinite(pLa) && Number.isFinite(pLo)) { lat.value = pLa; lon.value = pLo; }
@@ -116,7 +123,7 @@ async function fetchCoordsById(idPlaya) {
     if (!idPlaya) return;
     const { data } = await axiosClient.get('/playas', { params: { id_playa: idPlaya, fields: 'lat,lon,id_provincia', limit: 1 } });
     const row = Array.isArray(data) ? data[0] : data;
-    if (row?.id_provincia != null) playaProvCpro.value = String(row.id_provincia).padStart(2,'0');
+    if (row?.id_provincia != null) playaProvCpro.value = String(row.id_provincia).padStart(2, '0');
     let pLa = parseCoord(row?.lat); let pLo = parseCoord(row?.lon);
     ;[pLa, pLo] = normalizeCoords(pLa, pLo, playaProvCpro.value);
     if (Number.isFinite(pLa) && Number.isFinite(pLo)) { lat.value = pLa; lon.value = pLo; }
@@ -138,9 +145,12 @@ function formatearFechaYYYYMMDD(fechaNum) {
 }
 
 async function cargarPrediccion(idPlaya) {
+  let mySeq = 0;
   try {
+    mySeq = ++predSeq;
     loading.value = true; error.value = null;
     const { data } = await axiosClient.get(`/aemet/playa/${idPlaya}`, { params: { t: Date.now() } });
+    if (mySeq !== predSeq) { return; }
     const playa = Array.isArray(data) ? data[0] : data;
     nombrePlaya.value = playa?.nombre || "";
     datos.value = playa?.prediccion?.dia || [];
@@ -148,12 +158,16 @@ async function cargarPrediccion(idPlaya) {
       updateCoordsFromResponse(playa);
     }
     if (!hasCoords()) { await fetchCoordsById(idPlaya); }
+    try { console.debug('[MeteoPlaya] cargarPrediccion done', { idPlaya, lat: lat.value, lon: lon.value }); } catch (e) { }
   } catch (e) {
     error.value = e?.message || 'Error cargando predicción de playa';
   } finally {
-    loading.value = false;
-    await nextTick();
-    await initMap();
+    // Solo la última petición activa puede cerrar el loading y refrescar el mapa
+    if (mySeq === predSeq) {
+      loading.value = false;
+      await nextTick();
+      await initMap();
+    }
   }
 }
 
@@ -163,7 +177,7 @@ async function guardarSeleccion(pl) {
     const uid = userData()?.value?.id;
     await axiosClient.post('/user/location-pref', { user_id: uid, codigo_playa: pl.id_playa });
     codigoPlaya.value = pl.id_playa;
-    if (pl?.id_provincia != null) playaProvCpro.value = String(pl.id_provincia).padStart(2,'0');
+    if (pl?.id_provincia != null) playaProvCpro.value = String(pl.id_provincia).padStart(2, '0');
     nombrePlaya.value = pl.nombre_playa;
     // Guardar coordenadas desde el selector si están disponibles
     if (pl) {
@@ -171,7 +185,13 @@ async function guardarSeleccion(pl) {
       let pLo = parseCoord(pl.lon ?? pl.lng ?? pl.Lon ?? pl.longitude ?? pl.Longitud ?? pl.longitud);
       ;[pLa, pLo] = normalizeCoords(pLa, pLo, playaProvCpro.value);
       if (Number.isFinite(pLa) && Number.isFinite(pLo)) { lat.value = pLa; lon.value = pLo; }
+      // Fijar playa seleccionada como fuente de verdad y persistir
+      selPlaya.value = { id_playa: pl.id_playa, nombre: pl.nombre_playa, lat: lat.value, lon: lon.value, id_provincia: pl.id_provincia };
+      try { localStorage.setItem('meteo_playa_selected', JSON.stringify(selPlaya.value)); } catch (e) { }
+      try { console.debug('[MeteoPlaya] guardarSeleccion', selPlaya.value); } catch (e) { }
     }
+    // Inicializar mapa inmediatamente con coords locales (sin esperar a la API)
+    try { await nextTick(); await initMap(); setTimeout(() => { try { map && map.invalidateSize() } catch (e) { } }, 120); } catch (e) { }
     await cargarPrediccion(pl.id_playa);
   } catch (e) {
     console.error(e);
@@ -181,6 +201,13 @@ async function guardarSeleccion(pl) {
   }
 }
 
+// Si el modal se cierra, refrescar el mapa por si el tamaño cambió debajo del overlay
+watch(openPicker, async (isOpen) => {
+  if (!isOpen) {
+    try { await nextTick(); await initMap(); setTimeout(() => { try { map && map.invalidateSize() } catch (e) { } }, 80); } catch (e) { }
+  }
+});
+
 onMounted(async () => {
   try {
     const uid = userData()?.value?.id;
@@ -189,6 +216,19 @@ onMounted(async () => {
     municipioName.value = data?.municipio_name || '';
     cpro.value = data?.cpro ? String(data.cpro).padStart(2, '0') : null;
     codigoPlaya.value = data?.codigo_playa || null;
+    // Restaurar selección previa como respaldo
+    try {
+      const cached = localStorage.getItem('meteo_playa_selected');
+      if (cached) {
+        const s = JSON.parse(cached);
+        if (s && s.lat != null && s.lon != null) {
+          selPlaya.value = s;
+          lat.value = parseCoord(s.lat);
+          lon.value = parseCoord(s.lon);
+          if (s.id_provincia != null) playaProvCpro.value = String(s.id_provincia).padStart(2, '0');
+        }
+      }
+    } catch (e) { }
     if (codigoPlaya.value) {
       await cargarPrediccion(codigoPlaya.value);
     } else {
@@ -212,20 +252,23 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
     <div class="absolute inset-0 bg-black/40"></div>
 
     <div class="relative z-10 min-h-screen p-4 pt-10 text-gray-200">
-      <h1 class="mb-4 text-3xl font-extrabold tracking-tight text-center md:text-4xl page-title">Previsión en la playa
+      <h1 class="mb-4 text-3xl font-bold tracking-tight text-center page-title">Previsión en la playa
       </h1>
-      <div v-if="!loading" class="flex flex-wrap items-center justify-center gap-3 mb-4 text-center">
-        <h2 class="flex items-center gap-2 text-2xl font-semibold text-white/95">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 text-white/90">
-            <path fill-rule="evenodd"
-              d="M12 2.25c-3.728 0-6.75 3.022-6.75 6.75 0 4.637 5.37 10.164 6.1 10.89a.75.75 0 0 0 1.1 0c.73-.726 6.3-6.253 6.3-10.89 0-3.728-3.022-6.75-6.75-6.75Zm0 9.75a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"
-              clip-rule="evenodd" />
-          </svg>
-          <span>{{ nombrePlaya || 'Selecciona una playa' }}</span>
-        </h2>
-        <button @click="openPicker = true" class="btn-glass-primary">
-          {{ nombrePlaya ? 'Cambiar' : 'Elegir playa' }}
-        </button>
+      <div v-if="!loading" class="flex justify-center mb-4">
+        <div class="inline-flex items-baseline gap-4 px-5 py-2 rounded-full frost-chip">
+          <h2 class="flex items-baseline gap-2 m-0 text-xl font-semibold leading-tight md:text-2xl text-white/95">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+              class="self-center w-6 h-6 mt-1 text-white/90">
+              <path fill-rule="evenodd"
+                d="M12 2.25c-3.728 0-6.75 3.022-6.75 6.75 0 4.637 5.37 10.164 6.1 10.89a.75.75 0 0 0 1.1 0c.73-.726 6.3-6.253 6.3-10.89 0-3.728-3.022-6.75-6.75-6.75Zm0 9.75a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"
+                clip-rule="evenodd" />
+            </svg>
+            <span>{{ nombrePlaya || 'Selecciona una playa' }}</span>
+          </h2>
+          <button @click="openPicker = true" class="btn-glass-primary self-baseline">
+            {{ nombrePlaya ? 'Cambiar' : 'Elegir playa' }}
+          </button>
+        </div>
       </div>
 
       <div v-if="loading" class="flex items-center justify-center min-h-[30vh]">
@@ -301,14 +344,17 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
           </table>
         </div>
 
-        <div v-if="hasCoords()" class="p-4 border frost-card border-white/15 rounded-2xl">
-          <h3 class="mb-2 text-sm font-semibold">Mapa</h3>
-          <div ref="mapEl" class="w-full h-64 overflow-hidden rounded-xl"></div>
-        </div>
+      </div>
+
+      <!-- Mostrar el mapa: mantener el contenedor en DOM y alternar visibilidad -->
+      <div v-show="hasCoords()" class="p-4 mt-4 border frost-card border-white/15 rounded-2xl">
+        <h3 class="mb-2 text-sm font-semibold">Mapa</h3>
+        <div ref="mapEl" class="w-full h-[30rem] overflow-hidden rounded-xl"></div>
       </div>
 
       <PlayaPickerModal :open="openPicker" :municipio-id="municipioId" :cpro="cpro" :municipio-name="municipioName"
-        :saving="savingSelection" @close="openPicker = false" @selected="guardarSeleccion" />
+        :saving="savingSelection" :selected-id="codigoPlaya" :selected-lat="lat" :selected-lon="lon"
+        @close="openPicker = false" @selected="guardarSeleccion" />
     </div>
   </div>
 </template>
@@ -374,8 +420,8 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
   width: 48px;
   height: 48px;
   border-radius: 9999px;
-  border: 4px solid color-mix(in srgb, white 75%, var(--color-primary) 25%);
-  border-top-color: color-mix(in srgb, white 30%, var(--color-primary) 70%);
+  border: 4px solid color-mix(in srgb, #ffffff 40%, var(--color-primary) 60%);
+  border-top-color: color-mix(in srgb, #ffffff 85%, var(--color-primary) 15%);
   animation: spin 1s linear infinite;
 }
 
@@ -386,25 +432,43 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
 }
 
 /* Leaflet: asegurar contraste de controles y fondo del mapa */
-:deep(.leaflet-container) { background: #dbeafe; /* sky-100 aprox para evitar parpadeo azul */ }
-:deep(.leaflet-control-zoom a) {
-  background: rgba(255,255,255,0.9);
-  color: #111827; /* slate-900 */
-  border: 1px solid rgba(0,0,0,0.15);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+:deep(.leaflet-container) {
+  background: #dbeafe;
+  /* sky-100 aprox para evitar parpadeo azul */
 }
-:deep(.leaflet-control-zoom a:hover) { background: #ffffff; }
+
+:deep(.leaflet-control-zoom a) {
+  background: rgba(255, 255, 255, 0.9);
+  color: #111827;
+  /* slate-900 */
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+:deep(.leaflet-control-zoom a:hover) {
+  background: #ffffff;
+}
+
 @media (prefers-color-scheme: dark) {
   :deep(.leaflet-control-zoom a) {
-    background: rgba(17,24,39,0.85); /* slate-900 */
-    color: #e5e7eb; /* gray-200 */
-    border-color: rgba(255,255,255,0.2);
+    background: rgba(17, 24, 39, 0.85);
+    /* slate-900 */
+    color: #e5e7eb;
+    /* gray-200 */
+    border-color: rgba(255, 255, 255, 0.2);
   }
-  :deep(.leaflet-control-zoom a:hover) { background: rgba(17,24,39,0.95); }
+
+  :deep(.leaflet-control-zoom a:hover) {
+    background: rgba(17, 24, 39, 0.95);
+  }
 }
+
 /* Evitar filtros accidentales en tiles/markers por estilos globales */
 :deep(.leaflet-pane img),
-:deep(.leaflet-pane canvas) { filter: none !important; opacity: 1 !important; }
+:deep(.leaflet-pane canvas) {
+  filter: none !important;
+  opacity: 1 !important;
+}
 
 /* Botón glass primario con buen contraste en ambos temas */
 .btn-glass-primary {
@@ -467,5 +531,71 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Badge del nombre de la playa: fondo verde del tema y texto blanco */
+.badge-primary {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+/* Chip con efecto glass para icono + nombre + botón */
+.frost-chip {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 10%, transparent),
+      color-mix(in srgb, var(--color-primary) 10%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 24%, transparent),
+      color-mix(in srgb, var(--color-bg) 24%, transparent));
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.08),
+    0 6px 24px rgba(0, 0, 0, 0.20);
+}
+
+@media (prefers-color-scheme: light) {
+  .frost-chip {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 7%, transparent),
+        color-mix(in srgb, var(--color-primary) 7%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 18%, transparent),
+        color-mix(in srgb, var(--color-bg) 18%, transparent));
+  }
+}
+
+/* Leaflet popup con efecto glass y tinte primario sutil */
+:deep(.leaflet-popup-content-wrapper),
+:deep(.leaflet-popup-tip) {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 8%, transparent),
+      color-mix(in srgb, var(--color-primary) 8%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 16%, transparent),
+      color-mix(in srgb, var(--color-bg) 16%, transparent));
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+:deep(.leaflet-popup-content) {
+  margin: 8px 12px;
 }
 </style>

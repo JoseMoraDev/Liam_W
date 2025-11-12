@@ -58,7 +58,7 @@ onMounted(async () => {
         <div class="absolute inset-0 bg-black/40"></div>
 
         <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
-            <h1 class="mb-6 text-3xl font-extrabold tracking-tight text-center md:text-4xl page-title">Pronóstico
+            <h1 class="mb-6 text-3xl font-bold tracking-tight text-center page-title">Pronóstico
                 horario</h1>
 
             <div v-if="!dias.length" class="flex items-center justify-center min-h-[50vh]">

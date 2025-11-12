@@ -3,15 +3,15 @@
     <div class="absolute inset-0 bg-black/40" @click="onClose" />
     <div
       ref="panelEl"
-      class="relative z-10 w-full max-w-2xl p-4 mb-5 border rounded-2xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-white/30 dark:border-zinc-700/40 max-h-[85vh] overflow-y-auto">
-      <div class="mx-auto mb-2 h-1.5 w-12 rounded-full bg-black/20 dark:bg-white/20"></div>
-      <header class="sticky top-0 z-10 flex items-center justify-between pb-2 mb-3 bg-white/80 dark:bg-zinc-900/80 backdrop-blur">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Selecciona una playa</h2>
+      class="relative z-10 w-full max-w-2xl p-4 mb-5 border rounded-2xl panel-glass border-white/15 max-h-[85vh] overflow-y-auto">
+      <div class="mx-auto mb-2 h-1.5 w-12 rounded-full bg-white/30"></div>
+      <header class="sticky top-0 z-10 flex items-center justify-between pb-2 mb-3 header-glass">
+        <h2 class="text-lg font-semibold text-white">Selecciona una playa</h2>
         <div class="flex items-center gap-2">
           <button :disabled="props.saving" @click="onClose"
-            class="px-3 py-2 text-sm rounded-md bg-black/10 dark:bg-white/10 disabled:opacity-50">Cancelar</button>
+            class="px-3 py-2 text-sm rounded-md btn-glass disabled:opacity-50">Cancelar</button>
           <button :disabled="!sel || props.saving" @click="confirmar"
-            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md disabled:opacity-50 hover:bg-blue-700">
+            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white btn-primary-glass rounded-md disabled:opacity-50">
             <span v-if="props.saving"
               class="inline-block w-4 h-4 border-2 rounded-full border-white/80 border-t-transparent animate-spin"></span>
             <span>{{ props.saving ? 'Guardando…' : 'Guardar' }}</span>
@@ -21,8 +21,8 @@
 
       <!-- Mapa preview (arriba para que siempre se vea) -->
       <div class="mt-2">
-        <h3 class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-200">Mapa</h3>
-        <div ref="mapEl" class="w-full h-64 min-h-[16rem] overflow-hidden border rounded-xl border-white/30 dark:border-zinc-700/40 bg-[#dbeafe]"></div>
+        <h3 class="mb-2 text-sm font-semibold text-white">Mapa</h3>
+        <div ref="mapEl" class="w-full h-64 min-h-[16rem] overflow-hidden border rounded-xl border-white/15 map-glass"></div>
       </div>
 
       <div class="mt-4 space-y-6">
@@ -32,11 +32,9 @@
             || 'tu municipio' }}</h3>
           <div class="grid grid-cols-1 gap-2 pr-1 overflow-auto md:grid-cols-2 max-h-72">
             <button v-for="p in playasMunicipio" :key="p.id_playa" @click="!props.saving && select(p)"
-              :class="['w-full text-left px-3 py-2 rounded-md border', sel?.id_playa === p.id_playa ? 'border-blue-400 bg-blue-500/8 dark:bg-blue-400/12' : 'border-white/40 dark:border-zinc-700/40 bg-white/60 dark:bg-black/30']">
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ p.nombre_playa }}</div>
-              <div class="text-xs italic text-gray-900 dark:text-gray-100">{{ p.nombre_municipio }} · {{
-                p.nombre_provincia }}
-              </div>
+              :class="['w-full text-left px-3 py-2 rounded-md border option-btn', sel?.id_playa === p.id_playa ? 'opt-active' : 'opt-default']">
+              <div class="text-sm font-medium text-white">{{ p.nombre_playa }}</div>
+              <div class="text-xs italic text-white/90">{{ p.nombre_municipio }} · {{ p.nombre_provincia }}</div>
             </button>
             <p v-if="!playasMunicipio.length" class="text-sm text-gray-500">Sin resultados.</p>
           </div>
@@ -45,9 +43,9 @@
         <!-- Playas de la provincia (excluyendo municipio) -->
         <section>
           <div class="flex items-center justify-between mb-2">
-            <h3 class="text-sm font-semibold text-gray-700 uppercase dark:text-gray-200">Playas de</h3>
+            <h3 class="text-sm font-semibold text-white uppercase">Playas de</h3>
             <select v-model="provSel" @change="fetchProvincia"
-              class="px-3 py-1 text-sm border rounded-md bg-white/70 dark:bg-black/30 border-white/40 dark:border-zinc-700/40">
+              class="px-3 py-1 text-sm border rounded-md chip-glass border-white/15 text-white">
               <option v-for="p in provincias" :key="p.id_provincia" :value="p.id_provincia">
                 {{ p.nombre_provincia }}
               </option>
@@ -55,15 +53,13 @@
           </div>
           <div class="mb-2">
             <input v-model="q" @input="debouncedBuscar" type="text" placeholder="Busca aquí tu playa"
-              class="w-full px-3 py-2 border rounded-md bg-white/70 dark:bg-black/30 border-white/40 dark:border-zinc-700/40" />
+              class="w-full px-3 py-2 border rounded-md chip-glass border-white/15 placeholder-white/60 text-white" />
           </div>
           <div ref="provListEl" class="grid grid-cols-1 gap-2 pr-1 overflow-auto sm:grid-cols-2 md:grid-cols-2 max-h-48">
             <button v-for="p in playasProvinciaFiltradas" :key="p.id_playa" @click="!props.saving && select(p)"
-              :class="['w-full text-left px-3 py-2 rounded-md border', sel?.id_playa === p.id_playa ? 'border-blue-400 bg-blue-500/8 dark:bg-blue-400/12' : 'border-white/40 dark:border-zinc-700/40 bg-white/60 dark:bg-black/30']">
-              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ p.nombre_playa }}</div>
-              <div class="text-xs italic text-gray-900 dark:text-gray-100">{{ p.nombre_municipio }} · {{
-                p.nombre_provincia }}
-              </div>
+              :class="['w-full text-left px-3 py-2 rounded-md border option-btn', sel?.id_playa === p.id_playa ? 'opt-active' : 'opt-default']">
+              <div class="text-sm font-medium text-white">{{ p.nombre_playa }}</div>
+              <div class="text-xs italic text-white/90">{{ p.nombre_municipio }} · {{ p.nombre_provincia }}</div>
             </button>
             <p v-if="!playasProvinciaFiltradas.length" class="text-sm text-gray-500">Sin resultados.</p>
           </div>
@@ -88,6 +84,9 @@ const props = defineProps({
   cpro: { type: [String, Number], default: null },
   municipioName: { type: String, default: '' },
   saving: { type: Boolean, default: false },
+  selectedId: { type: [String, Number], default: null },
+  selectedLat: { type: [String, Number], default: null },
+  selectedLon: { type: [String, Number], default: null },
 })
 const emit = defineEmits(['close', 'selected'])
 
@@ -265,6 +264,13 @@ async function fetchProvincia() {
       provListEl.value.scrollTop = 0
     }
   } catch (e) { /* ignore */ }
+  // Preseleccionar la playa activa si está en la lista de provincia
+  try {
+    if (!sel.value && props.selectedId != null) {
+      const s = playasProvincia.value.find(p => String(p.id_playa) === String(props.selectedId))
+      if (s) sel.value = s
+    }
+  } catch (e) { }
 }
 
 function debouncedBuscar() {
@@ -279,9 +285,40 @@ if (props.cpro) {
 await fetchMunicipio()
 await fetchProvincia()
 
+// Si llega selectedId desde el padre, asegurar selección y provincia
+try {
+  if (props.selectedId != null) {
+    const inMun = playasMunicipio.value.find(p => String(p.id_playa) === String(props.selectedId))
+    const inProv = playasProvincia.value.find(p => String(p.id_playa) === String(props.selectedId))
+    const s = inMun || inProv
+    if (s) {
+      sel.value = s
+      if (s.id_provincia != null) provSel.value = String(s.id_provincia).padStart(2, '0')
+    } else {
+      // Buscar por id para centrar el mapa aunque no esté en las listas actuales
+      const { data } = await axiosClient.get('/playas', { params: { id_playa: props.selectedId, fields: 'id_playa,lat,lon,id_provincia,nombre_playa,nombre_municipio,nombre_provincia', limit: 1 } })
+      const row = Array.isArray(data) ? data[0] : data
+      if (row && row.id_playa) {
+        sel.value = row
+        if (row.id_provincia != null) provSel.value = String(row.id_provincia).padStart(2, '0')
+        await ensureMapReady()
+      }
+    }
+  }
+} catch (e) { }
+
 
 function getFirstCoords() {
-  const src = sel.value ? [sel.value] : (playasMunicipio.value.length ? playasMunicipio.value : playasProvincia.value)
+  // Prioridad: selección activa; luego coords pasadas desde el padre; luego listas
+  if (sel.value) {
+    const lat = Number(sel.value.lat); const lon = Number(sel.value.lon)
+    if (!Number.isNaN(lat) && !Number.isNaN(lon)) return [lat, lon]
+  }
+  if (props.selectedLat != null && props.selectedLon != null) {
+    const la = Number(props.selectedLat); const lo = Number(props.selectedLon)
+    if (!Number.isNaN(la) && !Number.isNaN(lo)) return [la, lo]
+  }
+  const src = (playasMunicipio.value.length ? playasMunicipio.value : playasProvincia.value)
   if (src && src.length) {
     const p = src[0]
     const lat = Number(p.lat); const lon = Number(p.lon)
@@ -368,6 +405,16 @@ watch(() => props.open, async (v) => {
     if (props.cpro) provSel.value = String(props.cpro).padStart(2, '0')
     await fetchMunicipio()
     await fetchProvincia()
+    // Reafirmar la playa activa pasada desde el padre
+    try {
+      if (props.selectedId != null) {
+        const s = (playasMunicipio.value.concat(playasProvincia.value)).find(p => String(p.id_playa) === String(props.selectedId))
+        if (s) {
+          sel.value = s
+          if (s.id_provincia != null) provSel.value = String(s.id_provincia).padStart(2, '0')
+        }
+      }
+    } catch (e) { }
     await ensureMapReady()
   } else {
     try { if (map) { map.remove(); map = null; marker = null } } catch (e) { }
@@ -430,4 +477,144 @@ watch(provSel, async (val, oldVal) => {
   color: color-mix(in srgb, black 30%, var(--color-primary) 70%);
 }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Panel glass como Diaria (.frost-card) */
+.panel-glass {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 3%, transparent),
+      color-mix(in srgb, var(--color-primary) 3%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+  /* Evita la "sombra/cuadro" del header sticky fuera de los bordes redondeados */
+  overflow: hidden;
+}
+
+/* Cabecera glass como Diaria (.glass-header) */
+.header-glass {
+  position: sticky;
+  top: 0;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-image: linear-gradient(to bottom, color-mix(in srgb, var(--color-bg) 20%, transparent), color-mix(in srgb, var(--color-bg) 20%, transparent));
+  border-bottom: none;
+  box-shadow: none;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+}
+
+/* Botones glass */
+.btn-glass {
+  color: #ffffff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 24%, transparent),
+      color-mix(in srgb, var(--color-bg) 24%, transparent));
+  border: 1px solid rgba(255,255,255,0.18);
+}
+.btn-primary-glass {
+  color: #ffffff;
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 16%, transparent),
+      color-mix(in srgb, var(--color-primary) 16%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 14%, transparent),
+      color-mix(in srgb, var(--color-bg) 14%, transparent));
+  border: 1px solid rgba(255,255,255,0.22);
+}
+
+/* Chips/select e input con glass teñido del tema principal (no blanco) */
+.chip-glass {
+  color: #ffffff;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, white 18%, transparent),
+      color-mix(in srgb, white 18%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 10%, transparent),
+      color-mix(in srgb, var(--color-bg) 10%, transparent));
+  border: 1px solid rgba(255,255,255,0.15);
+  background-color: transparent;
+}
+.chip-glass::placeholder { color: rgba(255,255,255,0.7); }
+select.chip-glass { appearance: none; -webkit-appearance: none; }
+
+/* Input usa el mismo tono que el select (no simula estado seleccionado) */
+input.chip-glass { background-image: inherit; border-color: rgba(255,255,255,0.15); }
+
+/* Mapa fondo glass (sin azul saturado) */
+.map-glass {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, white 10%, transparent),
+      color-mix(in srgb, white 10%, transparent));
+  background-color: transparent;
+}
+
+/* Opciones de listas con glass sutil */
+.option-btn {
+  transition: background-color .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.opt-default {
+  border-color: rgba(255,255,255,0.15);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, white 18%, transparent),
+      color-mix(in srgb, white 18%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 10%, transparent),
+      color-mix(in srgb, var(--color-bg) 10%, transparent));
+}
+.opt-active {
+  border-color: rgba(255,255,255,0.22);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 12%, transparent),
+      color-mix(in srgb, var(--color-primary) 12%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent));
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* Tema claro: mismas capas que Diaria para el panel */
+@media (prefers-color-scheme: light) {
+  .panel-glass {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 3%, transparent),
+        color-mix(in srgb, var(--color-primary) 3%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 12%, transparent),
+        color-mix(in srgb, var(--color-bg) 12%, transparent));
+  }
+
+  .header-glass {
+    background-image: linear-gradient(to bottom,
+        color-mix(in srgb, white 28%, transparent),
+        color-mix(in srgb, white 28%, transparent));
+  }
+}
+
+/* Texto blanco dentro del panel, como en Diaria */
+:deep(.panel-glass),
+:deep(.panel-glass *),
+:deep(.panel-glass th),
+:deep(.panel-glass td) {
+  color: #ffffff !important;
+}
 </style>
