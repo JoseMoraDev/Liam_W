@@ -204,6 +204,28 @@
   margin-right: 0.25rem;
   /* espacio antes del valor */
 }
+
+/* En tema claro, oscurecer ~30% los títulos con color primario para mejorar contraste */
+@media (prefers-color-scheme: light) {
+  :deep(.estado-general .frost-card h3),
+  :deep(.atmosfera-libre .frost-card h3) {
+    color: color-mix(in srgb, var(--color-primary) 70%, black 30%) !important;
+  }
+  :deep(.sensacion-termica .tint-emph) {
+    color: color-mix(in srgb, var(--color-primary) 70%, black 30%) !important;
+  }
+}
+
+/* En tema oscuro, aclarar un poco más el tinte (más blanco) */
+@media (prefers-color-scheme: dark) {
+  :deep(.estado-general .frost-card h3),
+  :deep(.atmosfera-libre .frost-card h3) {
+    color: color-mix(in srgb, var(--color-primary) 60%, white 40%) !important;
+  }
+  :deep(.sensacion-termica .tint-emph) {
+    color: color-mix(in srgb, var(--color-primary) 60%, white 40%) !important;
+  }
+}
 </style>
 
 <script setup>

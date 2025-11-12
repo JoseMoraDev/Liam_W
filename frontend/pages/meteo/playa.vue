@@ -256,9 +256,9 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
       </h1>
       <div v-if="!loading" class="flex justify-center mb-4">
         <div class="inline-flex items-baseline gap-4 px-5 py-2 rounded-full frost-chip">
-          <h2 class="flex items-baseline gap-2 m-0 text-xl font-semibold leading-tight md:text-2xl text-white/95">
+          <h2 class="flex items-baseline gap-2 m-0 text-lg font-semibold leading-tight text-white/95">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-              class="self-center w-6 h-6 mt-1 text-white/90">
+              class="self-center w-6 h-6 mb-1 text-white/90">
               <path fill-rule="evenodd"
                 d="M12 2.25c-3.728 0-6.75 3.022-6.75 6.75 0 4.637 5.37 10.164 6.1 10.89a.75.75 0 0 0 1.1 0c.73-.726 6.3-6.253 6.3-10.89 0-3.728-3.022-6.75-6.75-6.75Zm0 9.75a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"
                 clip-rule="evenodd" />
@@ -349,7 +349,7 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
       <!-- Mostrar el mapa: mantener el contenedor en DOM y alternar visibilidad -->
       <div v-show="hasCoords()" class="p-4 mt-4 border frost-card border-white/15 rounded-2xl">
         <h3 class="mb-2 text-sm font-semibold">Mapa</h3>
-        <div ref="mapEl" class="w-full h-[30rem] overflow-hidden rounded-xl"></div>
+        <div ref="mapEl" class="w-full h-[calc(30rem-10px)] overflow-hidden rounded-xl"></div>
       </div>
 
       <PlayaPickerModal :open="openPicker" :municipio-id="municipioId" :cpro="cpro" :municipio-name="municipioName"

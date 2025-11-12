@@ -205,12 +205,12 @@ const onMapReady = (map) => {
     <div class="absolute inset-0 bg-black/40"></div>
 
     <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
-      <h1 class="mb-4 text-xl font-bold">🚦 Estado del tráfico</h1>
+      <h1 class="mb-6 text-3xl font-bold tracking-tight text-center page-title">🚦 Estado del tráfico</h1>
 
     <div v-if="!datos">Cargando tráfico...</div>
 
     <div v-else class="flex flex-col gap-6">
-      <div class="flex flex-col gap-4 p-4 shadow-md rounded-xl theme-surface">
+      <div class="flex flex-col gap-4 p-4 border frost-card border-white/15 rounded-2xl">
         <div
           class="flex items-center justify-between pb-2 border-b theme-border"
         >
@@ -230,21 +230,15 @@ const onMapReady = (map) => {
             {{ datos.currentSpeed }} km/h
           </span>
         </div>
-        <div
-          class="flex items-center justify-between pb-2 border-b theme-border"
-        >
+        <div class="flex items-center justify-between pb-2 border-b theme-border">
           <span class="font-semibold">Velocidad libre</span>
           <span class="theme-text-muted">{{ datos.freeFlowSpeed }} km/h</span>
         </div>
-        <div
-          class="flex items-center justify-between pb-2 border-b theme-border"
-        >
+        <div class="flex items-center justify-between pb-2 border-b theme-border">
           <span class="font-semibold">Tiempo de viaje actual</span>
           <span>{{ Math.round(datos.currentTravelTime / 60) }} min</span>
         </div>
-        <div
-          class="flex items-center justify-between pb-2 border-b theme-border"
-        >
+        <div class="flex items-center justify-between pb-2 border-b theme-border">
           <span class="font-semibold">Tiempo en condiciones libres</span>
           <span>{{ Math.round(datos.freeFlowTravelTime / 60) }} min</span>
         </div>
@@ -261,7 +255,7 @@ const onMapReady = (map) => {
       </div>
 
       <div class="grid grid-cols-1 gap-4">
-        <div class="p-3 rounded-lg theme-surface">
+        <div class="p-4 border frost-card border-white/15 rounded-2xl">
           <h2 class="mb-2 text-sm font-semibold">Velocidad</h2>
           <div style="height: 200px; width: 100%">
             <Bar
@@ -283,7 +277,7 @@ const onMapReady = (map) => {
           </div>
         </div>
 
-        <div class="p-3 rounded-lg theme-surface">
+        <div class="p-4 border frost-card border-white/15 rounded-2xl">
           <h2 class="mb-2 text-sm font-semibold">Tiempo</h2>
           <div style="height: 200px; width: 100%">
             <Bar
@@ -305,7 +299,7 @@ const onMapReady = (map) => {
           </div>
         </div>
 
-        <div class="p-3 rounded-lg theme-surface">
+        <div class="p-4 border frost-card border-white/15 rounded-2xl">
           <h2 class="mb-2 text-sm font-semibold">Congestión</h2>
           <div style="height: 200px; width: 100%">
             <Doughnut
@@ -323,21 +317,66 @@ const onMapReady = (map) => {
         </div>
       </div>
 
-      <client-only>
-        <LMap
-          v-if="coords.length"
-          style="height: 250px; width: 100%"
-          @ready="onMapReady"
-        >
-          <LTileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution="&copy; OpenStreetMap"
-          />
-          <LPolyline :lat-lngs="coords" :color="css('--color-danger')" :weight="5" />
-          <LMarker :lat-lng="coords[0]" />
-        </LMap>
-      </client-only>
+      <div class="p-4 border frost-card border-white/15 rounded-2xl">
+        <client-only>
+          <LMap
+            v-if="coords.length"
+            style="height: 250px; width: 100%"
+            @ready="onMapReady"
+          >
+            <LTileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution="&copy; OpenStreetMap"
+            />
+            <LPolyline :lat-lngs="coords" :color="css('--color-danger')" :weight="5" />
+            <LMarker :lat-lng="coords[0]" />
+          </LMap>
+        </client-only>
+      </div>
     </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.page-title { color: #ffffff !important; }
+
+/* Glass muy sutil como en Diaria */
+.frost-card {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 3%, transparent),
+      color-mix(in srgb, var(--color-primary) 3%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: light) {
+  .frost-card {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 3%, transparent),
+        color-mix(in srgb, var(--color-primary) 3%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 12%, transparent),
+        color-mix(in srgb, var(--color-bg) 12%, transparent));
+  }
+}
+
+/* Forzar texto blanco dentro de frost-card */
+:deep(.frost-card),
+:deep(.frost-card *),
+:deep(.frost-card th),
+:deep(.frost-card td) {
+  color: #ffffff !important;
+}
+</style>

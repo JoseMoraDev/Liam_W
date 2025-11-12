@@ -127,8 +127,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-h-screen p-4 text-[color:var(--color-text)] bg-[color:var(--color-bg)]">
-    <h1 class="mt-12 mb-6 text-2xl font-bold text-center">🚦 Incidencias de tráfico</h1>
+  <div class="relative w-full min-h-screen bg-center bg-cover" style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
+    <div class="absolute inset-0 bg-black/40"></div>
+
+    <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
+      <h1 class="mb-6 text-3xl font-bold tracking-tight text-center page-title">🚦 Incidencias de tráfico</h1>
 
     <div v-if="cargando" class="py-10 text-lg text-center">
       Cargando incidentes...
@@ -139,10 +142,9 @@ onMounted(async () => {
 
     <div v-else class="flex flex-col gap-6">
       <!-- Mapa -->
-      <div
-        id="mapa"
-        class="w-full min-h-[500px] rounded-lg border theme-border shadow-lg theme-surface"
-      ></div>
+      <div class="p-4 border frost-card border-white/15 rounded-2xl">
+        <div id="mapa" class="w-full min-h-[500px] rounded-lg overflow-hidden"></div>
+      </div>
 
       <!-- Lista de incidentes -->
       <h2 class="text-xl font-semibold">Listado de incidencias</h2>
@@ -150,7 +152,7 @@ onMounted(async () => {
         <div
           v-for="(incidente, index) in incidentes"
           :key="index"
-          class="p-4 transition theme-surface border theme-border rounded-lg shadow-md hover:theme-surface-weak"
+          class="p-4 transition border frost-card border-white/15 rounded-2xl hover:opacity-95"
         >
           <div class="flex items-center justify-between mb-2">
             <span class="font-bold">
@@ -182,8 +184,52 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.page-title { color: #ffffff !important; }
+
+/* Glass muy sutil como en Diaria */
+.frost-card {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 3%, transparent),
+      color-mix(in srgb, var(--color-primary) 3%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: light) {
+  .frost-card {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 3%, transparent),
+        color-mix(in srgb, var(--color-primary) 3%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 12%, transparent),
+        color-mix(in srgb, var(--color-bg) 12%, transparent));
+  }
+}
+
+/* Forzar texto blanco dentro de frost-card */
+:deep(.frost-card),
+:deep(.frost-card *),
+:deep(.frost-card th),
+:deep(.frost-card td) {
+  color: #ffffff !important;
+}
+</style>
 
 <style>
 .leaflet-container {

@@ -126,15 +126,15 @@ onMounted(async () => {
 
     <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
       <!-- Encabezado -->
-      <div class="mb-6">
-      <h1 class="text-2xl font-bold">🌿 Niveles de polen</h1>
-      <p class="text-gray-400">Ubicación: Elche (Alicante) · Datos horarios</p>
-    </div>
+      <div class="mb-6 text-center">
+        <h1 class="mb-2 text-3xl font-bold tracking-tight page-title">🌿 Niveles de polen</h1>
+        <p class="text-[color:var(--color-text-muted)]">Ubicación: Elche (Alicante) · Datos horarios</p>
+      </div>
 
     <!-- Lista de tarjetas -->
     <div class="flex flex-col gap-6">
       <!-- Abedul -->
-      <div class="p-4 bg-gray-800 shadow rounded-xl">
+      <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
         <h2 class="mb-2 text-lg font-semibold">🌳 Polen de Abedul</h2>
         <div class="h-48">
           <Line
@@ -148,7 +148,7 @@ onMounted(async () => {
       </div>
 
       <!-- Gramíneas -->
-      <div class="p-4 bg-gray-800 shadow rounded-xl">
+      <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
         <h2 class="mb-2 text-lg font-semibold">🌱 Polen de Gramíneas</h2>
         <div class="h-48">
           <Line
@@ -162,7 +162,7 @@ onMounted(async () => {
       </div>
 
       <!-- Olivo -->
-      <div class="p-4 bg-gray-800 shadow rounded-xl">
+      <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
         <h2 class="mb-2 text-lg font-semibold">🌿 Polen de Olivo</h2>
         <div class="h-48">
           <Line
@@ -178,3 +178,46 @@ onMounted(async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.page-title { color: #ffffff !important; }
+
+/* Glass muy sutil como en Diaria */
+.frost-card {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 3%, transparent),
+      color-mix(in srgb, var(--color-primary) 3%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: light) {
+  .frost-card {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 3%, transparent),
+        color-mix(in srgb, var(--color-primary) 3%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 12%, transparent),
+        color-mix(in srgb, var(--color-bg) 12%, transparent));
+  }
+}
+
+/* Forzar texto blanco dentro de las tarjetas para máxima legibilidad */
+:deep(.frost-card),
+:deep(.frost-card *),
+:deep(.frost-card th),
+:deep(.frost-card td) {
+  color: #ffffff !important;
+}
+</style>
