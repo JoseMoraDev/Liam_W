@@ -152,7 +152,7 @@ const onMapReady = (map) => {
   }
   // Asegurar cálculo correcto de tamaño tras montar
   setTimeout(() => {
-    try { map.invalidateSize(); } catch (_) {}
+    try { map.invalidateSize(); } catch (_) { }
   }, 0);
 };
 
@@ -216,7 +216,7 @@ const cityRadius = 5000;
         {{ error }}
       </div>
 
-      <div v-else-if="datos" class="flex flex-col gap-6">
+      <div v-else-if="datos" class="flex flex-col gap-6 mt-10">
         <!-- Hero resumen -->
         <div class="p-5 border frost-card border-white/15 rounded-2xl">
           <div class="flex items-center justify-between gap-3">
@@ -257,10 +257,11 @@ const cityRadius = 5000;
         </div>
 
         <!-- Mapa -->
-        <div class="p-4 border frost-card border-white/15 rounded-2xl w-full">
+        <div class="w-full p-4 border frost-card border-white/15 rounded-2xl">
           <client-only>
             <div class="w-full h-[360px] md:h-[460px] lg:h-[560px]">
-              <LMap v-if="coords.length" style="height: 100%; width: 100%" :options="{ scrollWheelZoom: false }" @ready="onMapReady">
+              <LMap v-if="coords.length" style="height: 100%; width: 100%" :options="{ scrollWheelZoom: false }"
+                @ready="onMapReady">
                 <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   attribution="&copy; OpenStreetMap" />
                 <LCircle :lat-lng="center" :radius="cityRadius" :color="status.color" :weight="2" :fill="true"
@@ -340,6 +341,59 @@ const cityRadius = 5000;
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Zoom +/- con el color predominante del tema (igual que 'Cambiar') */
+:deep(.leaflet-control-zoom a) {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 32%, transparent),
+      color-mix(in srgb, var(--color-primary) 32%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 18%, transparent),
+      color-mix(in srgb, var(--color-bg) 18%, transparent));
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
+:deep(.leaflet-control-zoom a:hover),
+:deep(.leaflet-control-zoom a:focus) {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 45%, transparent),
+      color-mix(in srgb, var(--color-primary) 45%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 22%, transparent),
+      color-mix(in srgb, var(--color-bg) 22%, transparent));
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 55%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+  :deep(.leaflet-control-zoom a) {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 22%, transparent),
+        color-mix(in srgb, var(--color-primary) 22%, transparent));
+    color: #0b1220;
+    border-color: rgba(0, 0, 0, 0.16);
+  }
+
+  :deep(.leaflet-control-zoom a:hover),
+  :deep(.leaflet-control-zoom a:focus) {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 22%, transparent),
+        color-mix(in srgb, white 22%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 30%, transparent),
+        color-mix(in srgb, var(--color-primary) 30%, transparent));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 45%, transparent);
   }
 }
 </style>

@@ -56,8 +56,8 @@ class TomTomController extends Controller
             return response()->json(['error' => 'Falta parámetro bbox'], 400);
         }
 
-        $fields = '{incidents{type,geometry{type,coordinates},properties{iconCategory}}}';
-        $language = 'en-GB';
+        $fields = '{incidents{type,geometry{type,coordinates},properties{iconCategory,roadNumbers,from,to}}}';
+        $language = 'es-ES';
         $categoryFilter = '0,1,2,3,4,5,6,7,8,9,10,11,14';
         $timeValidityFilter = 'present';
 

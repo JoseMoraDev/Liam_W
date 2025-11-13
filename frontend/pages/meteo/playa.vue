@@ -444,29 +444,55 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
   /* sky-100 aprox para evitar parpadeo azul */
 }
 
+/* Zoom +/- con el color predominante del tema (igual que 'Cambiar') */
 :deep(.leaflet-control-zoom a) {
-  background: rgba(255, 255, 255, 0.9);
-  color: #111827;
-  /* slate-900 */
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 22%, transparent),
+      color-mix(in srgb, var(--color-primary) 22%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 16%, transparent),
+      color-mix(in srgb, var(--color-bg) 16%, transparent));
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
 }
 
-:deep(.leaflet-control-zoom a:hover) {
-  background: #ffffff;
+:deep(.leaflet-control-zoom a:hover),
+:deep(.leaflet-control-zoom a:focus) {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 30%, transparent),
+      color-mix(in srgb, var(--color-primary) 30%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 18%, transparent),
+      color-mix(in srgb, var(--color-bg) 18%, transparent));
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 45%, transparent);
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   :deep(.leaflet-control-zoom a) {
-    background: rgba(17, 24, 39, 0.85);
-    /* slate-900 */
-    color: #e5e7eb;
-    /* gray-200 */
-    border-color: rgba(255, 255, 255, 0.2);
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 16%, transparent),
+        color-mix(in srgb, var(--color-primary) 16%, transparent));
+    color: #0b1220;
+    border-color: rgba(0, 0, 0, 0.12);
   }
-
-  :deep(.leaflet-control-zoom a:hover) {
-    background: rgba(17, 24, 39, 0.95);
+  :deep(.leaflet-control-zoom a:hover),
+  :deep(.leaflet-control-zoom a:focus) {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 20%, transparent),
+        color-mix(in srgb, white 20%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 22%, transparent),
+        color-mix(in srgb, var(--color-primary) 22%, transparent));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
   }
 }
 

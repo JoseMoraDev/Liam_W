@@ -786,27 +786,27 @@ input.chip-glass {
 :deep(.leaflet-control-zoom a) {
   background-image:
     linear-gradient(to bottom,
-      color-mix(in srgb, var(--color-primary) 22%, transparent),
-      color-mix(in srgb, var(--color-primary) 22%, transparent)),
+      color-mix(in srgb, var(--color-primary) 32%, transparent),
+      color-mix(in srgb, var(--color-primary) 32%, transparent)),
     linear-gradient(to bottom,
-      color-mix(in srgb, var(--color-bg) 16%, transparent),
-      color-mix(in srgb, var(--color-bg) 16%, transparent));
+      color-mix(in srgb, var(--color-bg) 18%, transparent),
+      color-mix(in srgb, var(--color-bg) 18%, transparent));
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
 }
 
 :deep(.leaflet-control-zoom a:hover),
 :deep(.leaflet-control-zoom a:focus) {
   background-image:
     linear-gradient(to bottom,
-      color-mix(in srgb, var(--color-primary) 30%, transparent),
-      color-mix(in srgb, var(--color-primary) 30%, transparent)),
+      color-mix(in srgb, var(--color-primary) 45%, transparent),
+      color-mix(in srgb, var(--color-primary) 45%, transparent)),
     linear-gradient(to bottom,
-      color-mix(in srgb, var(--color-bg) 18%, transparent),
-      color-mix(in srgb, var(--color-bg) 18%, transparent));
+      color-mix(in srgb, var(--color-bg) 22%, transparent),
+      color-mix(in srgb, var(--color-bg) 22%, transparent));
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 45%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 55%, transparent);
 }
 
 @media (prefers-color-scheme: light) {
@@ -816,21 +816,21 @@ input.chip-glass {
         color-mix(in srgb, white 18%, transparent),
         color-mix(in srgb, white 18%, transparent)),
       linear-gradient(to bottom,
-        color-mix(in srgb, var(--color-primary) 16%, transparent),
-        color-mix(in srgb, var(--color-primary) 16%, transparent));
+        color-mix(in srgb, var(--color-primary) 22%, transparent),
+        color-mix(in srgb, var(--color-primary) 22%, transparent));
     color: #0b1220;
-    border-color: rgba(0, 0, 0, 0.12);
+    border-color: rgba(0, 0, 0, 0.16);
   }
   :deep(.leaflet-control-zoom a:hover),
   :deep(.leaflet-control-zoom a:focus) {
     background-image:
       linear-gradient(to bottom,
-        color-mix(in srgb, white 20%, transparent),
-        color-mix(in srgb, white 20%, transparent)),
+        color-mix(in srgb, white 22%, transparent),
+        color-mix(in srgb, white 22%, transparent)),
       linear-gradient(to bottom,
-        color-mix(in srgb, var(--color-primary) 22%, transparent),
-        color-mix(in srgb, var(--color-primary) 22%, transparent));
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
+        color-mix(in srgb, var(--color-primary) 30%, transparent),
+        color-mix(in srgb, var(--color-primary) 30%, transparent));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 45%, transparent);
   }
 }
 
