@@ -13,7 +13,7 @@
 
         <!-- Marca -->
         <NuxtLink to="/" class="hidden font-semibold tracking-wide text-[color:var(--color-text)] sm:block">
-          Live Ambience
+          Previsiones
         </NuxtLink>
 
         <NuxtLink to="/ubicacion"
@@ -125,26 +125,31 @@
     <!-- Panel móvil -->
     <transition name="fade">
       <div v-if="isLoggedIn && open" ref="menuRef"
-        class="fixed p-4 space-y-2 text-gray-800 rounded-xl shadow-lg frost-panel w-max z-[10000] border border-white/15"
+        class="fixed p-4 text-gray-800 rounded-2xl shadow-xl menu-panel z-[10000] border border-white/15"
         :style="panelStyle">
         <!-- Menú de un solo nivel -->
-        <NuxtLink to="/previsiones" class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg menu-btn"
-          @click="open = false">
-          <client-only><font-awesome-icon icon="fa-solid fa-cloud-sun" class="w-4 h-4 mr-2" /></client-only>
-          {{ t('nav.forecasts') }}
-        </NuxtLink>
+        <div class="w-56 space-y-2">
+          <NuxtLink to="/previsiones" class="menu-pill" @click="open = false">
+            <div class="flex items-center gap-2">
+              <client-only><font-awesome-icon icon="fa-solid fa-cloud-sun" class="w-4 h-4" /></client-only>
+              <span class="font-semibold uppercase tracking-wide">{{ t('nav.forecasts') }}</span>
+            </div>
+          </NuxtLink>
 
-        <NuxtLink to="/ajustes" class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg menu-btn"
-          @click="open = false">
-          <client-only><font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4 mr-2" /></client-only>
-          {{ t('nav.settings') }}
-        </NuxtLink>
+          <NuxtLink to="/ajustes" class="menu-pill" @click="open = false">
+            <div class="flex items-center gap-2">
+              <client-only><font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4" /></client-only>
+              <span class="font-semibold uppercase tracking-wide">{{ t('nav.settings') }}</span>
+            </div>
+          </NuxtLink>
 
-        <NuxtLink v-if="currentUser?.role === 'admin'" to="/avanzado"
-          class="flex items-center px-4 py-2 font-semibold uppercase rounded-lg menu-btn" @click="open = false">
-          <client-only><font-awesome-icon icon="fa-solid fa-cogs" class="w-4 h-4 mr-2" /></client-only>
-          {{ t('nav.advanced') }}
-        </NuxtLink>
+          <NuxtLink v-if="currentUser?.role === 'admin'" to="/avanzado" class="menu-pill" @click="open = false">
+            <div class="flex items-center gap-2">
+              <client-only><font-awesome-icon icon="fa-solid fa-cogs" class="w-4 h-4" /></client-only>
+              <span class="font-semibold uppercase tracking-wide">{{ t('nav.advanced') }}</span>
+            </div>
+          </NuxtLink>
+        </div>
       </div>
     </transition>
   </nav>
@@ -347,6 +352,93 @@ watch(isLoggedIn, async () => {
   }
 });
 </script>
+
+<style scoped>
+.menu-panel {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 10%, transparent),
+      color-mix(in srgb, var(--color-primary) 10%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 18%, transparent),
+      color-mix(in srgb, var(--color-bg) 18%, transparent));
+  background-color: transparent;
+  box-shadow: 0 10px 25px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.menu-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.18);
+  color: #ffffff;
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 18%, transparent),
+      color-mix(in srgb, var(--color-primary) 18%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 22%, transparent),
+      color-mix(in srgb, var(--color-bg) 22%, transparent));
+  transition: background-image .2s ease, transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.menu-pill:hover,
+.menu-pill:focus-visible {
+  outline: none;
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 28%, transparent),
+      color-mix(in srgb, var(--color-primary) 28%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 26%, transparent),
+      color-mix(in srgb, var(--color-bg) 26%, transparent));
+  border-color: color-mix(in srgb, var(--color-primary) 35%, rgba(255,255,255,.18));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 45%, transparent);
+  transform: translateY(-1px);
+}
+
+.menu-pill:active {
+  transform: translateY(0);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 50%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+  .menu-panel {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 10%, transparent),
+        color-mix(in srgb, var(--color-primary) 10%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 14%, transparent),
+        color-mix(in srgb, var(--color-bg) 14%, transparent));
+  }
+  .menu-pill {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 16%, transparent),
+        color-mix(in srgb, white 16%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 16%, transparent),
+        color-mix(in srgb, var(--color-primary) 16%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 16%, transparent),
+        color-mix(in srgb, var(--color-bg) 16%, transparent));
+    color: #0b1220;
+    border-color: rgba(0,0,0,.12);
+  }
+  .menu-pill:hover,
+  .menu-pill:focus-visible {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
+  }
+}
+</style>
 
 <style scoped>
 .nav-glass {

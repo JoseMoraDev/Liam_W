@@ -122,6 +122,16 @@ const locales = [
   { code: "eu", name: "Euskara", flag: "/flags/euskadi.svg" },
   { code: "ary", name: "العربية المغربية", flag: "/flags/maroc.svg" },
 ]
+function preloadFlags() {
+  try {
+    locales.forEach(l => {
+      const img = new Image()
+      img.src = l.flag
+    })
+  } catch (e) {
+    // no-op
+  }
+}
 
 function selectLocale(code) {
   setLocale(code)
@@ -146,6 +156,7 @@ function previewVars(vars) {
 
 onMounted(() => {
   mounted.value = true;
+  preloadFlags()
 });
 </script>
 

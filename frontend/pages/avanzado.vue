@@ -131,7 +131,7 @@
         <transition name="fade">
           <div v-if="adminOpen" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black/50"
             @click.self="adminOpen = false">
-            <div class="w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 bg-white rounded-2xl shadow-xl">
+            <div class="w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 rounded-2xl shadow-xl theme-surface theme-border border">
               <div class="flex items-center justify-between mb-3">
                 <h3 class="text-xl font-bold text-[color:var(--color-text)]">{{ t('admin.users.title') }}</h3>
                 <button @click="adminOpen = false" class="px-3 py-1 text-gray-700 bg-gray-100 border rounded-md">{{
@@ -140,7 +140,6 @@
               <!-- Gestión de usuarios -->
               <div class="w-full p-0 space-y-4">
                 <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                  <h2 class="text-lg font-semibold text-[color:var(--color-text)]">{{ t('admin.users.title') }}</h2>
                   <div class="flex flex-col w-full gap-2 sm:flex-row sm:w-auto sm:items-center">
                     <input v-model="search" @input="onSearchInput" type="text"
                       :placeholder="t('admin.users.search_placeholder')"
@@ -157,7 +156,7 @@
                 </div>
 
                 <!-- Tabla desktop -->
-                <div class="hidden overflow-x-auto bg-white shadow md:block rounded-xl">
+                <div class="hidden overflow-x-auto md:block rounded-xl theme-surface theme-border border">
                   <table class="w-full text-sm">
                     <thead class="text-left text-gray-600 bg-gray-50">
                       <tr>
@@ -175,15 +174,15 @@
                         <td class="px-3 py-2">{{ u.id }}</td>
                         <td class="px-3 py-2">
                           <input v-model="u.name" @change="saveUser(u)"
-                            class="w-full max-w-[220px] px-2 py-1 border rounded-md border-gray-300/60" />
+                            class="w-full max-w-[220px] px-2 py-1 border rounded-md theme-border bg-transparent" />
                         </td>
                         <td class="px-3 py-2">
                           <input v-model="u.email" disabled
-                            class="w-full max-w-[260px] px-2 py-1 border rounded-md border-gray-300/60 opacity-75 cursor-not-allowed" />
+                            class="w-full max-w-[260px] px-2 py-1 border rounded-md theme-border bg-transparent opacity-75 cursor-not-allowed" />
                         </td>
                         <td class="px-3 py-2">
                           <select v-model="u.role" @change="setRole(u)"
-                            class="px-2 py-1 border rounded-md border-gray-300/60">
+                            class="px-2 py-1 border rounded-md theme-border bg-transparent">
                             <option value="free">{{ t('admin.users.role_free') }}</option>
                             <option value="premium">{{ t('admin.users.role_premium') }}</option>
                             <option value="admin">{{ t('admin.users.role_admin') }}</option>
@@ -191,7 +190,7 @@
                         </td>
                         <td class="px-3 py-2">
                           <input type="number" min="0" v-model.number="u.free_daily_quota" :disabled="u.role !== 'free'"
-                            class="w-24 px-2 py-1 border rounded-md border-gray-300/60 disabled:opacity-50" />
+                            class="w-24 px-2 py-1 border rounded-md theme-border bg-transparent disabled:opacity-50" />
                         </td>
                         <td class="px-3 py-2">
                           <label class="inline-flex items-center gap-2">
@@ -204,7 +203,7 @@
                             class="px-2 py-1 mr-2 text-gray-800 bg-gray-100 border rounded-md hover:bg-gray-200">{{
                               t('admin.users.save') }}</button>
                           <button @click="removeUser(u)"
-                            class="px-2 py-1 text-red-700 bg-red-100 border border-red-200 rounded-md hover:bg-red-200">{{
+                            class="px-2 py-1 rounded-md border text-[color:var(--color-danger)] border-[color:var(--color-danger)]/40 bg-[color:var(--color-overlay-weak)] hover:bg-[color:var(--color-danger)]/10">{{
                               t('admin.users.delete') }}</button>
                         </td>
                       </tr>
@@ -218,7 +217,7 @@
 
                 <!-- Tarjetas móvil -->
                 <div class="grid gap-3 md:hidden">
-                  <div v-for="u in filteredUsers" :key="u.id" class="p-3 bg-white shadow rounded-xl">
+                  <div v-for="u in filteredUsers" :key="u.id" class="p-3 rounded-xl theme-surface theme-border border">
                     <div class="flex items-center justify-between mb-2">
                       <div class="text-xs text-gray-500">{{ t('admin.users.id') }} {{ u.id }}</div>
                       <label class="inline-flex items-center gap-2 text-sm">
@@ -228,23 +227,23 @@
                     </div>
                     <div class="flex flex-col gap-2">
                       <input v-model="u.name" @change="saveUser(u)"
-                        class="w-full h-10 px-3 border rounded-lg border-gray-300/60"
+                        class="w-full h-10 px-3 border rounded-lg theme-border bg-transparent"
                         :placeholder="t('admin.users.name')" />
                       <input v-model="u.email" disabled
-                        class="w-full h-10 px-3 border rounded-lg opacity-75 cursor-not-allowed border-gray-300/60"
+                        class="w-full h-10 px-3 border rounded-lg opacity-75 cursor-not-allowed theme-border bg-transparent"
                         :placeholder="t('admin.users.email')" />
                       <div class="flex items-center gap-2">
                         <select v-model="u.role" @change="setRole(u)"
-                          class="flex-1 h-10 px-3 border rounded-lg border-gray-300/60">
+                          class="flex-1 h-10 px-3 border rounded-lg theme-border bg-transparent">
                           <option value="free">{{ t('admin.users.role_free') }}</option>
                           <option value="premium">{{ t('admin.users.role_premium') }}</option>
                           <option value="admin">{{ t('admin.users.role_admin') }}</option>
                         </select>
                         <input type="number" min="0" v-model.number="u.free_daily_quota" :disabled="u.role !== 'free'"
-                          class="h-10 px-2 border rounded-lg w-28 border-gray-300/60 disabled:opacity-50"
+                          class="h-10 px-2 border rounded-lg w-28 theme-border bg-transparent disabled:opacity-50"
                           :placeholder="t('admin.users.quota')" />
                         <button @click="removeUser(u)"
-                          class="px-3 py-2 text-red-700 bg-red-100 border border-red-200 rounded-md">{{
+                          class="px-3 py-2 rounded-md border text-[color:var(--color-danger)] border-[color:var(--color-danger)]/40 bg-[color:var(--color-overlay-weak)] hover:bg-[color:var(--color-danger)]/10">{{
                             t('admin.users.delete') }}</button>
                       </div>
                     </div>
@@ -258,23 +257,23 @@
               <transition name="fade">
                 <div v-if="dialog.open" class="fixed inset-0 z-[11000] flex items-center justify-center bg-black/50"
                   @click.self="closeDialog">
-                  <div class="w-full max-w-md p-4 bg-white shadow-xl rounded-2xl">
+                  <div class="w-full max-w-md p-4 rounded-2xl shadow-xl theme-surface theme-border border">
                     <h3 class="mb-3 text-lg font-semibold text-gray-800">{{ dialog.mode === 'create' ?
                       t('admin.users.modal_create') :
                       t('admin.users.modal_edit') }}</h3>
                     <form @submit.prevent="submitDialog" class="space-y-3">
                       <input v-model="dialog.form.name" type="text" :placeholder="t('admin.users.name')"
-                        class="w-full h-10 px-3 border rounded-lg border-gray-300/60" required />
+                        class="w-full h-10 px-3 border rounded-lg theme-border bg-transparent" required />
                       <input v-model="dialog.form.email" type="email" :placeholder="t('admin.users.email')"
-                        class="w-full h-10 px-3 border rounded-lg border-gray-300/60" :disabled="dialog.mode === 'edit'"
+                        class="w-full h-10 px-3 border rounded-lg theme-border bg-transparent" :disabled="dialog.mode === 'edit'"
                         :required="dialog.mode === 'create'" />
                       <input v-if="dialog.mode === 'create' || dialog.form.password !== undefined"
                         v-model="dialog.form.password" type="password" :placeholder="t('admin.users.password')"
-                        class="w-full h-10 px-3 border rounded-lg border-gray-300/60"
+                        class="w-full h-10 px-3 border rounded-lg theme-border bg-transparent"
                         :required="dialog.mode === 'create'" minlength="8" />
                       <div class="flex gap-2">
                         <select v-model="dialog.form.role"
-                          class="flex-1 h-10 px-3 border rounded-lg border-gray-300/60">
+                          class="flex-1 h-10 px-3 border rounded-lg theme-border bg-transparent">
                           <option value="free">{{ t('admin.users.role_free') }}</option>
                           <option value="premium">{{ t('admin.users.role_premium') }}</option>
                           <option value="admin">{{ t('admin.users.role_admin') }}</option>
