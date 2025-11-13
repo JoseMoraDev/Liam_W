@@ -1,15 +1,17 @@
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
+import { ref, onMounted, nextTick, computed } from "vue";
 import { axiosClient } from "~/axiosConfig";
+import { userData } from "~/store/auth";
 import "leaflet/dist/leaflet.css";
 
 const incidentes = ref([]);
 const cargando = ref(true);
+const error = ref(null);
 let map = null;
 const center = ref([40.4168, -3.7038]); // fallback Madrid
 
 // Helper para leer variables CSS del tema
-function css(name){
+function css(name) {
   if (typeof window === 'undefined') return ''
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 }
@@ -85,34 +87,72 @@ async function initMap() {
   if (incidentes.value.length) {
     const allCoords = [];
     incidentes.value.forEach((incidente) => {
-      if (!incidente.geometry?.coordinates?.length) return;
-      const coords = incidente.geometry.coordinates.map((c) => [c[1], c[0]]);
-      const color = colorCategoria(incidente.properties.iconCategory);
+      const geom = incidente?.geometry;
+      const props = incidente?.properties || {};
+      const color = colorCategoria(props.iconCategory);
+      if (!geom) return;
 
-      L.polyline(coords, { color, weight: 5, opacity: 0.7 })
-        .bindPopup(descripcionCategoria(incidente.properties.iconCategory))
-        .addTo(map);
-
-      allCoords.push(...coords);
+      try {
+        if (geom.type === 'LineString' && Array.isArray(geom.coordinates)) {
+          const coords = geom.coordinates.map(([lon, lat]) => [lat, lon]);
+          if (coords.length) {
+            L.polyline(coords, { color, weight: 5, opacity: 0.7 })
+              .bindPopup(descripcionCategoria(props.iconCategory))
+              .addTo(map);
+            allCoords.push(...coords);
+          }
+        } else if (geom.type === 'MultiLineString' && Array.isArray(geom.coordinates)) {
+          geom.coordinates.forEach((segment) => {
+            const coords = segment.map(([lon, lat]) => [lat, lon]);
+            if (coords.length) {
+              L.polyline(coords, { color, weight: 5, opacity: 0.7 })
+                .bindPopup(descripcionCategoria(props.iconCategory))
+                .addTo(map);
+              allCoords.push(...coords);
+            }
+          });
+        } else if (geom.type === 'Point' && Array.isArray(geom.coordinates)) {
+          const [lon, lat] = geom.coordinates;
+          const ll = [lat, lon];
+          L.circleMarker(ll, { radius: 6, color, weight: 2, fillColor: color, fillOpacity: 0.7 })
+            .bindPopup(descripcionCategoria(props.iconCategory))
+            .addTo(map);
+          allCoords.push(ll);
+        }
+      } catch (_) { /* ignore malformed geometry */ }
     });
 
-    if (allCoords.length) map.fitBounds(allCoords, { padding: [20, 20] });
+    if (allCoords.length) {
+      map.fitBounds(allCoords, { padding: [20, 20] });
+    }
   }
+
+  // Asegurar render tras layout
+  setTimeout(() => {
+    try { map.invalidateSize(); } catch (_) { }
+  }, 0);
 }
 
 // Cargar datos
 onMounted(async () => {
   try {
     // Obtener coordenadas y construir un bbox pequeño alrededor
-    const pref = await axiosClient.get('/user/location-pref');
+    const uid = userData()?.value?.id;
+    const pref = await axiosClient.get('/user/location-pref', { params: uid ? { user_id: uid } : {} });
     const { lat, lon } = pref.data || {};
-    if (lat != null && lon != null) {
-      center.value = [lat, lon];
+    const latNum = Number(lat);
+    const lonNum = Number(lon);
+    if (Number.isFinite(latNum) && Number.isFinite(lonNum)) {
+      center.value = [latNum, lonNum];
     }
-    const delta = 0.02; // ~2km aprox
-    const bbox = (lat != null && lon != null)
-      ? `${(lon - delta).toFixed(3)},${(lat - delta).toFixed(3)},${(lon + delta).toFixed(3)},${(lat + delta).toFixed(3)}`
-      : `-3.73,40.40,-3.68,40.44`; // bbox Madrid
+    const delta = 0.05; // ~5-6km aprox
+    const refLat = Number.isFinite(latNum) ? latNum : 40.4168;
+    const refLon = Number.isFinite(lonNum) ? lonNum : -3.7038;
+    const west = (refLon - delta).toFixed(5);
+    const south = (refLat - delta).toFixed(5);
+    const east = (refLon + delta).toFixed(5);
+    const north = (refLat + delta).toFixed(5);
+    const bbox = `${west},${south},${east},${north}`;
     const res = await axiosClient.get('/tomtom/traffic-incidents', { params: { bbox } });
     incidentes.value = res.data.incidents || [];
 
@@ -120,76 +160,111 @@ onMounted(async () => {
     initMap();
   } catch (err) {
     console.error("Error al cargar incidentes de tráfico:", err);
+    const details = err?.response?.data?.details || err?.message;
+    error.value = details ? `No se pudieron cargar las alertas de tráfico. ${details}` : 'No se pudieron cargar las alertas de tráfico.';
   } finally {
     cargando.value = false;
   }
 });
+
+// Resumen para hero
+const totalIncidentes = computed(() => incidentes.value.length || 0);
+const categoriasContadas = computed(() => {
+  const map = new Map();
+  for (const it of incidentes.value) {
+    const k = it?.properties?.iconCategory;
+    map.set(k, (map.get(k) || 0) + 1);
+  }
+  return Array.from(map.entries()).slice(0, 3); // top 3
+});
 </script>
 
 <template>
-  <div class="relative w-full min-h-screen bg-center bg-cover" style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
+  <div class="relative w-full min-h-screen bg-center bg-cover"
+    style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
     <div class="absolute inset-0 bg-black/40"></div>
 
-    <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
-      <h1 class="mb-6 text-3xl font-bold tracking-tight text-center page-title">🚦 Incidencias de tráfico</h1>
+    <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)] pt-10">
+      <h1 class="mb-6 text-3xl font-bold tracking-tight text-center page-title">Incidencias de tráfico</h1>
 
-    <div v-if="cargando" class="py-10 text-lg text-center">
-      Cargando incidentes...
-    </div>
-    <div v-else-if="!incidentes.length" class="py-10 text-lg text-center">
-      No hay incidentes en la zona.
-    </div>
-
-    <div v-else class="flex flex-col gap-6">
-      <!-- Mapa -->
-      <div class="p-4 border frost-card border-white/15 rounded-2xl">
-        <div id="mapa" class="w-full min-h-[500px] rounded-lg overflow-hidden"></div>
+      <div v-if="cargando" class="flex items-center justify-center min-h-[30vh]">
+        <div class="flex flex-col items-center gap-3">
+          <div class="spinner" aria-label="Cargando"></div>
+          <div class="loader-text">Cargando incidentes...</div>
+        </div>
       </div>
 
-      <!-- Lista de incidentes -->
-      <h2 class="text-xl font-semibold">Listado de incidencias</h2>
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div
-          v-for="(incidente, index) in incidentes"
-          :key="index"
-          class="p-4 transition border frost-card border-white/15 rounded-2xl hover:opacity-95"
-        >
-          <div class="flex items-center justify-between mb-2">
-            <span class="font-bold">
-              {{ descripcionCategoria(incidente.properties.iconCategory) }}
-            </span>
-            <span
-              class="w-4 h-4 rounded-full"
-              :style="{
-                backgroundColor: colorCategoria(
-                  incidente.properties.iconCategory
-                ),
-              }"
-            ></span>
+      <div v-else-if="error" class="max-w-md p-4 mx-auto text-center border rounded-xl border-white/20 frost-card">
+        {{ error }}
+      </div>
+
+      <div v-else class="flex flex-col gap-6">
+        <!-- Hero -->
+        <div class="p-5 border frost-card border-white/15 rounded-2xl">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-lg bg-yellow-500 text-black">
+                Alertas activas
+              </div>
+              <div class="mt-3 text-4xl font-extrabold leading-tight">{{ totalIncidentes }}</div>
+              <div class="mt-1 text-sm text-white/70">en los alrededores</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-white/70">Principales categorías</div>
+              <div class="mt-1 text-sm text-white/80">
+                <template v-for="([cat, count], i) in categoriasContadas" :key="cat">
+                  <span v-if="i > 0" class="text-white/50"> · </span>
+                  <span>{{ descripcionCategoria(cat) }} ({{ count }})</span>
+                </template>
+              </div>
+            </div>
           </div>
-          <div class="mb-1 text-sm theme-text-muted">
-            <strong>Coordenadas inicio:</strong>
-            {{ incidente.geometry.coordinates[0][1].toFixed(6) }},
-            {{ incidente.geometry.coordinates[0][0].toFixed(6) }}
+        </div>
+
+        <!-- Mapa -->
+        <div class="p-4 border frost-card border-white/15 rounded-2xl">
+          <div class="w-full h-[360px] md:h-[460px] lg:h-[560px] rounded-lg overflow-hidden">
+            <div id="mapa" class="w-full h-full"></div>
           </div>
-          <div class="mb-1 text-sm theme-text-muted">
-            <strong>Coordenadas fin:</strong>
-            {{ incidente.geometry.coordinates.slice(-1)[0][1].toFixed(6) }},
-            {{ incidente.geometry.coordinates.slice(-1)[0][0].toFixed(6) }}
-          </div>
-          <div class="text-sm theme-text-muted">
-            <strong>Número de puntos:</strong>
-            {{ incidente.geometry.coordinates.length }}
+        </div>
+
+        <!-- Lista de incidentes -->
+        <h2 class="text-xl font-semibold">Listado de incidencias</h2>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div v-for="(incidente, index) in incidentes" :key="index"
+            class="p-4 transition border frost-card border-white/15 rounded-2xl hover:opacity-95">
+            <div class="flex items-center justify-between mb-2">
+              <span class="font-bold">
+                {{ descripcionCategoria(incidente.properties.iconCategory) }}
+              </span>
+              <span class="w-4 h-4 rounded-full"
+                :style="{ backgroundColor: colorCategoria(incidente.properties.iconCategory) }"></span>
+            </div>
+            <div class="mb-1 text-sm text-white/80">
+              <strong>Inicio:</strong>
+              {{ incidente.geometry.coordinates[0][1].toFixed(6) }},
+              {{ incidente.geometry.coordinates[0][0].toFixed(6) }}
+            </div>
+            <div class="mb-1 text-sm text-white/80">
+              <strong>Fin:</strong>
+              {{ incidente.geometry.coordinates.slice(-1)[0][1].toFixed(6) }},
+              {{ incidente.geometry.coordinates.slice(-1)[0][0].toFixed(6) }}
+            </div>
+            <div class="text-sm text-white/70">
+              <strong>Puntos:</strong>
+              {{ incidente.geometry.coordinates.length }}
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.page-title { color: #ffffff !important; }
+.page-title {
+  color: #ffffff !important;
+}
 
 /* Glass muy sutil como en Diaria */
 .frost-card {
@@ -228,6 +303,27 @@ onMounted(async () => {
 :deep(.frost-card th),
 :deep(.frost-card td) {
   color: #ffffff !important;
+}
+
+/* Spinner */
+.spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid color-mix(in srgb, white 30%, transparent);
+  border-top-color: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loader-text {
+  color: color-mix(in srgb, white 75%, transparent);
+  font-weight: 600;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
 

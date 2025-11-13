@@ -14,6 +14,7 @@ import {
 
 // Importa el cliente axios configurado (ya apunta al backend)
 import { axiosClient } from "~/axiosConfig";
+import { userData } from "~/store/auth";
 
 // Registrar los componentes de Chart.js
 ChartJS.register(
@@ -63,7 +64,18 @@ const charts = ref({
 // Cargar datos desde el backend
 onMounted(async () => {
   try {
-    const res = await axiosClient.get("/polen");
+    // Intentar usar lat/lon guardadas del usuario para consultar polen local
+    let params = {};
+    try {
+      const uid = userData()?.value?.id;
+      const pref = await axiosClient.get("/user/location-pref", { params: uid ? { user_id: uid } : {} });
+      const { lat, lon } = pref.data || {};
+      if (lat != null && lon != null) {
+        params = { lat, lon };
+      }
+    } catch (e) { /* ignore, fallback a backend default */ }
+
+    const res = await axiosClient.get("/polen", { params });
     const data = res.data;
 
     datos.value = {
@@ -121,66 +133,56 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="relative w-full min-h-screen bg-center bg-cover" style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
+  <div class="relative w-full min-h-screen px-10 bg-center bg-cover"
+    style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
     <div class="absolute inset-0 bg-black/40"></div>
 
     <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
       <!-- Encabezado -->
-      <div class="mb-6 text-center">
-        <h1 class="mb-2 text-3xl font-bold tracking-tight page-title">🌿 Niveles de polen</h1>
-        <p class="text-[color:var(--color-text-muted)]">Ubicación: Elche (Alicante) · Datos horarios</p>
+      <div class="pt-10 mb-6 text-center">
+        <h1 class="mb-2 text-3xl font-bold tracking-tight page-title">Niveles de polen</h1>
       </div>
 
-    <!-- Lista de tarjetas -->
-    <div class="flex flex-col gap-6">
-      <!-- Abedul -->
-      <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
-        <h2 class="mb-2 text-lg font-semibold">🌳 Polen de Abedul</h2>
-        <div class="h-48">
-          <Line
-            v-if="charts.abedul.data"
-            :data="charts.abedul.data"
-            :options="charts.abedul.options"
-          />
-          <p v-else class="text-sm text-gray-400">Cargando datos...</p>
+      <!-- Lista de tarjetas -->
+      <div class="flex flex-col gap-6">
+        <!-- Abedul -->
+        <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
+          <h2 class="mb-2 text-lg font-semibold">🌳 Polen de Abedul</h2>
+          <div class="h-48">
+            <Line v-if="charts.abedul.data" :data="charts.abedul.data" :options="charts.abedul.options" />
+            <p v-else class="text-sm text-gray-400">Cargando datos...</p>
+          </div>
+          <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
         </div>
-        <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
-      </div>
 
-      <!-- Gramíneas -->
-      <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
-        <h2 class="mb-2 text-lg font-semibold">🌱 Polen de Gramíneas</h2>
-        <div class="h-48">
-          <Line
-            v-if="charts.gramineas.data"
-            :data="charts.gramineas.data"
-            :options="charts.gramineas.options"
-          />
-          <p v-else class="text-sm text-gray-400">Cargando datos...</p>
+        <!-- Gramíneas -->
+        <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
+          <h2 class="mb-2 text-lg font-semibold">🌱 Polen de Gramíneas</h2>
+          <div class="h-48">
+            <Line v-if="charts.gramineas.data" :data="charts.gramineas.data" :options="charts.gramineas.options" />
+            <p v-else class="text-sm text-gray-400">Cargando datos...</p>
+          </div>
+          <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
         </div>
-        <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
-      </div>
 
-      <!-- Olivo -->
-      <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
-        <h2 class="mb-2 text-lg font-semibold">🌿 Polen de Olivo</h2>
-        <div class="h-48">
-          <Line
-            v-if="charts.olivo.data"
-            :data="charts.olivo.data"
-            :options="charts.olivo.options"
-          />
-          <p v-else class="text-sm text-gray-400">Cargando datos...</p>
+        <!-- Olivo -->
+        <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
+          <h2 class="mb-2 text-lg font-semibold">🌿 Polen de Olivo</h2>
+          <div class="h-48">
+            <Line v-if="charts.olivo.data" :data="charts.olivo.data" :options="charts.olivo.options" />
+            <p v-else class="text-sm text-gray-400">Cargando datos...</p>
+          </div>
+          <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
         </div>
-        <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
       </div>
-    </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.page-title { color: #ffffff !important; }
+.page-title {
+  color: #ffffff !important;
+}
 
 /* Glass muy sutil como en Diaria */
 .frost-card {

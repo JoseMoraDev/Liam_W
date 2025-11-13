@@ -13,7 +13,7 @@
           {{ zona }}
         </p>
         <p v-if="loading" class="mt-2 text-sm text-gray-500 dark:text-gray-400">Cargando…</p>
-        <p v-if="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
+        <p v-if="error && !needsAreaSetup" class="mt-2 text-sm text-white">{{ error }}</p>
         <div class="flex items-center justify-center gap-3 mt-3" v-if="!error">
           <span class="text-xl font-semibold text-white">Selecciona día</span>
           <select v-model="selectedDay"
@@ -102,6 +102,17 @@
         Datos: Agencia Estatal de Meteorología -
         <a :href="sourceLink" target="_blank" class="underline hover:text-gray-700 dark:hover:text-gray-200">AEMET</a>
       </footer>
+    </div>
+  </div>
+  <div v-if="needsAreaSetup" class="fixed inset-0 z-50 flex items-center justify-center">
+    <div class="absolute inset-0 bg-black/60"></div>
+    <div class="relative z-10 w-full max-w-md p-6 border rounded-2xl frost-card border-white/15">
+      <h3 class="mb-2 text-xl font-bold text-white">Configura tu zona de montaña</h3>
+      <p class="mb-4 text-sm leading-relaxed text-white/95">No se encontró ubicación de montaña en tus preferencias. Ve a la pantalla de Ubicación para elegir tu zona de montaña y poder mostrar el boletín.</p>
+      <div class="flex items-center justify-end gap-3">
+        <button @click="needsAreaSetup = false" class="px-3 py-2 text-sm text-white border rounded-md border-white/25 hover:border-white/40">Ahora no</button>
+        <button @click="goToUbicacion" class="px-3 py-2 text-sm font-semibold text-white border rounded-md border-white/25 bg-[color:var(--color-primary)]/40 hover:bg-[color:var(--color-primary)]/55">Ir a Ubicación</button>
+      </div>
     </div>
   </div>
 </template>
@@ -207,10 +218,12 @@
 
 /* En tema claro, oscurecer ~30% los títulos con color primario para mejorar contraste */
 @media (prefers-color-scheme: light) {
+
   :deep(.estado-general .frost-card h3),
   :deep(.atmosfera-libre .frost-card h3) {
     color: color-mix(in srgb, var(--color-primary) 70%, black 30%) !important;
   }
+
   :deep(.sensacion-termica .tint-emph) {
     color: color-mix(in srgb, var(--color-primary) 70%, black 30%) !important;
   }
@@ -218,10 +231,12 @@
 
 /* En tema oscuro, aclarar un poco más el tinte (más blanco) */
 @media (prefers-color-scheme: dark) {
+
   :deep(.estado-general .frost-card h3),
   :deep(.atmosfera-libre .frost-card h3) {
     color: color-mix(in srgb, var(--color-primary) 60%, white 40%) !important;
   }
+
   :deep(.sensacion-termica .tint-emph) {
     color: color-mix(in srgb, var(--color-primary) 60%, white 40%) !important;
   }
@@ -230,6 +245,7 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { axiosClient } from "~/axiosConfig";
 import { userData } from "~/store/auth";
 
@@ -238,6 +254,9 @@ const error = ref(null);
 const zona = ref('');
 const dia = ref('');
 const boletin = ref(null);
+const needsAreaSetup = ref(false);
+const missingAreaText = ref('');
+const router = useRouter();
 const isTexto = computed(() => typeof boletin.value === 'string');
 
 const sourceLink = computed(() => {
@@ -265,7 +284,9 @@ async function fetchMontana(day) {
     const pref = prefRes?.data || {};
     const areaCode = pref?.area_code;
     if (!areaCode) {
-      throw new Error('No hay area_code guardado en preferencias. Guarda tu ubicación de montaña.');
+      needsAreaSetup.value = true;
+      missingAreaText.value = 'No se encontró ubicación de montaña.';
+      return;
     }
     // 2) Llamar backend con el área explícita
     const url = `/aemet/montana/${areaCode}/${day}`;
@@ -276,10 +297,16 @@ async function fetchMontana(day) {
     const b = data?.boletin ?? null;
     boletin.value = Array.isArray(b) ? (b[0] || null) : b;
   } catch (e) {
-    error.value = e?.message || 'Error cargando predicción de montaña';
+    if (!needsAreaSetup.value) {
+      error.value = e?.message || 'Error cargando predicción de montaña';
+    }
   } finally {
     loading.value = false;
   }
+}
+
+function goToUbicacion() {
+  router.push('/ubicacion');
 }
 
 onMounted(async () => {

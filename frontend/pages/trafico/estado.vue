@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { axiosClient } from "~/axiosConfig";
 import { userData } from "~/store/auth";
 
 // Vue Leaflet
-import { LMap, LTileLayer, LMarker, LPolyline } from "@vue-leaflet/vue-leaflet";
+import { LMap, LTileLayer, LMarker, LPolyline, LCircle } from "@vue-leaflet/vue-leaflet";
 import "leaflet/dist/leaflet.css";
 
 // Chart.js
@@ -31,10 +31,9 @@ ChartJS.register(
 );
 
 const datos = ref(null);
-const velocidadData = ref(null);
-const tiempoData = ref(null);
-const congestionData = ref(null);
 const coords = ref([]);
+const loading = ref(true);
+const error = ref(null);
 
 let leafletMap = null; // guardamos el objeto real del mapa
 
@@ -55,13 +54,13 @@ function hexToRgba(input, alpha = 1) {
     return v.replace(/rgb\(([^,]+),\s*([^,]+),\s*[^)]+\)/, `rgba($1,$2,$3,${alpha})`)
   }
   // Hex #RRGGBB o #RGB
-  let hex = v.replace('#','')
+  let hex = v.replace('#', '')
   if (hex.length === 3) {
     hex = hex.split('').map(c => c + c).join('')
   }
-  const r = parseInt(hex.substring(0,2), 16)
-  const g = parseInt(hex.substring(2,4), 16)
-  const b = parseInt(hex.substring(4,6), 16)
+  const r = parseInt(hex.substring(0, 2), 16)
+  const g = parseInt(hex.substring(2, 4), 16)
+  const b = parseInt(hex.substring(4, 6), 16)
   return `rgba(${r}, ${g}, ${b}, ${alpha})`
 }
 
@@ -114,6 +113,7 @@ onMounted(async () => {
   }
 
   try {
+    loading.value = true;
     // Obtener coordenadas de la ubicación guardada
     const uid = userData()?.value?.id;
     const pref = await axiosClient.get('/user/location-pref', { params: uid ? { user_id: uid } : {} });
@@ -125,56 +125,6 @@ onMounted(async () => {
     datos.value = res.data.flowSegmentData;
 
     if (datos.value) {
-      // Dataset de velocidad
-      velocidadData.value = {
-        labels: ["Velocidad"],
-        datasets: [
-          {
-            label: "Actual",
-            data: [datos.value.currentSpeed],
-            backgroundColor: hexToRgba(css('--color-danger'), 0.7), // rojo tema
-          },
-          {
-            label: "Libre",
-            data: [datos.value.freeFlowSpeed],
-            backgroundColor: hexToRgba(css('--color-success'), 0.7), // verde tema
-          },
-        ],
-      };
-
-      // Dataset de tiempo
-      tiempoData.value = {
-        labels: ["Tiempo"],
-        datasets: [
-          {
-            label: "Actual",
-            data: [Math.round(datos.value.currentTravelTime / 60)],
-            backgroundColor: hexToRgba(css('--color-primary'), 0.7), // primario tema
-          },
-          {
-            label: "Libre",
-            data: [Math.round(datos.value.freeFlowTravelTime / 60)],
-            backgroundColor: hexToRgba(css('--color-secondary'), 0.7), // secundario tema
-          },
-        ],
-      };
-
-      // Dataset congestión
-      const congestion = (
-        (datos.value.currentSpeed / datos.value.freeFlowSpeed) *
-        100
-      ).toFixed(0);
-
-      congestionData.value = {
-        labels: ["Tráfico", "Libre"],
-        datasets: [
-          {
-            data: [congestion, 100 - congestion],
-            backgroundColor: [css('--color-warning'), css('--color-border')], // tema
-          },
-        ],
-      };
-
       // Coordenadas para el mapa
       coords.value = datos.value.coordinates.coordinate.map((c) => [
         c.latitude,
@@ -186,8 +136,11 @@ onMounted(async () => {
         leafletMap.fitBounds(coords.value, { padding: [20, 20] });
       }
     }
+    loading.value = false;
   } catch (err) {
     console.error("Error al cargar tráfico:", err);
+    error.value = 'No se pudieron cargar los datos de tráfico.';
+    loading.value = false;
   }
 });
 
@@ -197,149 +150,138 @@ const onMapReady = (map) => {
   if (coords.value.length) {
     map.fitBounds(coords.value, { padding: [20, 20] });
   }
+  // Asegurar cálculo correcto de tamaño tras montar
+  setTimeout(() => {
+    try { map.invalidateSize(); } catch (_) {}
+  }, 0);
 };
+
+// ========= Derivados para UI clara =========
+const speedRatio = computed(() => {
+  if (!datos.value) return 0;
+  const f = Number(datos.value.freeFlowSpeed) || 0;
+  const c = Number(datos.value.currentSpeed) || 0;
+  return f > 0 ? c / f : 0;
+});
+
+const delayMin = computed(() => {
+  if (!datos.value) return 0;
+  const diff = (Number(datos.value.currentTravelTime) || 0) - (Number(datos.value.freeFlowTravelTime) || 0);
+  return Math.max(0, Math.round(diff / 60));
+});
+
+const reliability = computed(() => {
+  if (!datos.value) return 0;
+  const conf = Number(datos.value.confidence) || 0;
+  return Math.round(conf * 100);
+});
+
+const status = computed(() => {
+  if (!datos.value) return { label: '—', color: css('--color-border'), badge: 'bg-gray-500 text-white' };
+  if (datos.value.roadClosure) return { label: 'Cerrado', color: css('--color-danger'), badge: 'bg-red-600 text-white' };
+  const r = speedRatio.value;
+  if (r >= 0.8) return { label: 'Fluido', color: css('--color-success'), badge: 'bg-green-600 text-white' };
+  if (r >= 0.6) return { label: 'Denso', color: css('--color-warning'), badge: 'bg-yellow-500 text-black' };
+  return { label: 'Congestión', color: css('--color-danger'), badge: 'bg-red-600 text-white' };
+});
+
+// Centro aproximado del segmento para centrar el área
+const center = computed(() => {
+  if (!coords.value.length) return [40.4168, -3.7038];
+  let lat = 0, lon = 0;
+  for (const [a, b] of coords.value) { lat += a; lon += b; }
+  return [lat / coords.value.length, lon / coords.value.length];
+});
+
+// Radio de ciudad (m) — 5km
+const cityRadius = 5000;
 </script>
 
 <template>
-  <div class="relative w-full min-h-screen bg-center bg-cover" style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
+  <div class="relative w-full min-h-screen px-10 pt-10 bg-center bg-cover"
+    style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
     <div class="absolute inset-0 bg-black/40"></div>
 
-    <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
-      <h1 class="mb-6 text-3xl font-bold tracking-tight text-center page-title">🚦 Estado del tráfico</h1>
+    <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)] pt-10 px-10">
+      <h1 class="mt-6 text-3xl font-bold tracking-tight text-center page-title">Estado del tráfico</h1>
 
-    <div v-if="!datos">Cargando tráfico...</div>
-
-    <div v-else class="flex flex-col gap-6">
-      <div class="flex flex-col gap-4 p-4 border frost-card border-white/15 rounded-2xl">
-        <div
-          class="flex items-center justify-between pb-2 border-b theme-border"
-        >
-          <span class="font-semibold">Velocidad actual</span>
-          <span
-            class="px-3 py-1 font-bold rounded-lg"
-            :class="{
-              'bg-green-600 text-white':
-                datos.currentSpeed > datos.freeFlowSpeed * 0.7,
-              'bg-yellow-500 text-black':
-                datos.currentSpeed <= datos.freeFlowSpeed * 0.7 &&
-                datos.currentSpeed > datos.freeFlowSpeed * 0.4,
-              'bg-red-600 text-white':
-                datos.currentSpeed <= datos.freeFlowSpeed * 0.4,
-            }"
-          >
-            {{ datos.currentSpeed }} km/h
-          </span>
-        </div>
-        <div class="flex items-center justify-between pb-2 border-b theme-border">
-          <span class="font-semibold">Velocidad libre</span>
-          <span class="theme-text-muted">{{ datos.freeFlowSpeed }} km/h</span>
-        </div>
-        <div class="flex items-center justify-between pb-2 border-b theme-border">
-          <span class="font-semibold">Tiempo de viaje actual</span>
-          <span>{{ Math.round(datos.currentTravelTime / 60) }} min</span>
-        </div>
-        <div class="flex items-center justify-between pb-2 border-b theme-border">
-          <span class="font-semibold">Tiempo en condiciones libres</span>
-          <span>{{ Math.round(datos.freeFlowTravelTime / 60) }} min</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="font-semibold">Confianza</span>
-          <span>{{ (datos.confidence * 100).toFixed(0) }}%</span>
-        </div>
-        <div
-          v-if="datos.roadClosure"
-          class="p-3 mt-4 font-bold text-center rounded-lg text-white bg-[color:var(--color-danger)]"
-        >
-          ⚠️ Carretera cerrada
+      <div v-if="loading" class="flex items-center justify-center min-h-[30vh]">
+        <div class="flex flex-col items-center gap-3">
+          <div class="spinner" aria-label="Cargando"></div>
+          <div class="loader-text">Cargando tráfico...</div>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-4">
-        <div class="p-4 border frost-card border-white/15 rounded-2xl">
-          <h2 class="mb-2 text-sm font-semibold">Velocidad</h2>
-          <div style="height: 200px; width: 100%">
-            <Bar
-              v-if="velocidadData"
-              :data="velocidadData"
-              :options="{
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'x',
-                plugins: {
-                  legend: { position: 'top', labels: { color: css('--color-text') } },
-                },
-                scales: {
-                  x: { ticks: { color: css('--color-text-muted') } },
-                  y: { ticks: { color: css('--color-text-muted') }, beginAtZero: true },
-                },
-              }"
-            />
-          </div>
-        </div>
-
-        <div class="p-4 border frost-card border-white/15 rounded-2xl">
-          <h2 class="mb-2 text-sm font-semibold">Tiempo</h2>
-          <div style="height: 200px; width: 100%">
-            <Bar
-              v-if="tiempoData"
-              :data="tiempoData"
-              :options="{
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'x',
-                plugins: {
-                  legend: { position: 'top', labels: { color: css('--color-text') } },
-                },
-                scales: {
-                  x: { ticks: { color: css('--color-text-muted') } },
-                  y: { ticks: { color: css('--color-text-muted') }, beginAtZero: true },
-                },
-              }"
-            />
-          </div>
-        </div>
-
-        <div class="p-4 border frost-card border-white/15 rounded-2xl">
-          <h2 class="mb-2 text-sm font-semibold">Congestión</h2>
-          <div style="height: 200px; width: 100%">
-            <Doughnut
-              v-if="congestionData"
-              :data="congestionData"
-              :options="{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { position: 'bottom', labels: { color: css('--color-text') } },
-                },
-              }"
-            />
-          </div>
-        </div>
+      <div v-else-if="error" class="max-w-md p-4 mx-auto text-center border rounded-xl border-white/20 frost-card">
+        {{ error }}
       </div>
 
-      <div class="p-4 border frost-card border-white/15 rounded-2xl">
-        <client-only>
-          <LMap
-            v-if="coords.length"
-            style="height: 250px; width: 100%"
-            @ready="onMapReady"
-          >
-            <LTileLayer
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              attribution="&copy; OpenStreetMap"
-            />
-            <LPolyline :lat-lngs="coords" :color="css('--color-danger')" :weight="5" />
-            <LMarker :lat-lng="coords[0]" />
-          </LMap>
-        </client-only>
+      <div v-else-if="datos" class="flex flex-col gap-6">
+        <!-- Hero resumen -->
+        <div class="p-5 border frost-card border-white/15 rounded-2xl">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div :class="['inline-flex items-center px-3 py-1 rounded-lg text-xs font-semibold', status.badge]">
+                {{ status.label }}
+              </div>
+              <div class="mt-3 text-4xl font-extrabold leading-tight">{{ datos.currentSpeed }}<span
+                  class="text-2xl font-bold"> km/h</span></div>
+              <div class="mt-1 text-sm text-white/70">Libre: {{ datos.freeFlowSpeed }} km/h · FRC: {{ datos.frc }}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-white/70">Retraso</div>
+              <div class="text-3xl font-extrabold">{{ delayMin }}<span class="text-xl font-bold"> min</span></div>
+              <div class="mt-1 text-sm text-white/70">Confianza: {{ reliability }}%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div class="p-4 border frost-card border-white/15 rounded-2xl">
+            <div class="text-sm text-white/70">Velocidad actual</div>
+            <div class="mt-1 text-2xl font-bold">{{ datos.currentSpeed }} km/h</div>
+          </div>
+          <div class="p-4 border frost-card border-white/15 rounded-2xl">
+            <div class="text-sm text-white/70">Velocidad libre</div>
+            <div class="mt-1 text-2xl font-bold">{{ datos.freeFlowSpeed }} km/h</div>
+          </div>
+          <div class="p-4 border frost-card border-white/15 rounded-2xl">
+            <div class="text-sm text-white/70">Relación</div>
+            <div class="mt-1 text-2xl font-bold">{{ Math.round(speedRatio * 100) }}%</div>
+          </div>
+          <div class="p-4 border frost-card border-white/15 rounded-2xl">
+            <div class="text-sm text-white/70">Confianza</div>
+            <div class="mt-1 text-2xl font-bold">{{ reliability }}%</div>
+          </div>
+        </div>
+
+        <!-- Mapa -->
+        <div class="p-4 border frost-card border-white/15 rounded-2xl w-full">
+          <client-only>
+            <div class="w-full h-[360px] md:h-[460px] lg:h-[560px]">
+              <LMap v-if="coords.length" style="height: 100%; width: 100%" :options="{ scrollWheelZoom: false }" @ready="onMapReady">
+                <LTileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution="&copy; OpenStreetMap" />
+                <LCircle :lat-lng="center" :radius="cityRadius" :color="status.color" :weight="2" :fill="true"
+                  :fillColor="status.color" :fillOpacity="0.25" />
+                <LMarker :lat-lng="center" />
+              </LMap>
+            </div>
+          </client-only>
+        </div>
+
+        <!-- Nota fuente -->
+        <div class="text-sm text-center text-white/60">Fuente: TomTom Traffic Flow API</div>
       </div>
-    </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.page-title { color: #ffffff !important; }
+.page-title {
+  color: #ffffff !important;
+}
 
 /* Glass muy sutil como en Diaria */
 .frost-card {
@@ -378,5 +320,26 @@ const onMapReady = (map) => {
 :deep(.frost-card th),
 :deep(.frost-card td) {
   color: #ffffff !important;
+}
+
+/* Spinner */
+.spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid color-mix(in srgb, white 30%, transparent);
+  border-top-color: color-mix(in srgb, var(--color-primary) 70%, white 30%);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loader-text {
+  color: color-mix(in srgb, white 75%, transparent);
+  font-weight: 600;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

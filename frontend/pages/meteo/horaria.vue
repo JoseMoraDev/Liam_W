@@ -10,6 +10,26 @@ function findVal(arr, h) {
     return it ? it.value ?? null : null;
 }
 
+function formatFechaLarga(input) {
+    try {
+        if (!input) return "—";
+        const s = typeof input === "string" ? input : String(input);
+        const d = new Date(s.includes("T") ? s : `${s}T00:00:00`);
+        if (isNaN(d)) return "—";
+        const partes = new Intl.DateTimeFormat("es-ES", {
+            weekday: "long",
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+        })
+            .format(d)
+            .replace(",", "");
+        return partes.charAt(0).toUpperCase() + partes.slice(1);
+    } catch (_) {
+        return "—";
+    }
+}
+
 onMounted(async () => {
     try {
         const res = await axios.get(
@@ -71,7 +91,7 @@ onMounted(async () => {
             <div v-else class="space-y-8">
                 <div v-for="(dia, index) in dias" :key="index"
                     class="p-4 overflow-x-auto border frost-card border-white/15 rounded-2xl">
-                    <h2 class="mb-3 text-lg font-semibold">📅 {{ dia.fecha.split("T")[0] }}</h2>
+                    <h2 class="mb-3 text-lg font-semibold">📅 {{ formatFechaLarga(dia.fecha.split("T")[0]) }}</h2>
                     <table class="min-w-full border-collapse table-fixed">
                         <thead>
                             <tr class="glass-header text-[color:var(--color-text-muted)]">

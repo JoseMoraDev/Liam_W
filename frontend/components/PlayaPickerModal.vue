@@ -1,8 +1,7 @@
 <template>
   <div v-if="open" class="fixed inset-0 z-50 flex items-end justify-center p-4">
     <div class="absolute inset-0 bg-black/40" @click="onClose" />
-    <div
-      ref="panelEl"
+    <div ref="panelEl"
       class="relative z-10 w-full max-w-2xl p-4 mb-5 border rounded-2xl panel-glass border-white/15 max-h-[85vh] overflow-y-auto">
       <div class="mx-auto mb-2 h-1.5 w-12 rounded-full bg-white/30"></div>
       <header class="sticky top-0 z-10 flex items-center justify-between pb-2 mb-3 header-glass">
@@ -11,10 +10,10 @@
           <button :disabled="props.saving" @click="onClose"
             class="px-3 py-2 text-sm rounded-md btn-glass disabled:opacity-50">Cancelar</button>
           <button :disabled="!sel || props.saving" @click="confirmar"
-            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white btn-primary-glass rounded-md disabled:opacity-50">
+            class="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white rounded-md btn-primary-glass disabled:opacity-50">
             <span v-if="props.saving"
               class="inline-block w-4 h-4 border-2 rounded-full border-white/80 border-t-transparent animate-spin"></span>
-            <span>{{ props.saving ? 'Guardando…' : 'Guardar' }}</span>
+            <span>{{ props.saving ? 'Guardando…' : 'Seleccionar' }}</span>
           </button>
         </div>
       </header>
@@ -22,7 +21,8 @@
       <!-- Mapa preview (arriba para que siempre se vea) -->
       <div class="mt-2">
         <h3 class="mb-2 text-sm font-semibold text-white">Mapa</h3>
-        <div ref="mapEl" class="w-full h-64 min-h-[16rem] overflow-hidden border rounded-xl border-white/15 map-glass"></div>
+        <div ref="mapEl" class="w-full h-64 min-h-[16rem] overflow-hidden border rounded-xl border-white/15 map-glass">
+        </div>
       </div>
 
       <div class="mt-4 space-y-6">
@@ -41,21 +41,22 @@
         </section>
 
         <!-- Playas de la provincia (excluyendo municipio) -->
-        <section>
-          <div class="flex items-center justify-between mb-2">
+        <section v-if="provincias.length && provSel">
+          <div class="flex items-center justify-between mb-2 relative">
             <h3 class="text-sm font-semibold text-white uppercase">Playas de</h3>
-            <select v-model="provSel" @change="fetchProvincia"
-              class="px-3 py-1 text-sm border rounded-md chip-glass border-white/15 text-white">
-              <option v-for="p in provincias" :key="p.id_provincia" :value="p.id_provincia">
+            <select :key="provSel" v-model="provSel" @change="fetchProvincia"
+              class="px-3 py-1 text-sm text-white rounded-md chip-glass">
+              <option v-for="p in provincias" :key="p.id_provincia" :value="String(p.id_provincia).padStart(2,'0')">
                 {{ p.nombre_provincia }}
               </option>
             </select>
           </div>
           <div class="mb-2">
             <input v-model="q" @input="debouncedBuscar" type="text" placeholder="Busca aquí tu playa"
-              class="w-full px-3 py-2 border rounded-md chip-glass border-white/15 placeholder-white/60 text-white" />
+              class="w-full px-3 py-2 text-white border rounded-md chip-glass border-white/15 placeholder-white/60" />
           </div>
-          <div ref="provListEl" class="grid grid-cols-1 gap-2 pr-1 overflow-auto sm:grid-cols-2 md:grid-cols-2 max-h-48">
+          <div ref="provListEl"
+            class="grid grid-cols-1 gap-2 pr-1 overflow-auto sm:grid-cols-2 md:grid-cols-2 max-h-48">
             <button v-for="p in playasProvinciaFiltradas" :key="p.id_playa" @click="!props.saving && select(p)"
               :class="['w-full text-left px-3 py-2 rounded-md border option-btn', sel?.id_playa === p.id_playa ? 'opt-active' : 'opt-default']">
               <div class="text-sm font-medium text-white">{{ p.nombre_playa }}</div>
@@ -104,8 +105,15 @@ let resizeHandler = null
 let ro = null
 const mapEl = ref(null)
 const panelEl = ref(null)
+const provControlEl = ref(null)
+const provMenuEl = ref(null)
+const provOpen = ref(false)
 const resolvedMunicipioId = ref(null) // código concatenado resuelto dinámicamente
 const loadingLists = ref(false)
+const provLocked = ref(false) // evita cambios en bucle de provincia tras fijarla correctamente
+const provEnforceUntil = ref(0) // timestamp hasta el que se fuerza que provSel coincida con la del municipio
+let docClickHandler = null
+let suppressDocClose = false
 
 function onClose() { emit('close') }
 async function computeMunicipioMid() {
@@ -158,9 +166,10 @@ async function select(p) {
   try {
     if (p && p.id_provincia != null) {
       const nextProv = String(p.id_provincia).padStart(2, '0')
-      if (provSel.value !== nextProv) {
+      if (!provLocked.value && provSel.value !== nextProv) {
         provSel.value = nextProv
         await fetchProvincia()
+        provLocked.value = true
       }
     }
   } catch (e) { }
@@ -236,12 +245,24 @@ async function fetchMunicipio() {
   if (!provSel.value && playasMunicipio.value.length) {
     provSel.value = String(playasMunicipio.value[0].id_provincia).padStart(2, '0')
     await fetchProvincia()
+    provLocked.value = true
   } else if (!playasMunicipio.value.length && provSel.value) {
     // Si no hay playas de municipio pero sí cpro, cargar provincia igualmente (sin fallback adicional)
     await fetchProvincia()
   }
   // Tras tener datos municipales, si el modal está abierto, asegurar mapa
   if (props.open) { await initMap(); updateMarker() }
+  // Verificación: si hay playas del municipio, forzar provSel a la provincia del municipio
+  try {
+    if (!provLocked.value && playasMunicipio.value.length) {
+      const want = String(playasMunicipio.value[0].id_provincia).padStart(2, '0')
+      if (provSel.value !== want) {
+        provSel.value = want
+        await fetchProvincia()
+      }
+      provLocked.value = true
+    }
+  } catch (e) { /* ignore */ }
   loadingLists.value = false
 }
 
@@ -294,6 +315,7 @@ try {
     if (s) {
       sel.value = s
       if (s.id_provincia != null) provSel.value = String(s.id_provincia).padStart(2, '0')
+      await fetchProvincia()
     } else {
       // Buscar por id para centrar el mapa aunque no esté en las listas actuales
       const { data } = await axiosClient.get('/playas', { params: { id_playa: props.selectedId, fields: 'id_playa,lat,lon,id_provincia,nombre_playa,nombre_municipio,nombre_provincia', limit: 1 } })
@@ -301,6 +323,7 @@ try {
       if (row && row.id_playa) {
         sel.value = row
         if (row.id_provincia != null) provSel.value = String(row.id_provincia).padStart(2, '0')
+        await fetchProvincia()
         await ensureMapReady()
       }
     }
@@ -363,7 +386,7 @@ async function initMap() {
   requestAnimationFrame(() => { try { map && map.invalidateSize() } catch (e) { } })
   setTimeout(() => { try { map && map.invalidateSize() } catch (e) { } }, 120)
   // Listener de resize
-  resizeHandler = () => { try { map.invalidateSize() } catch (e) { } }
+  resizeHandler = () => { try { map && map.invalidateSize() } catch (e) { } }
   window.addEventListener('resize', resizeHandler)
   // Observer de cambios de tamaño/visibilidad del contenedor
   try {
@@ -398,26 +421,59 @@ async function ensureMapReady() {
 
 watch(() => props.open, async (v) => {
   if (v) {
+    provLocked.value = false
+    provEnforceUntil.value = Date.now() + 5000
     q.value = ''
     try { if (panelEl && panelEl.value) panelEl.value.scrollTop = 0 } catch (e) { }
     await ensureMapReady()
-    await fetchProvincias()
-    if (props.cpro) provSel.value = String(props.cpro).padStart(2, '0')
-    await fetchMunicipio()
-    await fetchProvincia()
-    // Reafirmar la playa activa pasada desde el padre
+    // 1) Resolver provincia desde selectedId (si existe) ANTES de cargar provincias para evitar fallback visual
     try {
       if (props.selectedId != null) {
-        const s = (playasMunicipio.value.concat(playasProvincia.value)).find(p => String(p.id_playa) === String(props.selectedId))
-        if (s) {
-          sel.value = s
-          if (s.id_provincia != null) provSel.value = String(s.id_provincia).padStart(2, '0')
+        const { data } = await axiosClient.get('/playas', { params: { id_playa: props.selectedId, fields: 'id_playa,id_provincia,lat,lon,nombre_playa,nombre_municipio,nombre_provincia', limit: 1 } })
+        const row = Array.isArray(data) ? data[0] : data
+        if (row && row.id_playa) {
+          sel.value = row
+          if (row.id_provincia != null) {
+            provSel.value = String(row.id_provincia).padStart(2, '0')
+            provLocked.value = true
+          }
         }
+      }
+    } catch (e) { }
+    // 2) Si no quedó fijada, usar cpro del padre
+    if (!provSel.value && props.cpro) { provSel.value = String(props.cpro).padStart(2, '0'); provLocked.value = true }
+    // 3) Cargar catálogo de provincias después de tener provSel
+    await fetchProvincias()
+    // Con provincia fijada, cargar listas en orden
+    await fetchMunicipio()
+    await fetchProvincia()
+    // Verificación final tras cargar listas: alinear provincia con la del municipio si existe
+    try {
+      if (!provLocked.value && playasMunicipio.value.length) {
+        const want = String(playasMunicipio.value[0].id_provincia).padStart(2, '0')
+        if (provSel.value !== want) {
+          provSel.value = want
+          await fetchProvincia()
+        }
+        provLocked.value = true
+      }
+    } catch (e) { }
+    // Reconciliar: si hay una playa seleccionada, forzar que el desplegable use su provincia
+    try {
+      if (!provLocked.value && sel.value && sel.value.id_provincia != null) {
+        const want = String(sel.value.id_provincia).padStart(2, '0')
+        if (provSel.value !== want) {
+          provSel.value = want
+          await fetchProvincia()
+        }
+        provLocked.value = true
       }
     } catch (e) { }
     await ensureMapReady()
   } else {
     try { if (map) { map.remove(); map = null; marker = null } } catch (e) { }
+    provLocked.value = false
+    provEnforceUntil.value = 0
   }
 })
 watch([sel, playasMunicipio, playasProvincia], async () => { if (props.open) { await ensureMapReady() } })
@@ -428,6 +484,7 @@ watch(() => props.cpro, async (val) => {
     provSel.value = String(val).padStart(2, '0')
     q.value = ''
     await fetchProvincia()
+    provLocked.value = true
   }
 })
 watch(() => props.municipioId, async () => {
@@ -441,6 +498,27 @@ watch(() => props.municipioName, async () => {
   if (props.open) { await initMap(); updateMarker() }
 })
 
+// Si cambia la playa seleccionada desde el padre, alinea la provincia del desplegable
+watch(() => props.selectedId, async (nv, ov) => {
+  if (nv == null || nv === ov) return
+  try {
+    const { data } = await axiosClient.get('/playas', { params: { id_playa: nv, fields: 'id_playa,id_provincia,lat,lon,nombre_playa,nombre_municipio,nombre_provincia', limit: 1 } })
+    const row = Array.isArray(data) ? data[0] : data
+    if (row && row.id_playa) {
+      sel.value = row
+      if (row.id_provincia != null) {
+        const want = String(row.id_provincia).padStart(2, '0')
+        if (!provLocked.value && provSel.value !== want) {
+          provSel.value = want
+          await fetchProvincia()
+        }
+        provLocked.value = true
+      }
+      if (props.open) { await initMap(); updateMarker() }
+    }
+  } catch (e) { }
+})
+
 onMounted(async () => {
   if (props.open) { await ensureMapReady() }
   // Reajustar en scroll del panel (por si cambia el layout)
@@ -448,17 +526,45 @@ onMounted(async () => {
     const handler = () => { try { map && map.invalidateSize() } catch (e) { } }
     if (panelEl && panelEl.value) panelEl.value.addEventListener('scroll', handler, { passive: true })
   } catch (e) { }
+  // Cerrar menú al hacer click fuera
+  try {
+    const onDocClick = (ev) => {
+      if (suppressDocClose) return
+      const t = ev.target
+      const inside = (provControlEl?.value && provControlEl.value.contains(t)) || (provMenuEl?.value && provMenuEl.value.contains(t))
+      if (!inside) provOpen.value = false
+    }
+    document.addEventListener('click', onDocClick)
+    docClickHandler = onDocClick
+  } catch (e) { }
 })
 
 onBeforeUnmount(() => {
   try { if (map) { map.remove(); map = null; marker = null } } catch (e) { }
   try { if (resizeHandler) { window.removeEventListener('resize', resizeHandler) } } catch (e) { }
   try { if (ro && mapEl.value) { ro.disconnect(); ro = null } } catch (e) { }
+  try { if (docClickHandler) { document.removeEventListener('click', docClickHandler); docClickHandler = null } } catch (e) { }
 })
 
 // Guardar provincia al cambiar y limpiar búsqueda para evitar filtros residuales
 watch(provSel, async (val, oldVal) => {
   if (val !== oldVal) { q.value = '' }
+})
+
+// Durante los primeros 5s tras abrir, si hay playas del municipio, forzar que la provincia del desplegable
+// coincida con la provincia del municipio para evitar saltos al primer valor del catálogo.
+watch(provSel, async (nv, ov) => {
+  if (!props.open) return
+  if (Date.now() > provEnforceUntil.value) return
+  try {
+    if (playasMunicipio.value.length) {
+      const want = String(playasMunicipio.value[0].id_provincia).padStart(2, '0')
+      if (nv !== want) {
+        provSel.value = want
+        await fetchProvincia()
+      }
+    }
+  } catch (e) { }
 })
 </script>
 
@@ -471,12 +577,22 @@ watch(provSel, async (val, oldVal) => {
   border-top-color: color-mix(in srgb, white 30%, var(--color-primary) 70%);
   animation: spin 1s linear infinite;
 }
+
 .loader-text {
   font-weight: 600;
   letter-spacing: 0.2px;
   color: color-mix(in srgb, black 30%, var(--color-primary) 70%);
 }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* Panel glass como Diaria (.frost-card) */
 .panel-glass {
@@ -500,9 +616,9 @@ watch(provSel, async (val, oldVal) => {
 .header-glass {
   position: sticky;
   top: 0;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background-image: linear-gradient(to bottom, color-mix(in srgb, var(--color-bg) 20%, transparent), color-mix(in srgb, var(--color-bg) 20%, transparent));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background-image: none;
   border-bottom: none;
   box-shadow: none;
   border-top-left-radius: inherit;
@@ -518,8 +634,9 @@ watch(provSel, async (val, oldVal) => {
     linear-gradient(to bottom,
       color-mix(in srgb, var(--color-bg) 24%, transparent),
       color-mix(in srgb, var(--color-bg) 24%, transparent));
-  border: 1px solid rgba(255,255,255,0.18);
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
+
 .btn-primary-glass {
   color: #ffffff;
   background-image:
@@ -529,7 +646,7 @@ watch(provSel, async (val, oldVal) => {
     linear-gradient(to bottom,
       color-mix(in srgb, var(--color-bg) 14%, transparent),
       color-mix(in srgb, var(--color-bg) 14%, transparent));
-  border: 1px solid rgba(255,255,255,0.22);
+  border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 /* Chips/select e input con glass teñido del tema principal (no blanco) */
@@ -537,21 +654,124 @@ watch(provSel, async (val, oldVal) => {
   color: #ffffff;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  /* Igual que Diaria: capas glass con tinte primario sutil y velo de fondo */
   background-image:
     linear-gradient(to bottom,
-      color-mix(in srgb, white 18%, transparent),
-      color-mix(in srgb, white 18%, transparent)),
+      color-mix(in srgb, var(--color-primary) 3%, transparent),
+      color-mix(in srgb, var(--color-primary) 3%, transparent)),
     linear-gradient(to bottom,
-      color-mix(in srgb, var(--color-bg) 10%, transparent),
-      color-mix(in srgb, var(--color-bg) 10%, transparent));
-  border: 1px solid rgba(255,255,255,0.15);
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent));
+  border: 1px solid rgba(255, 255, 255, 0.18);
   background-color: transparent;
 }
-.chip-glass::placeholder { color: rgba(255,255,255,0.7); }
-select.chip-glass { appearance: none; -webkit-appearance: none; }
+
+.chip-glass::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+select.chip-glass {
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Forzar fondo más oscuro del control select y del desplegable para contraste */
+:deep(select.chip-glass) {
+  /* Mismo glass que Diaria para coherencia visual */
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 16%, transparent),
+      color-mix(in srgb, var(--color-primary) 16%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 22%, transparent),
+      color-mix(in srgb, var(--color-bg) 22%, transparent)),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='%23ffffff'><path d='M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.06z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right .6rem center;
+  background-size: 12px 12px;
+  border-color: rgba(255, 255, 255, 0.07);
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 12px;
+  outline: none !important;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,.10);
+  background-clip: padding-box;
+  -webkit-tap-highlight-color: transparent;
+  color: #ffffff;
+  padding-right: 1.9rem;
+}
+
+:deep(select.chip-glass:focus),
+:deep(select.chip-glass:focus-visible) {
+  outline: none !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--color-primary) 38%, transparent),
+    inset 0 1px 4px rgba(0,0,0,.10);
+}
+
+:deep(select.chip-glass) option {
+  /* Fondo del menú: tinte del color predominante (primary) + velo de fondo */
+  background-color: color-mix(in srgb, var(--color-primary) 40%, color-mix(in srgb, var(--color-bg) 60%, transparent));
+  color: #ffffff;
+  border: 0;
+  line-height: 1.5;
+  padding: 6px 10px;
+}
+:deep(select.chip-glass) option:hover,
+:deep(select.chip-glass) option:checked,
+:deep(select.chip-glass) option:focus {
+  background-color: color-mix(in srgb, var(--color-primary) 55%, color-mix(in srgb, var(--color-bg) 45%, transparent));
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Variante tema claro igual a Diaria */
+@media (prefers-color-scheme: light) {
+  .chip-glass {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 6%, transparent),
+        color-mix(in srgb, var(--color-primary) 6%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 12%, transparent),
+        color-mix(in srgb, var(--color-bg) 12%, transparent));
+  }
+  :deep(select.chip-glass) {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 10%, transparent),
+        color-mix(in srgb, white 10%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 10%, transparent),
+        color-mix(in srgb, var(--color-primary) 10%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 16%, transparent),
+        color-mix(in srgb, var(--color-bg) 16%, transparent)),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='%230b1220'><path d='M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.25 8.29a.75.75 0 01-.02-1.06z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right .6rem center;
+    background-size: 12px 12px;
+    color: #ffffff;
+    border-color: rgba(0,0,0,.06);
+    border-radius: 12px;
+    padding-right: 1.9rem;
+  }
+  :deep(select.chip-glass) option {
+    background-color: color-mix(in srgb, var(--color-primary) 36%, color-mix(in srgb, var(--color-bg) 64%, transparent));
+    color: #ffffff;
+    line-height: 1.5;
+    padding: 6px 10px;
+  }
+}
 
 /* Input usa el mismo tono que el select (no simula estado seleccionado) */
-input.chip-glass { background-image: inherit; border-color: rgba(255,255,255,0.15); }
+input.chip-glass {
+  background-image: inherit;
+  border-color: rgba(255, 255, 255, 0.15);
+}
 
 /* Mapa fondo glass (sin azul saturado) */
 .map-glass {
@@ -562,12 +782,65 @@ input.chip-glass { background-image: inherit; border-color: rgba(255,255,255,0.1
   background-color: transparent;
 }
 
+/* Controles de zoom Leaflet con color predominante del tema (glass) */
+:deep(.leaflet-control-zoom a) {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 22%, transparent),
+      color-mix(in srgb, var(--color-primary) 22%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 16%, transparent),
+      color-mix(in srgb, var(--color-bg) 16%, transparent));
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+}
+
+:deep(.leaflet-control-zoom a:hover),
+:deep(.leaflet-control-zoom a:focus) {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 30%, transparent),
+      color-mix(in srgb, var(--color-primary) 30%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 18%, transparent),
+      color-mix(in srgb, var(--color-bg) 18%, transparent));
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+@media (prefers-color-scheme: light) {
+  :deep(.leaflet-control-zoom a) {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 16%, transparent),
+        color-mix(in srgb, var(--color-primary) 16%, transparent));
+    color: #0b1220;
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+  :deep(.leaflet-control-zoom a:hover),
+  :deep(.leaflet-control-zoom a:focus) {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 20%, transparent),
+        color-mix(in srgb, white 20%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 22%, transparent),
+        color-mix(in srgb, var(--color-primary) 22%, transparent));
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
+  }
+}
+
 /* Opciones de listas con glass sutil */
 .option-btn {
   transition: background-color .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
+
 .opt-default {
-  border-color: rgba(255,255,255,0.15);
+  border-color: rgba(255, 255, 255, 0.15);
   background-image:
     linear-gradient(to bottom,
       color-mix(in srgb, white 18%, transparent),
@@ -576,8 +849,9 @@ input.chip-glass { background-image: inherit; border-color: rgba(255,255,255,0.1
       color-mix(in srgb, var(--color-bg) 10%, transparent),
       color-mix(in srgb, var(--color-bg) 10%, transparent));
 }
+
 .opt-active {
-  border-color: rgba(255,255,255,0.22);
+  border-color: rgba(255, 255, 255, 0.22);
   background-image:
     linear-gradient(to bottom,
       color-mix(in srgb, var(--color-primary) 12%, transparent),
@@ -585,7 +859,7 @@ input.chip-glass { background-image: inherit; border-color: rgba(255,255,255,0.1
     linear-gradient(to bottom,
       color-mix(in srgb, var(--color-bg) 12%, transparent),
       color-mix(in srgb, var(--color-bg) 12%, transparent));
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 /* Tema claro: mismas capas que Diaria para el panel */

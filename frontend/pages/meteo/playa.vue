@@ -175,7 +175,14 @@ async function guardarSeleccion(pl) {
   savingSelection.value = true;
   try {
     const uid = userData()?.value?.id;
-    await axiosClient.post('/user/location-pref', { user_id: uid, codigo_playa: pl.id_playa });
+    // Merge with existing prefs to avoid wiping other settings (e.g., montaña area_code)
+    let existing = {};
+    try {
+      const res = await axiosClient.get('/user/location-pref', { params: uid ? { user_id: uid } : {} });
+      existing = res?.data || {};
+    } catch (e) { /* ignore */ }
+    const payload = { ...existing, user_id: uid, codigo_playa: pl.id_playa };
+    await axiosClient.post('/user/location-pref', payload);
     codigoPlaya.value = pl.id_playa;
     if (pl?.id_provincia != null) playaProvCpro.value = String(pl.id_provincia).padStart(2, '0');
     nombrePlaya.value = pl.nombre_playa;

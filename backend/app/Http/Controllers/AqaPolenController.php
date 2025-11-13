@@ -11,12 +11,16 @@ class AqaPolenController extends Controller
      * Devuelve los datos horarios de polen para Elche (Alicante)
      * Fuente: Open-Meteo Air Quality API
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // 📍 Coordenadas de Elche
-            $lat = 38.2699;
-            $lon = -0.7126;
+            // 📍 Coordenadas: aceptar query params con fallback a Elche
+            $lat = $request->query('lat');
+            $lon = $request->query('lon');
+            if (!is_numeric($lat) || !is_numeric($lon)) {
+                $lat = 38.2699; // Elche
+                $lon = -0.7126;
+            }
 
             // 🌿 URL de la API pública de Open-Meteo (polen)
             $url = "https://air-quality-api.open-meteo.com/v1/air-quality?latitude={$lat}&longitude={$lon}&hourly=birch_pollen,grass_pollen,olive_pollen";

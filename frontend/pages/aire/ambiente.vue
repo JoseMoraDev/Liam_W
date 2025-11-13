@@ -16,6 +16,29 @@ function formatearFecha(fechaISO) {
     .replace(".", "");
 }
 
+// Formatea 'YYYY-MM-DD HH:MM:SS' o ISO a 'DD/MM/YYYY a las HH:MM'
+function formatFechaHora(s) {
+  try {
+    if (!s || typeof s !== 'string') return '—';
+    const norm = s.replace('T', ' ').trim();
+    const [datePart, timePartRaw = ''] = norm.split(' ');
+    const [y, m, d] = (datePart || '').split('-');
+    const hhmm = timePartRaw.slice(0, 5);
+    if (y && m && d && hhmm) return `${d}/${m}/${y} a las ${hhmm}`;
+    // Fallback usando Date si el formato difiere
+    const dt = new Date(s);
+    if (!isNaN(dt)) {
+      const dd = String(dt.getDate()).padStart(2, '0');
+      const mm = String(dt.getMonth() + 1).padStart(2, '0');
+      const yy = dt.getFullYear();
+      const hh = String(dt.getHours()).padStart(2, '0');
+      const mi = String(dt.getMinutes()).padStart(2, '0');
+      return `${dd}/${mm}/${yy} a las ${hh}:${mi}`;
+    }
+  } catch (e) { }
+  return '—';
+}
+
 onMounted(async () => {
   try {
     // Obtener lat/lon guardadas
@@ -51,22 +74,28 @@ onMounted(async () => {
     style="background-image: url('/img/menu.jpg'); background-attachment: fixed;">
     <div class="absolute inset-0 bg-black/40"></div>
 
-    <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
-      <h1 class="mb-6 text-3xl font-bold tracking-tight text-center page-title">🌍 Calidad del aire</h1>
+    <div class="relative z-10 min-h-screen pt-10 p-4 text-[color:var(--color-text)]">
+      <h1 class="pt-6 mb-6 text-3xl font-bold tracking-tight text-center page-title">Calidad del aire</h1>
 
-      <div v-if="loading">Cargando datos...</div>
+      <div v-if="loading" class="flex items-center justify-center min-h-[30vh]">
+        <div class="flex flex-col items-center gap-3">
+          <div class="spinner" aria-label="Cargando"></div>
+          <div class="loader-text">Cargando datos...</div>
+        </div>
+      </div>
       <div v-else-if="error" class="text-red-400">⚠️ {{ error }}</div>
       <div v-else-if="!aire">No hay datos disponibles para esta ubicación.</div>
       <div v-else>
         <!-- Info general -->
-        <div class="mb-4">
-          <p class="text-lg font-semibold">📍 {{ aire.city?.name || '—' }}</p>
-          <p class="text-sm text-slate-400">
+        <div class="mb-4 text-center">
+          <p class="mb-1 font-semibold text-md text-white/80">Estación más cercana</p>
+          <p class="text-xl font-semibold">{{ aire.city?.name || '—' }}</p>
+          <p class="mt-6 text-md text-slate-700">
             Índice AQI actual: <span class="font-bold">{{ aire.aqi ?? '—' }}</span>
             ({{ (aire.dominentpol || '')?.toString()?.toUpperCase() || '—' }})
           </p>
-          <p class="text-sm text-slate-400">
-            Última actualización: {{ aire.time?.s || '—' }}
+          <p class="text-md text-slate-700">
+            Última actualización {{ formatFechaHora(aire.time?.s) }}
           </p>
         </div>
 
@@ -197,5 +226,30 @@ onMounted(async () => {
 :deep(.frost-card th),
 :deep(.frost-card td) {
   color: #ffffff !important;
+}
+
+/* Spinner con color principal del tema */
+.spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  border: 4px solid color-mix(in srgb, white 75%, var(--color-primary) 25%);
+  border-top-color: color-mix(in srgb, white 30%, var(--color-primary) 70%);
+  animation: spin 1s linear infinite;
+}
+
+.loader-text {
+  font-weight: 600;
+  color: color-mix(in srgb, white 85%, var(--color-primary) 15%);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
