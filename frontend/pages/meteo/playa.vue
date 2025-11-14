@@ -1,9 +1,10 @@
 <script setup>
-import { ref, onMounted, watch, nextTick, onBeforeUnmount } from "vue";
+import { ref, onMounted, watch, nextTick, onBeforeUnmount, computed } from "vue";
 import { axiosClient } from "~/axiosConfig";
 import { userData } from "~/store/auth";
 import PlayaPickerModal from "~/components/PlayaPickerModal.vue";
 import 'leaflet/dist/leaflet.css'
+import { useI18n } from 'vue-i18n'
 
 const datos = ref([]);
 const nombrePlaya = ref("");
@@ -132,14 +133,15 @@ async function fetchCoordsById(idPlaya) {
 
 // Función para formatear fecha estilo "lun 02"
 function formatearFechaYYYYMMDD(fechaNum) {
-  if (!fechaNum) return "—";
+  if (!fechaNum) return t('forecasts.beach_page.date_unknown');
   const str = fechaNum.toString();
   const year = str.substring(0, 4);
   const month = str.substring(4, 6);
   const day = str.substring(6, 8);
   const fecha = new Date(`${year}-${month}-${day}`);
   const opciones = { weekday: "short", day: "2-digit" };
-  return new Intl.DateTimeFormat("es-ES", opciones)
+  const tag = localeTag.value;
+  return new Intl.DateTimeFormat([tag, locale?.value || 'es-ES', 'es-ES'], opciones)
     .format(fecha)
     .replace(".", "");
 }
@@ -160,7 +162,7 @@ async function cargarPrediccion(idPlaya) {
     if (!hasCoords()) { await fetchCoordsById(idPlaya); }
     try { console.debug('[MeteoPlaya] cargarPrediccion done', { idPlaya, lat: lat.value, lon: lon.value }); } catch (e) { }
   } catch (e) {
-    error.value = e?.message || 'Error cargando predicción de playa';
+    error.value = e?.message || `${t('forecasts.beach_page.error_prefix')} ${t('forecasts.beach_page.error_loading')}`;
   } finally {
     // Solo la última petición activa puede cerrar el loading y refrescar el mapa
     if (mySeq === predSeq) {
@@ -242,7 +244,7 @@ onMounted(async () => {
       openPicker.value = true;
     }
   } catch (e) {
-    error.value = e?.message || 'Error cargando preferencias de usuario';
+    error.value = e?.message || `${t('forecasts.beach_page.error_prefix')} ${t('forecasts.beach_page.error_loading')}`;
   } finally {
     loading.value = false;
   }
@@ -251,6 +253,103 @@ onMounted(async () => {
 watch([lat, lon], async () => { if (!loading.value) { await initMap(); } });
 
 onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null; } } catch (e) { } });
+// i18n
+const { t, locale } = useI18n();
+const localeTag = computed(() => {
+  const l = (locale?.value || 'es').toLowerCase();
+  const map = {
+    es: 'es-ES',
+    ca: 'ca-ES',
+    val: 'ca-ES-valencia',
+    gl: 'gl-ES',
+    eu: 'eu-ES',
+    ary: 'ar-MA'
+  };
+  return map[l] || l;
+});
+
+// Helpers traducción dinámica de columnas (cielo, viento, oleaje)
+function norm(s) {
+  return String(s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}+/gu, '')
+    .replace(/[^a-z\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function traducirCielo(desc) {
+  const d = norm(desc);
+  if (!d) return '—';
+  const map = [
+    [['despejado','claro'], 'forecasts.sky_states.clear'],
+    [['poco nuboso','pouco nuboso','nubes altas','intervalos de nubes altas'], 'forecasts.sky_states.mostly_clear'],
+    [['intervalos nubosos','parcialmente nuboso','entre nubes'], 'forecasts.sky_states.partly_cloudy'],
+    [['nuboso'], 'forecasts.sky_states.cloudy'],
+    [['muy nuboso','moi nuboso'], 'forecasts.sky_states.very_cloudy'],
+    [['cubierto'], 'forecasts.sky_states.overcast'],
+    [['bruma'], 'forecasts.sky_states.haze'],
+    [['niebla','nevoa','boira'], 'forecasts.sky_states.fog'],
+    [['lluvia debil','lluvia ligera','chuvisco','xirimiri'], 'forecasts.sky_states.light_rain'],
+    [['lluvia','chuvia','euria'], 'forecasts.sky_states.rain'],
+    [['chubascos','xubascos'], 'forecasts.sky_states.showers'],
+    [['tormenta','tronada'], 'forecasts.sky_states.storm'],
+    [['nieve','neve','elurra'], 'forecasts.sky_states.snow']
+  ];
+  for (const [keys, key] of map) if (keys.some(k => d.includes(k))) return t(key);
+  return desc || '—';
+}
+
+function traducirTermica(desc) {
+  const d = norm(desc);
+  if (!d) return '—';
+  const map = [
+    [['frio','fria','fred','freda','fresca','hotz'], 'forecasts.beach_states.thermal.cold'],
+    [['fresco','fresquet','fresquiño'], 'forecasts.beach_states.thermal.cool'],
+    [['agradable','suave','placida','plaent'], 'forecasts.beach_states.thermal.pleasant'],
+    [['templado','temperado'], 'forecasts.beach_states.thermal.warm'],
+    [['calido','caliente','calor','calurosa','bochorno','boixorno'], 'forecasts.beach_states.thermal.hot'],
+    [['muy caluroso','molt calor','moi calor'], 'forecasts.beach_states.thermal.very_hot'],
+    [['bochorno','xofre','xofrizo'], 'forecasts.beach_states.thermal.muggy']
+  ];
+  for (const [keys, key] of map) if (keys.some(k => d.includes(k))) return t(key);
+  return desc || '—';
+}
+
+function traducirViento(desc) {
+  const d = norm(desc);
+  if (!d) return '—';
+  const map = [
+    [['calma','en calma','calma chicha'], 'forecasts.beach_states.wind.calm'],
+    [['flojo','brisa','debil','suave','suau','feble','brando'], 'forecasts.beach_states.wind.light'],
+    [['moderado','moderat'], 'forecasts.beach_states.wind.moderate'],
+    [['fuerte','fort'], 'forecasts.beach_states.wind.strong'],
+    [['muy fuerte','molt fort','temporal'], 'forecasts.beach_states.wind.very_strong'],
+    [['variable'], 'forecasts.beach_states.wind.variable'],
+    [['norte','nord','ipar'], 'forecasts.beach_states.wind.north'],
+    [['sur','sud','hego'], 'forecasts.beach_states.wind.south'],
+    [['este','est','levante','leste','ekialde'], 'forecasts.beach_states.wind.east'],
+    [['oeste','oest','poniente','mendebalde'], 'forecasts.beach_states.wind.west']
+  ];
+  for (const [keys, key] of map) if (keys.some(k => d.includes(k))) return t(key);
+  return desc || '—';
+}
+
+function traducirOleaje(desc) {
+  const d = norm(desc);
+  if (!d) return '—';
+  const map = [
+    [['calma','rizado','rizada','mar rizada','rissada','mar rissada'], 'forecasts.beach_states.waves.calm'],
+    [['marejadilla','marejol','maroreta'], 'forecasts.beach_states.waves.slight'],
+    [['marejada','maror','marexada'], 'forecasts.beach_states.waves.moderate'],
+    [['fuerte marejada','forta maror','forte marexada'], 'forecasts.beach_states.waves.rough'],
+    [['mar gruesa','muy gruesa','mar grossa','mar grosa'], 'forecasts.beach_states.waves.very_rough'],
+    [['ola','olas altas','ondas'], 'forecasts.beach_states.waves.waves']
+  ];
+  for (const [keys, key] of map) if (keys.some(k => d.includes(k))) return t(key);
+  return desc || '—';
+}
 </script>
 
 <template>
@@ -259,7 +358,7 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
     <div class="absolute inset-0 bg-black/40"></div>
 
     <div class="relative z-10 min-h-screen p-4 pt-10 text-gray-200">
-      <h1 class="mb-4 text-3xl font-bold tracking-tight text-center page-title">Previsión en la playa
+      <h1 class="mb-4 text-3xl font-bold tracking-tight text-center page-title">{{ $t('forecasts.beach') }}
       </h1>
       <div v-if="!loading" class="flex justify-center mb-4">
         <div class="inline-flex items-baseline gap-4 px-5 py-2 rounded-full frost-chip">
@@ -270,36 +369,36 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
                 d="M12 2.25c-3.728 0-6.75 3.022-6.75 6.75 0 4.637 5.37 10.164 6.1 10.89a.75.75 0 0 0 1.1 0c.73-.726 6.3-6.253 6.3-10.89 0-3.728-3.022-6.75-6.75-6.75Zm0 9.75a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"
                 clip-rule="evenodd" />
             </svg>
-            <span>{{ nombrePlaya || 'Selecciona una playa' }}</span>
+            <span>{{ nombrePlaya || $t('forecasts.beach_page.select_prompt') }}</span>
           </h2>
           <button @click="openPicker = true" class="btn-glass-primary self-baseline">
-            {{ nombrePlaya ? 'Cambiar' : 'Elegir playa' }}
+            {{ nombrePlaya ? $t('forecasts.beach_page.change_btn') : $t('forecasts.beach_page.pick_btn') }}
           </button>
         </div>
       </div>
 
       <div v-if="loading" class="flex items-center justify-center min-h-[30vh]">
         <div class="flex flex-col items-center gap-3">
-          <div class="spinner" aria-label="Cargando"></div>
-          <div class="loader-text">Cargando datos...</div>
+          <div class="spinner" :aria-label="$t('forecasts.beach_page.loading')"></div>
+          <div class="loader-text">{{ $t('forecasts.beach_page.loading') }}</div>
         </div>
       </div>
-      <div v-else-if="error" class="text-red-300">{{ error }}</div>
-      <div v-else-if="!codigoPlaya" class="text-slate-200">Elige una playa para ver la predicción.</div>
+      <div v-else-if="error" class="text-red-300">{{ $t('forecasts.beach_page.error_prefix') }} {{ error }}</div>
+      <div v-else-if="!codigoPlaya" class="text-slate-200">{{ $t('forecasts.beach_page.choose_cta') }}</div>
 
       <div v-else-if="datos && datos.length" class="space-y-4">
         <div class="p-4 overflow-x-auto border frost-card border-white/15 rounded-2xl">
           <table class="min-w-full border-collapse">
             <thead>
               <tr class="glass-header text-[color:var(--color-text-muted)]">
-                <th class="p-2 text-left">Fecha</th>
-                <th class="p-2">Cielo</th>
-                <th class="p-2">Viento</th>
-                <th class="p-2">Oleaje</th>
-                <th class="p-2">Tª máx</th>
-                <th class="p-2">Sens. térmica</th>
-                <th class="p-2">Tª agua</th>
-                <th class="p-2">UV máx</th>
+                <th class="p-2 text-left">{{ $t('forecasts.beach_page.date') }}</th>
+                <th class="p-2">{{ $t('forecasts.beach_page.sky') }}</th>
+                <th class="p-2">{{ $t('forecasts.beach_page.wind') }}</th>
+                <th class="p-2">{{ $t('forecasts.beach_page.waves') }}</th>
+                <th class="p-2">{{ $t('forecasts.beach_page.tmax') }}</th>
+                <th class="p-2">{{ $t('forecasts.beach_page.thermal') }}</th>
+                <th class="p-2">{{ $t('forecasts.beach_page.water_temp') }}</th>
+                <th class="p-2">{{ $t('forecasts.beach_page.uv_max') }}</th>
               </tr>
             </thead>
             <tbody class="glass-body">
@@ -312,17 +411,17 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
 
                 <!-- Estado del cielo -->
                 <td class="p-2 text-center">
-                  {{ dia.estadoCielo?.descripcion1 || "—" }}
+                  {{ traducirCielo(dia.estadoCielo?.descripcion1) }}
                 </td>
 
                 <!-- Viento -->
                 <td class="p-2 text-center">
-                  {{ dia.viento?.descripcion1 || "—" }}
+                  {{ traducirViento(dia.viento?.descripcion1) }}
                 </td>
 
                 <!-- Oleaje -->
                 <td class="p-2 text-center">
-                  {{ dia.oleaje?.descripcion1 || "—" }}
+                  {{ traducirOleaje(dia.oleaje?.descripcion1) }}
                 </td>
 
                 <!-- Temperatura máxima -->
@@ -332,9 +431,7 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
 
                 <!-- Sensación térmica -->
                 <td class="p-2 text-center">
-                  {{
-                    dia.sTermica?.descripcion1 || dia.stermica?.descripcion1 || "—"
-                  }}
+                  {{ traducirTermica(dia.sTermica?.descripcion1 || dia.stermica?.descripcion1) }}
                 </td>
 
                 <!-- Temperatura del agua -->
@@ -355,7 +452,7 @@ onBeforeUnmount(() => { try { if (map) { map.remove(); map = null; marker = null
 
       <!-- Mostrar el mapa: mantener el contenedor en DOM y alternar visibilidad -->
       <div v-show="hasCoords()" class="p-4 mt-4 border frost-card border-white/15 rounded-2xl">
-        <h3 class="mb-2 text-sm font-semibold">Mapa</h3>
+        <h3 class="mb-2 text-sm font-semibold">{{ $t('forecasts.beach_page.map_title') }}</h3>
         <div ref="mapEl" class="w-full h-[calc(30rem-10px)] overflow-hidden rounded-xl"></div>
       </div>
 

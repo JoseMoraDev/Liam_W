@@ -1,7 +1,5 @@
 <?php
 
-// TODO: quitar username de la tabla de usuarios
-// TODO: CLASIFICAR TODOS LOS
 use App\Http\Controllers\AemetCapController;
 use App\Http\Controllers\AemetController;
 use App\Http\Controllers\MunicipioController;
@@ -64,14 +62,6 @@ Route::post('/recuperar-passwd', function (Request $request) {
     $request->validate([
         'email' => 'required|email|exists:users,email'
     ]);
-
-    // TODO: VALIDAR EL USUARIO ASI
-    // if (!$user) {
-    //     return response()->json([
-    //         'success' => false,
-    //         'message' => 'No existe ningún usuario con ese correo.'
-    //     ], 404);
-    // }
 
     $token = Str::random(64);
 

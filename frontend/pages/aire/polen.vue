@@ -15,6 +15,9 @@ import {
 // Importa el cliente axios configurado (ya apunta al backend)
 import { axiosClient } from "~/axiosConfig";
 import { userData } from "~/store/auth";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 // Registrar los componentes de Chart.js
 ChartJS.register(
@@ -90,7 +93,7 @@ onMounted(async () => {
       labels: datos.value.labels,
       datasets: [
         {
-          label: "Abedul",
+          label: t('forecasts.air_pollen_page.birch'),
           data: datos.value.abedul,
           borderColor: "#4ade80",
           backgroundColor: "#4ade80",
@@ -104,7 +107,7 @@ onMounted(async () => {
       labels: datos.value.labels,
       datasets: [
         {
-          label: "Gramíneas",
+          label: t('forecasts.air_pollen_page.grasses'),
           data: datos.value.gramineas,
           borderColor: "#facc15",
           backgroundColor: "#facc15",
@@ -118,7 +121,7 @@ onMounted(async () => {
       labels: datos.value.labels,
       datasets: [
         {
-          label: "Olivo",
+          label: t('forecasts.air_pollen_page.olive'),
           data: datos.value.olivo,
           borderColor: "#60a5fa",
           backgroundColor: "#60a5fa",
@@ -127,7 +130,7 @@ onMounted(async () => {
       ],
     };
   } catch (err) {
-    console.error("Error cargando datos de polen:", err);
+    console.error(t('forecasts.air_pollen_page.error_console'), err);
   }
 });
 </script>
@@ -140,39 +143,39 @@ onMounted(async () => {
     <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
       <!-- Encabezado -->
       <div class="pt-10 mb-6 text-center">
-        <h1 class="mb-2 text-3xl font-bold tracking-tight page-title">Niveles de polen</h1>
+        <h1 class="mb-2 text-3xl font-bold tracking-tight page-title">{{ t('forecasts.air_pollen_page.title') }}</h1>
       </div>
 
       <!-- Lista de tarjetas -->
       <div class="flex flex-col gap-6">
         <!-- Abedul -->
         <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
-          <h2 class="mb-2 text-lg font-semibold">🌳 Polen de Abedul</h2>
+          <h2 class="mb-2 text-lg font-semibold">🌳 {{ t('forecasts.air_pollen_page.section_birch') }}</h2>
           <div class="h-48">
             <Line v-if="charts.abedul.data" :data="charts.abedul.data" :options="charts.abedul.options" />
-            <p v-else class="text-sm text-gray-400">Cargando datos...</p>
+            <p v-else class="text-sm text-gray-400">{{ t('forecasts.air_pollen_page.loading') }}</p>
           </div>
-          <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
+          <p class="mt-2 text-sm text-gray-400">{{ t('forecasts.air_pollen_page.units') }}</p>
         </div>
 
         <!-- Gramíneas -->
         <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
-          <h2 class="mb-2 text-lg font-semibold">🌱 Polen de Gramíneas</h2>
+          <h2 class="mb-2 text-lg font-semibold">🌱 {{ t('forecasts.air_pollen_page.section_grasses') }}</h2>
           <div class="h-48">
             <Line v-if="charts.gramineas.data" :data="charts.gramineas.data" :options="charts.gramineas.options" />
-            <p v-else class="text-sm text-gray-400">Cargando datos...</p>
+            <p v-else class="text-sm text-gray-400">{{ t('forecasts.air_pollen_page.loading') }}</p>
           </div>
-          <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
+          <p class="mt-2 text-sm text-gray-400">{{ t('forecasts.air_pollen_page.units') }}</p>
         </div>
 
         <!-- Olivo -->
         <div class="p-4 overflow-hidden border frost-card border-white/15 rounded-2xl">
-          <h2 class="mb-2 text-lg font-semibold">🌿 Polen de Olivo</h2>
+          <h2 class="mb-2 text-lg font-semibold">🌿 {{ t('forecasts.air_pollen_page.section_olive') }}</h2>
           <div class="h-48">
             <Line v-if="charts.olivo.data" :data="charts.olivo.data" :options="charts.olivo.options" />
-            <p v-else class="text-sm text-gray-400">Cargando datos...</p>
+            <p v-else class="text-sm text-gray-400">{{ t('forecasts.air_pollen_page.loading') }}</p>
           </div>
-          <p class="mt-2 text-sm text-gray-400">Unidades: granos/m³</p>
+          <p class="mt-2 text-sm text-gray-400">{{ t('forecasts.air_pollen_page.units') }}</p>
         </div>
       </div>
     </div>

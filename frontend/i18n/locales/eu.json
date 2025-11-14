@@ -79,7 +79,240 @@
     "traffic_title": "Trafikoa",
     "traffic_state": "Egoera",
     "traffic_alerts": "Alertak",
-    "select_location": "Hautatu kokapena"
+    "select_location": "Hautatu kokapena",
+    "beach_page": {
+      "loading": "Datuak kargatzen...",
+      "select_prompt": "Aukeratu hondartza bat",
+      "change_btn": "Aldatu",
+      "pick_btn": "Aukeratu hondartza",
+      "choose_cta": "Aukeratu hondartza iragarpena ikusteko.",
+      "date": "Data",
+      "sky": "Zerua",
+      "wind": "Haizea",
+      "waves": "Olatuak",
+      "tmax": "Tenp. max",
+      "thermal": "Sentsazio termikoa",
+      "water_temp": "Uretako tenp.",
+      "uv_max": "UV max",
+      "error_prefix": "Errorea:",
+      "error_loading": "Hondartzako datuak kargatzen",
+      "map_title": "Mapa",
+      "date_unknown": "—"
+    },
+    "snow_page": {
+      "loading": "Datuak kargatzen...",
+      "error_prefix": "Errorea:",
+      "bulletin_title": "Elur-buletina",
+      "zone_label": "Eremua:",
+      "data_provider_prefix": "Datuak hornitzailea:"
+    },
+    "air_ambient_page": {
+      "loading": "Datuak kargatzen...",
+      "error_prefix": "Errorea:",
+      "no_data": "Kokaleku honetarako ez dago daturik eskuragarri.",
+      "closest_station": "Hurbileneko estazioa",
+      "current_aqi": "Uneko AQI indizea:",
+      "last_update": "Azken eguneraketa",
+      "current_values": "Uneko balioak",
+      "temp": "Tenp.",
+      "humidity": "Hezetasuna",
+      "pressure": "Presioa",
+      "wind": "Haizea",
+      "forecast_title": "Kutsatzaileen iragarpena",
+      "date": "Data",
+      "no_forecast": "Ez dago iragarpenik eskuragarri.",
+      "error_aqicn": "AQICN errorea",
+      "error_console": "Aire-kalitatea kargatzean errorea:",
+      "error_unknown": "Errore ezezaguna"
+    },
+    "air_pollen_page": {
+      "title": "Polen mailak",
+      "section_birch": "Urkiaren polena",
+      "section_grasses": "Belarren polena",
+      "section_olive": "Olibondoaren polena",
+      "units": "Unitateak: ale/m³",
+      "loading": "Datuak kargatzen...",
+      "birch": "Urkia",
+      "grasses": "Belarrak",
+      "olive": "Olibondoa",
+      "error_console": "Polen datuak kargatzean errorea:"
+    },
+    "mountain_page": {
+      "title": "Mendiko iragarpena",
+      "loading": "Kargatzen…",
+      "select_day": "Eguna hautatu",
+      "bulletin_title": "Buletina",
+      "general_state": "Egoera orokorra",
+      "free_atmosphere": "Atmosfera askea",
+      "thermal_sensation": "Sentsazio termikoa",
+      "min_label": "Minimoa:",
+      "max_label": "Maximoa:",
+      "thermal_short": "sents.",
+      "data_provider_prefix": "Datuak:",
+      "setup_area_title": "Konfiguratu mendiko zure eremua",
+      "setup_area_text": "Ez da mendiko kokapena aurkitu zure hobespenetan. Joan Kokapena pantailara mendiko zure eremua aukeratzeko eta buletina erakutsi ahal izateko.",
+      "not_now": "Orain ez",
+      "go_to_location": "Joan Kokapenera",
+      "missing_area": "Ez da mendiko kokapena aurkitu.",
+      "error_prefix": "Errorea:",
+      "error_loading": "Mendiko iragarpena kargatzen"
+    },
+    "snow_phrases": {
+      "agency_full": "Estatuko Meteorologia Agentzia",
+      "snow_info_for": "Elurraren informazioa honetarako:",
+      "prepared_on_day": "Eguna:",
+      "campaign_finished_for": "Euskal Pirinioetan elur-jausien arriskuaren iragarpen kanpaina amaitutzat ematen da",
+      "however_if_weather": "Hala ere, eguraldi-baldintzek hala eskatuz gero, iragarpen berezia emango da.",
+      "reminder_no_zero_risk": "Gogorarazten da: elurra dagoen bitartean, arrisku hutsa ez da existitzen.",
+      "note_small_medium_avalanches": "Kontuan izan baldintza txarretan, 1 tamainako (txikia edo isuria) eta 2 tamainako (ertaina) elur-jausiekin ere, kalte pertsonal larriak gerta daitezkeela."
+    },
+    "snow_regions": {
+      "pirineo_catalan": "Pirinio Katalana"
+    },
+    "beach_states": {
+      "wind": {
+        "calm": "Bare",
+        "light": "Ahul",
+        "moderate": "Ertain",
+        "strong": "Indartsu",
+        "very_strong": "Oso indartsu",
+        "variable": "Aldakorra",
+        "north": "Ipar",
+        "south": "Hego",
+        "east": "Ekialde",
+        "west": "Mendebalde"
+      },
+      "waves": {
+        "calm": "Bare",
+        "slight": "Irristatua",
+        "moderate": "Ertain olatuak",
+        "rough": "Itsaso zakarra",
+        "very_rough": "Itsaso oso zakarra",
+        "waves": "Olatuak"
+      },
+      "thermal": {
+        "cold": "Hotz",
+        "cool": "Fresko",
+        "pleasant": "Atsegin",
+        "warm": "Epela",
+        "hot": "Bero",
+        "very_hot": "Oso bero",
+        "muggy": "Sargori"
+      }
+    },
+    "daily": {
+      "loading": "Datuak kargatzen...",
+      "date": "Data",
+      "temp_max": "Tenp. max",
+      "temp_min": "Tenp. min",
+      "sky_state": "Zeruen egoera",
+      "rain_prob": "Euriaren probabil.",
+      "temp_trend": "Tenp. eboluzioa"
+    },
+    "sky_states": {
+      "clear": "Oskarbi",
+      "mostly_clear": "Ia oskarbi",
+      "partly_cloudy": "Hodei tarteak",
+      "cloudy": "Hodeitsu",
+      "very_cloudy": "Oso hodeitsu",
+      "overcast": "Zeru estalia",
+      "haze": "Lainobera",
+      "fog": "Lainoa",
+      "light_rain": "Euri arina",
+      "rain": "Euria",
+      "showers": "Zaparradak",
+      "storm": "Ekaitza",
+      "snow": "Elurra",
+      "hail": "Kazkabarra"
+    },
+    
+    "alerts_page": {
+      "loading": "Datuak kargatzen...",
+      "emitted_by": "Bidalia:",
+      "valid_from": "Noiztik indarrean:",
+      "until": "Noiz arte:",
+      "level": "Maila:",
+      "probability": "Probabilitatea:",
+      "more_info_aemet": "Informazio gehiago AEMETen",
+      "error_prefix": "Errorea abisua kargatzean:",
+      "data_provider_prefix": "Datuak hornitzailea:",
+      "of_level": "mailakoa"
+    },
+    "alerts_events": {
+      "max_temp": "Tenperatura maximoen abisua",
+      "min_temp": "Tenperatura minimoen abisua",
+      "wind": "Haizearen abisua",
+      "storm": "Ekaitzaren abisua",
+      "coastal": "Kostaldeko abisua",
+      "rain": "Euriaren abisua",
+      "snow": "Elurraren abisua",
+      "fog": "Lainoaren abisua"
+    },
+    "alerts_levels": {
+      "green": "berdea",
+      "yellow": "horia",
+      "orange": "laranja",
+      "red": "gorria"
+    },
+    "alerts_senders": {
+      "aemet": "AEMET. Estatuko Meteorologia Agentzia"
+    },
+    "alerts_area": {
+      "littoral": "Itsasertza",
+      "north": "iparra",
+      "of": "-",
+      "province_alicante": "Alacant/Alicante",
+      "province_castellon": "Castelló/Castellón",
+      "province_valencia": "València/Valencia"
+    },
+    "traffic_state_page": {
+      "title": "Trafikoaren egoera",
+      "loading": "Trafikoa kargatzen...",
+      "error_prefix": "Errorea:",
+      "error_console": "Trafikoa kargatzean errorea:",
+      "error_loading": "Ezin izan dira trafikoari buruzko datuak kargatu.",
+      "icon_fix_warning": "Ezin izan da Leaflet ikonoen zuzenketa aplikatu. Egiaztatu baliabideen bideak.",
+      "status_closed": "Itxita",
+      "status_fluid": "Arina",
+      "status_dense": "Trinkoa",
+      "status_congestion": "Ilarak",
+      "free_speed": "Libre:",
+      "frc": "FRC:",
+      "delay": "Atzerapena",
+      "confidence": "Konfiantza:",
+      "kpi_current_speed": "Uneko abiadura",
+      "kpi_free_speed": "Abiadura librea",
+      "kpi_ratio": "Erlazioa",
+      "kpi_confidence": "Konfiantza",
+      "source_prefix": "Iturria:"
+    },
+    "traffic_alerts_page": {
+      "title": "Trafikoaren gorabeherak",
+      "loading": "Gorabeherak kargatzen...",
+      "error_prefix": "Errorea:",
+      "error_console": "Trafiko gorabeherak kargatzean errorea:",
+      "error_loading": "Ezin izan dira trafiko alertak kargatu.",
+      "icon_fix_warning": "Leaflet ikonoen zuzenketak huts egin du:",
+      "unknown_road": "Errepide ezezaguna",
+      "active_alerts": "Alertak aktibo",
+      "nearby": "inguruan",
+      "top_categories": "Kategoria nagusiak",
+      "list_title": "Gorabehera zerrenda",
+      "start": "Hasiera:",
+      "end": "Amaiera:",
+      "categories": {
+        "accident": "Istripua",
+        "roadworks": "Obrak",
+        "lane_closure": "Errei itxiera",
+        "congestion": "Ilarak",
+        "weather": "Eguraldi txarra",
+        "stopped_vehicle": "Gelditutako ibilgailua",
+        "event": "Gertaera",
+        "other_incidents": "Beste gorabeherak",
+        "other_uncategorized": "Besteak (sailkatu gabe)",
+        "unknown": "Ezezaguna"
+      }
+    }
   }
   ,
   "settings": {

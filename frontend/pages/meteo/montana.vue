@@ -7,15 +7,15 @@
       <!-- Título -->
       <div class="mt-10 text-center">
         <h1 class="text-3xl font-bold tracking-wide text-gray-800 dark:text-gray-100 page-title">
-          Predicción Montaña
+          {{ t('forecasts.mountain_page.title') }}
         </h1>
         <p class="mt-1 text-2xl font-semibold text-gray-200/95 dark:text-gray-200" v-if="zona">
           {{ zona }}
         </p>
-        <p v-if="loading" class="mt-2 text-sm text-gray-500 dark:text-gray-400">Cargando…</p>
+        <p v-if="loading" class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ t('forecasts.mountain_page.loading') }}</p>
         <p v-if="error && !needsAreaSetup" class="mt-2 text-sm text-white">{{ error }}</p>
         <div class="flex items-center justify-center gap-3 mt-3" v-if="!error">
-          <span class="text-xl font-semibold text-white">Selecciona día</span>
+          <span class="text-xl font-semibold text-white">{{ t('forecasts.mountain_page.select_day') }}</span>
           <select v-model="selectedDay"
             class="px-3 py-1 text-sm text-white border rounded-md chip-glass border-white/15">
             <option v-for="opt in dayOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
@@ -25,7 +25,7 @@
 
       <!-- Boletín como texto plano -->
       <section v-if="!loading && !error && isTexto" class="space-y-4">
-        <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200">Boletín</h2>
+        <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200">{{ t('forecasts.mountain_page.bulletin_title') }}</h2>
         <pre
           class="p-4 overflow-auto text-sm whitespace-pre-wrap border rounded-2xl frost-card border-white/15">{{ boletin }}</pre>
       </section>
@@ -34,7 +34,7 @@
       <section v-if="!loading && !error && !isTexto && (boletin?.seccion?.[0]?.apartado?.length)"
         class="space-y-4 estado-general">
         <h2 class="text-xl font-semibold text-white">
-          Estado general
+          {{ t('forecasts.mountain_page.general_state') }}
         </h2>
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <div v-for="apartado in boletin.seccion[0].apartado" :key="apartado.nombre"
@@ -53,7 +53,7 @@
       <section v-if="!loading && !error && !isTexto && (boletin?.seccion?.[1]?.apartado?.length)"
         class="space-y-4 atmosfera-libre">
         <h2 class="text-xl font-semibold text-white">
-          Atmósfera libre
+          {{ t('forecasts.mountain_page.free_atmosphere') }}
         </h2>
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           <div v-for="apartado in boletin.seccion[1].apartado" :key="apartado.nombre"
@@ -72,7 +72,7 @@
       <section v-if="!loading && !error && !isTexto && (boletin?.seccion?.[2]?.lugar?.length)"
         class="space-y-4 sensacion-termica">
         <h2 class="text-xl font-semibold text-white">
-          Sensación térmica
+          {{ t('forecasts.mountain_page.thermal_sensation') }}
         </h2>
         <div class="grid gap-6 sm:grid-cols-2">
           <div v-for="lugar in boletin.seccion[2].lugar" :key="lugar.nombre"
@@ -82,13 +82,13 @@
             </h3>
             <div class="space-y-1 text-gray-600 dark:text-gray-300">
               <p>
-                <span class="tint-emph">Mínima:</span>
-                <span class="font-bold">{{ lugar.minima }}ºC</span> (sensación
+                <span class="tint-emph">{{ t('forecasts.mountain_page.min_label') }}</span>
+                <span class="font-bold">{{ lugar.minima }}ºC</span> ({{ t('forecasts.mountain_page.thermal_short') }}
                 {{ lugar.stminima }}ºC)
               </p>
               <p>
-                <span class="tint-emph">Máxima:</span>
-                <span class="font-bold">{{ lugar.maxima }}ºC</span> (sensación
+                <span class="tint-emph">{{ t('forecasts.mountain_page.max_label') }}</span>
+                <span class="font-bold">{{ lugar.maxima }}ºC</span> ({{ t('forecasts.mountain_page.thermal_short') }}
                 {{ lugar.stmaxima }}ºC)
               </p>
             </div>
@@ -99,7 +99,7 @@
       <!-- Fuente -->
       <footer
         class="pt-6 text-sm text-center text-gray-500 border-t dark:text-gray-400 border-white/30 dark:border-gray-700/40">
-        Datos: Agencia Estatal de Meteorología -
+        {{ t('forecasts.mountain_page.data_provider_prefix') }} {{ t('forecasts.snow_phrases.agency_full') }} -
         <a :href="sourceLink" target="_blank" class="underline hover:text-gray-700 dark:hover:text-gray-200">AEMET</a>
       </footer>
     </div>
@@ -107,11 +107,11 @@
   <div v-if="needsAreaSetup" class="fixed inset-0 z-50 flex items-center justify-center">
     <div class="absolute inset-0 bg-black/60"></div>
     <div class="relative z-10 w-full max-w-md p-6 border rounded-2xl frost-card border-white/15">
-      <h3 class="mb-2 text-xl font-bold text-white">Configura tu zona de montaña</h3>
-      <p class="mb-4 text-sm leading-relaxed text-white/95">No se encontró ubicación de montaña en tus preferencias. Ve a la pantalla de Ubicación para elegir tu zona de montaña y poder mostrar el boletín.</p>
+      <h3 class="mb-2 text-xl font-bold text-white">{{ t('forecasts.mountain_page.setup_area_title') }}</h3>
+      <p class="mb-4 text-sm leading-relaxed text-white/95">{{ t('forecasts.mountain_page.setup_area_text') }}</p>
       <div class="flex items-center justify-end gap-3">
-        <button @click="needsAreaSetup = false" class="px-3 py-2 text-sm text-white border rounded-md border-white/25 hover:border-white/40">Ahora no</button>
-        <button @click="goToUbicacion" class="px-3 py-2 text-sm font-semibold text-white border rounded-md border-white/25 bg-[color:var(--color-primary)]/40 hover:bg-[color:var(--color-primary)]/55">Ir a Ubicación</button>
+        <button @click="needsAreaSetup = false" class="px-3 py-2 text-sm text-white border rounded-md border-white/25 hover:border-white/40">{{ t('forecasts.mountain_page.not_now') }}</button>
+        <button @click="goToUbicacion" class="px-3 py-2 text-sm font-semibold text-white border rounded-md border-white/25 bg-[color:var(--color-primary)]/40 hover:bg-[color:var(--color-primary)]/55">{{ t('forecasts.mountain_page.go_to_location') }}</button>
       </div>
     </div>
   </div>
@@ -248,6 +248,7 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { axiosClient } from "~/axiosConfig";
 import { userData } from "~/store/auth";
+import { useI18n } from 'vue-i18n';
 
 const loading = ref(true);
 const error = ref(null);
@@ -258,6 +259,7 @@ const needsAreaSetup = ref(false);
 const missingAreaText = ref('');
 const router = useRouter();
 const isTexto = computed(() => typeof boletin.value === 'string');
+const { t, locale } = useI18n();
 
 const sourceLink = computed(() => {
   if (!isTexto.value && boletin.value?.origen?.web) return boletin.value.origen.web;
@@ -270,7 +272,7 @@ const dayOptions = computed(() => {
   for (let i = 0; i <= 3; i++) {
     const d = new Date();
     d.setDate(d.getDate() + i);
-    const label = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+    const label = new Intl.DateTimeFormat([locale?.value || 'es-ES', 'es-ES'], { weekday: 'long', day: 'numeric', month: 'short' }).format(d);
     opts.push({ value: i, label });
   }
   return opts;
@@ -285,7 +287,7 @@ async function fetchMontana(day) {
     const areaCode = pref?.area_code;
     if (!areaCode) {
       needsAreaSetup.value = true;
-      missingAreaText.value = 'No se encontró ubicación de montaña.';
+      missingAreaText.value = t('forecasts.mountain_page.missing_area');
       return;
     }
     // 2) Llamar backend con el área explícita
@@ -298,7 +300,7 @@ async function fetchMontana(day) {
     boletin.value = Array.isArray(b) ? (b[0] || null) : b;
   } catch (e) {
     if (!needsAreaSetup.value) {
-      error.value = e?.message || 'Error cargando predicción de montaña';
+      error.value = e?.message || `${t('forecasts.mountain_page.error_prefix')} ${t('forecasts.mountain_page.error_loading')}`;
     }
   } finally {
     loading.value = false;

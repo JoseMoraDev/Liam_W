@@ -2,21 +2,24 @@
 import { ref, onMounted } from "vue";
 import { axiosClient } from "~/axiosConfig";
 import { userData } from "~/store/auth";
+import { useI18n } from 'vue-i18n';
 
 const aire = ref(null);
 const loading = ref(true);
 const error = ref(null);
 
-// Formatear fecha "jue 02"
+const { t, locale } = useI18n();
+
+// Formatear fecha "jue 02" con locale actual
 function formatearFecha(fechaISO) {
   const fecha = new Date(fechaISO);
   const opciones = { weekday: "short", day: "2-digit" };
-  return new Intl.DateTimeFormat("es-ES", opciones)
+  return new Intl.DateTimeFormat([locale?.value || 'es-ES', 'es-ES'], opciones)
     .format(fecha)
     .replace(".", "");
 }
 
-// Formatea 'YYYY-MM-DD HH:MM:SS' o ISO a 'DD/MM/YYYY a las HH:MM'
+// Formatea 'YYYY-MM-DD HH:MM:SS' o ISO a 'DD/MM/YYYY HH:MM' respetando locale
 function formatFechaHora(s) {
   try {
     if (!s || typeof s !== 'string') return '—';
@@ -24,16 +27,22 @@ function formatFechaHora(s) {
     const [datePart, timePartRaw = ''] = norm.split(' ');
     const [y, m, d] = (datePart || '').split('-');
     const hhmm = timePartRaw.slice(0, 5);
-    if (y && m && d && hhmm) return `${d}/${m}/${y} a las ${hhmm}`;
+    if (y && m && d && hhmm) {
+      try {
+        const dt = new Date(`${y}-${m}-${d}T${hhmm}:00`);
+        return new Intl.DateTimeFormat([locale?.value || 'es-ES', 'es-ES'], {
+          year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+        }).format(dt);
+      } catch (e) {
+        return `${d}/${m}/${y} ${hhmm}`;
+      }
+    }
     // Fallback usando Date si el formato difiere
     const dt = new Date(s);
     if (!isNaN(dt)) {
-      const dd = String(dt.getDate()).padStart(2, '0');
-      const mm = String(dt.getMonth() + 1).padStart(2, '0');
-      const yy = dt.getFullYear();
-      const hh = String(dt.getHours()).padStart(2, '0');
-      const mi = String(dt.getMinutes()).padStart(2, '0');
-      return `${dd}/${mm}/${yy} a las ${hh}:${mi}`;
+      return new Intl.DateTimeFormat([locale?.value || 'es-ES', 'es-ES'], {
+        year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+      }).format(dt);
     }
   } catch (e) { }
   return '—';
@@ -56,12 +65,12 @@ onMounted(async () => {
     if (res.data?.status === 'ok') {
       aire.value = res.data?.data || null;
     } else {
-      error.value = res.data?.data || res.data?.message || 'Error en AQICN';
+      error.value = res.data?.data || res.data?.message || t('forecasts.air_ambient_page.error_aqicn');
       aire.value = null;
     }
   } catch (err) {
-    console.error("Error al cargar calidad del aire:", err);
-    error.value = err?.response?.data?.error || err?.message || 'Error desconocido';
+    console.error(t('forecasts.air_ambient_page.error_console'), err);
+    error.value = err?.response?.data?.error || err?.message || t('forecasts.air_ambient_page.error_unknown');
     aire.value = null;
   } finally {
     loading.value = false;
@@ -75,32 +84,32 @@ onMounted(async () => {
     <div class="absolute inset-0 bg-black/40"></div>
 
     <div class="relative z-10 min-h-screen pt-10 p-4 text-[color:var(--color-text)]">
-      <h1 class="pt-6 mb-6 text-3xl font-bold tracking-tight text-center page-title">Calidad del aire</h1>
+      <h1 class="pt-6 mb-6 text-3xl font-bold tracking-tight text-center page-title">{{ t('forecasts.air_title') }}</h1>
 
       <div v-if="loading" class="flex items-center justify-center min-h-[30vh]">
         <div class="flex flex-col items-center gap-3">
-          <div class="spinner" aria-label="Cargando"></div>
-          <div class="loader-text">Cargando datos...</div>
+          <div class="spinner" :aria-label="t('forecasts.air_ambient_page.loading')"></div>
+          <div class="loader-text">{{ t('forecasts.air_ambient_page.loading') }}</div>
         </div>
       </div>
-      <div v-else-if="error" class="text-red-400">⚠️ {{ error }}</div>
-      <div v-else-if="!aire">No hay datos disponibles para esta ubicación.</div>
+      <div v-else-if="error" class="text-red-400">⚠️ {{ t('forecasts.air_ambient_page.error_prefix') }} {{ error }}</div>
+      <div v-else-if="!aire">{{ t('forecasts.air_ambient_page.no_data') }}</div>
       <div v-else>
         <!-- Info general -->
         <div class="mb-4 text-center">
-          <p class="mb-1 font-semibold text-md text-white/80">Estación más cercana</p>
+          <p class="mb-1 font-semibold text-md text-white/80">{{ t('forecasts.air_ambient_page.closest_station') }}</p>
           <p class="text-xl font-semibold">{{ aire.city?.name || '—' }}</p>
           <p class="mt-6 text-md text-slate-700">
-            Índice AQI actual: <span class="font-bold">{{ aire.aqi ?? '—' }}</span>
+            {{ t('forecasts.air_ambient_page.current_aqi') }} <span class="font-bold">{{ aire.aqi ?? '—' }}</span>
             ({{ (aire.dominentpol || '')?.toString()?.toUpperCase() || '—' }})
           </p>
           <p class="text-md text-slate-700">
-            Última actualización {{ formatFechaHora(aire.time?.s) }}
+            {{ t('forecasts.air_ambient_page.last_update') }} {{ formatFechaHora(aire.time?.s) }}
           </p>
         </div>
 
         <!-- Valores actuales -->
-        <h2 class="mb-2 text-lg font-bold">🔎 Valores actuales</h2>
+        <h2 class="mb-2 text-lg font-bold">🔎 {{ t('forecasts.air_ambient_page.current_values') }}</h2>
         <div class="p-4 mb-6 overflow-x-auto border frost-card border-white/15 rounded-2xl">
           <table class="min-w-full border-collapse">
             <thead>
@@ -110,10 +119,10 @@ onMounted(async () => {
                 <th class="p-2">O₃</th>
                 <th class="p-2">PM10</th>
                 <th class="p-2">PM2.5</th>
-                <th class="p-2">🌡️ Temp</th>
-                <th class="p-2">💧 Humedad</th>
-                <th class="p-2">📈 Presión</th>
-                <th class="p-2">🌬️ Viento</th>
+                <th class="p-2">🌡️ {{ t('forecasts.air_ambient_page.temp') }}</th>
+                <th class="p-2">💧 {{ t('forecasts.air_ambient_page.humidity') }}</th>
+                <th class="p-2">📈 {{ t('forecasts.air_ambient_page.pressure') }}</th>
+                <th class="p-2">🌬️ {{ t('forecasts.air_ambient_page.wind') }}</th>
               </tr>
             </thead>
             <tbody class="glass-body">
@@ -133,13 +142,13 @@ onMounted(async () => {
         </div>
 
         <!-- Pronóstico contaminantes -->
-        <h2 class="mb-2 text-lg font-bold">📅 Pronóstico contaminantes</h2>
+        <h2 class="mb-2 text-lg font-bold">📅 {{ t('forecasts.air_ambient_page.forecast_title') }}</h2>
         <div v-if="aire.forecast?.daily?.pm25?.length"
           class="p-4 overflow-x-auto border frost-card border-white/15 rounded-2xl">
           <table class="min-w-full border-collapse">
             <thead>
               <tr class="glass-header text-[color:var(--color-text-muted)]">
-                <th class="p-2 text-left">📆 Fecha</th>
+                <th class="p-2 text-left">📆 {{ t('forecasts.air_ambient_page.date') }}</th>
                 <th class="p-2">PM2.5 (µg/m³)</th>
                 <th class="p-2">PM10 (µg/m³)</th>
                 <th class="p-2">O₃ (µg/m³)</th>
@@ -168,7 +177,7 @@ onMounted(async () => {
             </tbody>
           </table>
         </div>
-        <div v-else class="text-slate-400">No hay pronóstico disponible.</div>
+        <div v-else class="text-slate-400">{{ t('forecasts.air_ambient_page.no_forecast') }}</div>
       </div>
     </div>
   </div>

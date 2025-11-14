@@ -7,24 +7,24 @@
     <!-- Contenido principal -->
     <div :class="mounted ? 'opacity-100' : 'opacity-0'"
       class="relative z-10 flex flex-col items-center w-full min-h-screen p-4 transition-opacity duration-300 md:p-8">
-      <h1 class="mb-4 text-3xl font-bold tracking-tight text-center page-title">Avisos meteorológicos</h1>
+      <h1 class="mb-4 text-3xl font-bold tracking-tight text-center page-title">{{ $t('forecasts.alerts') }}</h1>
       <div class="mt-8"></div>
 
       <!-- Loader mientras carga -->
       <div v-if="loading" class="flex items-center justify-center min-h-[40vh]">
         <div class="flex flex-col items-center gap-3 loader">
-          <div class="spinner" aria-label="Cargando"></div>
-          <div class="loader-text">Cargando datos...</div>
+          <div class="spinner" :aria-label="$t('forecasts.alerts_page.loading')"></div>
+          <div class="loader-text">{{ $t('forecasts.alerts_page.loading') }}</div>
         </div>
       </div>
 
       <!-- Aviso principal -->
       <div v-else-if="aviso" class="max-w-lg px-6 py-4 mt-12 text-center border frost-card border-white/15 rounded-2xl">
         <h1 :class="['text-2xl', 'font-bold', 'md:text-3xl', levelClass(aviso.info.parameters.level)]">
-          🚨 {{ aviso.info.event }}
+          🚨 {{ traducirEvento(aviso.info.event) }}
         </h1>
         <p class="mt-2 text-sm text-gray-200">
-          Emitido por {{ aviso.info.senderName }}
+          {{ $t('forecasts.alerts_page.emitted_by') }} {{ traducirEmisor(aviso.info.senderName) }}
         </p>
       </div>
 
@@ -32,10 +32,10 @@
       <div v-if="aviso"
         class="max-w-lg px-6 py-4 mt-8 space-y-3 text-center border frost-card border-white/15 rounded-2xl">
         <p class="text-xl font-semibold text-white">
-          📍 {{ aviso.info.area.areaDesc }}
+          📍 {{ traducirArea(aviso.info.area.areaDesc) }}
         </p>
         <p class="text-gray-200">
-          {{ aviso.info.headline }}
+          {{ traducirEvento(aviso.info.headline) }}
         </p>
         <p class="italic text-gray-300">
           {{ aviso.info.description }}
@@ -46,16 +46,12 @@
       <div v-if="aviso"
         class="max-w-lg px-6 py-4 mt-8 space-y-2 text-center border frost-card border-white/15 rounded-2xl">
         <p class="text-sm text-gray-200">
-          ⏳ Vigente desde
-          <span class="font-semibold text-white">{{
-            formateaFecha(aviso.info.onset)
-          }}</span>
+          ⏳ {{ $t('forecasts.alerts_page.valid_from') }}
+          <span class="font-semibold text-white">{{ formateaFecha(aviso.info.onset) }}</span>
         </p>
         <p class="text-sm text-gray-200">
-          🕒 Hasta
-          <span class="font-semibold text-white">{{
-            formateaFecha(aviso.info.expires)
-          }}</span>
+          🕒 {{ $t('forecasts.alerts_page.until') }}
+          <span class="font-semibold text-white">{{ formateaFecha(aviso.info.expires) }}</span>
         </p>
       </div>
 
@@ -63,10 +59,10 @@
       <div v-if="aviso"
         class="max-w-lg px-6 py-4 mt-8 space-y-2 text-center border frost-card border-white/15 rounded-2xl">
         <p :class="['text-lg', 'font-bold', levelClass(aviso.info.parameters.level)]">
-          Nivel: {{ aviso.info.parameters.level.toUpperCase() }}
+          {{ $t('forecasts.alerts_page.level') }} {{ aviso.info.parameters.level.toUpperCase() }}
         </p>
         <p class="text-sm text-gray-200">
-          Probabilidad: {{ aviso.info.parameters.probability }}
+          {{ $t('forecasts.alerts_page.probability') }} {{ aviso.info.parameters.probability }}
         </p>
       </div>
 
@@ -74,13 +70,13 @@
       <div v-if="aviso" class="max-w-lg px-6 py-4 mt-8 text-center border frost-card border-white/15 rounded-2xl">
         <p class="text-sm text-gray-100">📝 {{ aviso.info.instruction }}</p>
         <a :href="aviso.info.web" target="_blank" class="block mt-3 text-xs text-gray-300 underline hover:text-white">
-          Más información en AEMET
+          {{ $t('forecasts.alerts_page.more_info_aemet') }}
         </a>
       </div>
 
       <!-- Error -->
       <div v-if="error" class="mt-12 text-center text-red-400">
-        ⚠️ Error cargando aviso: {{ error }}
+        ⚠️ {{ $t('forecasts.alerts_page.error_prefix') }} {{ error }}
       </div>
 
       <!-- Spacer flexible -->
@@ -88,7 +84,7 @@
 
       <!-- Footer -->
       <footer class="absolute w-full text-xs text-center text-gray-600 bottom-2">
-        Datos proporcionados por
+        {{ $t('forecasts.alerts_page.data_provider_prefix') }}
         <a href="https://www.aemet.es" target="_blank" class="underline hover:text-white">AEMET</a>
       </footer>
     </div>
@@ -96,9 +92,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { axiosClient } from "~/axiosConfig";
 import { userData } from "~/store/auth";
+import { useI18n } from 'vue-i18n'
 
 const mounted = ref(false);
 const aviso = ref(null);
@@ -157,6 +154,48 @@ function mapRegionFromName(name) {
   return null;
 }
 
+// Traducciones dinámicas (top-level para uso en template)
+function traducirEmisor(s) {
+  const n = norm(s);
+  if (n.includes('aemet')) return t('forecasts.alerts_senders.aemet');
+  return s || '';
+}
+
+function traducirEvento(s) {
+  const txt = (s || '').toString();
+  const n = norm(txt);
+  let base = '';
+  if (n.includes('temperaturasmaximas')) base = t('forecasts.alerts_events.max_temp');
+  else if (n.includes('temperaturasminimas')) base = t('forecasts.alerts_events.min_temp');
+  else if (n.includes('viento') || n.includes('rachas')) base = t('forecasts.alerts_events.wind');
+  else if (n.includes('tormenta')) base = t('forecasts.alerts_events.storm');
+  else if (n.includes('coster') || n.includes('coastal')) base = t('forecasts.alerts_events.coastal');
+  else if (n.includes('lluvia') || n.includes('precipit')) base = t('forecasts.alerts_events.rain');
+  else if (n.includes('nieve')) base = t('forecasts.alerts_events.snow');
+  else if (n.includes('niebla')) base = t('forecasts.alerts_events.fog');
+  else base = txt;
+
+  let levelFrag = '';
+  if (n.includes('nivelverde') || n.includes('verde')) levelFrag = t('forecasts.alerts_page.of_level') + ' ' + t('forecasts.alerts_levels.green');
+  else if (n.includes('nivelamarillo') || n.includes('amarillo')) levelFrag = t('forecasts.alerts_page.of_level') + ' ' + t('forecasts.alerts_levels.yellow');
+  else if (n.includes('nivelnaranja') || n.includes('naranja')) levelFrag = t('forecasts.alerts_page.of_level') + ' ' + t('forecasts.alerts_levels.orange');
+  else if (n.includes('nivelrojo') || n.includes('rojo')) levelFrag = t('forecasts.alerts_page.of_level') + ' ' + t('forecasts.alerts_levels.red');
+
+  return levelFrag ? `${base} ${levelFrag}` : base;
+}
+
+function traducirArea(s) {
+  const txt = (s || '').toString();
+  let out = txt
+    .replace(/^Litoral\b/i, t('forecasts.alerts_area.littoral'))
+    .replace(/\bnorte\b/i, t('forecasts.alerts_area.north'))
+    .replace(/\bde\b/i, t('forecasts.alerts_area.of'));
+  out = out.replace(/Alicante/gi, t('forecasts.alerts_area.province_alicante'))
+    .replace(/Castellón/gi, t('forecasts.alerts_area.province_castellon'))
+    .replace(/Valencia/gi, t('forecasts.alerts_area.province_valencia'));
+  return out;
+}
+
 onMounted(async () => {
   mounted.value = true;
   try {
@@ -173,18 +212,20 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+
 });
 
 // Utilidad para dar formato bonito a fechas
 function formateaFecha(iso) {
   const d = new Date(iso);
-  return d.toLocaleString("es-ES", {
+  const tag = localeTag.value;
+  return new Intl.DateTimeFormat([tag, locale?.value || 'es-ES', 'es-ES'], {
     weekday: "long",
     hour: "2-digit",
     minute: "2-digit",
     day: "numeric",
     month: "long",
-  });
+  }).format(d);
 }
 
 function levelClass(level) {
@@ -195,6 +236,21 @@ function levelClass(level) {
   if (v.includes('ROJO')) return 'text-red-500';
   return 'text-gray-200';
 }
+
+// i18n helpers
+const { t, locale } = useI18n();
+const localeTag = computed(() => {
+  const l = (locale?.value || 'es').toLowerCase();
+  const map = {
+    'es': 'es-ES',
+    'ca': 'ca-ES',
+    'val': 'ca-ES-valencia',
+    'gl': 'gl-ES',
+    'eu': 'eu-ES',
+    'ary': 'ar-MA'
+  };
+  return map[l] || l;
+});
 </script>
 
 <style scoped>

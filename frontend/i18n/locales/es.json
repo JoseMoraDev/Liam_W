@@ -1,4 +1,4 @@
-{
+    {
   "app": { "title": "Aplicación" },
   "nav": {
     "home": "Inicio",
@@ -35,8 +35,7 @@
     "signin_here": "Inicia sesión aquí",
     "mismatch_error": "Las contraseñas no coinciden",
     "generic_error": "No se pudo completar el registro."
-  }
-  ,
+  },
   "login": {
     "subtitle": "Iniciar sesión",
     "email": "Correo",
@@ -48,8 +47,7 @@
     "error_server": "Ha ocurrido un error en el servidor. Inténtalo más tarde.",
     "error_network": "No se pudo conectar con el servidor. Revisa tu conexión.",
     "error_unknown": "Error desconocido."
-  }
-  ,
+  },
   "password": {
     "subtitle": "Recuperar contraseña",
     "placeholder_email": "Escribe aquí tu correo electrónico",
@@ -60,8 +58,7 @@
     "sent": "Se ha enviado un enlace a {email}.",
     "error_send": "Error al enviar el correo.",
     "error_server": "Error al conectar con el servidor."
-  }
-  ,
+  },
   "forecasts": {
     "current_location": "Ubicación actual",
     "change": "Cambiar",
@@ -78,9 +75,240 @@
     "traffic_title": "Tráfico",
     "traffic_state": "Estado",
     "traffic_alerts": "Alertas",
-    "select_location": "Selecciona ubicación"
-  }
-  ,
+    "select_location": "Selecciona ubicación",
+    "beach_page": {
+      "loading": "Cargando datos...",
+      "select_prompt": "Selecciona una playa",
+      "change_btn": "Cambiar",
+      "pick_btn": "Elegir playa",
+      "choose_cta": "Elige una playa para ver la predicción.",
+      "date": "Fecha",
+      "sky": "Cielo",
+      "wind": "Viento",
+      "waves": "Oleaje",
+      "tmax": "Tª máx",
+      "thermal": "Sens. térmica",
+      "water_temp": "Tª agua",
+      "uv_max": "UV máx",
+      "error_prefix": "Error:",
+      "error_loading": "Cargando datos de playa",
+      "map_title": "Mapa",
+      "date_unknown": "—"
+    },
+    "snow_page": {
+      "loading": "Cargando datos...",
+      "error_prefix": "Error:",
+      "bulletin_title": "Boletín Nivológico",
+      "zone_label": "Zona:",
+      "data_provider_prefix": "Datos proporcionados por"
+    },
+    "air_ambient_page": {
+      "loading": "Cargando datos...",
+      "error_prefix": "Error:",
+      "no_data": "No hay datos disponibles para esta ubicación.",
+      "closest_station": "Estación más cercana",
+      "current_aqi": "Índice AQI actual:",
+      "last_update": "Última actualización",
+      "current_values": "Valores actuales",
+      "temp": "Temp",
+      "humidity": "Humedad",
+      "pressure": "Presión",
+      "wind": "Viento",
+      "forecast_title": "Pronóstico de contaminantes",
+      "date": "Fecha",
+      "no_forecast": "No hay pronóstico disponible.",
+      "error_aqicn": "Error en AQICN",
+      "error_console": "Error al cargar calidad del aire:",
+      "error_unknown": "Error desconocido"
+    },
+    "air_pollen_page": {
+      "title": "Niveles de polen",
+      "section_birch": "Polen de Abedul",
+      "section_grasses": "Polen de Gramíneas",
+      "section_olive": "Polen de Olivo",
+      "units": "Unidades: granos/m³",
+      "loading": "Cargando datos...",
+      "birch": "Abedul",
+      "grasses": "Gramíneas",
+      "olive": "Olivo",
+      "error_console": "Error cargando datos de polen:"
+    },
+    "mountain_page": {
+      "title": "Predicción Montaña",
+      "loading": "Cargando…",
+      "select_day": "Selecciona día",
+      "bulletin_title": "Boletín",
+      "general_state": "Estado general",
+      "free_atmosphere": "Atmósfera libre",
+      "thermal_sensation": "Sensación térmica",
+      "min_label": "Mínima:",
+      "max_label": "Máxima:",
+      "thermal_short": "sensación",
+      "data_provider_prefix": "Datos:",
+      "setup_area_title": "Configura tu zona de montaña",
+      "setup_area_text": "No se encontró ubicación de montaña en tus preferencias. Ve a la pantalla de Ubicación para elegir tu zona de montaña y poder mostrar el boletín.",
+      "not_now": "Ahora no",
+      "go_to_location": "Ir a Ubicación",
+      "missing_area": "No se encontró ubicación de montaña.",
+      "error_prefix": "Error:",
+      "error_loading": "Cargando predicción de montaña"
+    },
+    "snow_phrases": {
+      "agency_full": "Agencia Estatal de Meteorología",
+      "snow_info_for": "Información nivológica para el",
+      "prepared_on_day": "Elaborado el día",
+      "campaign_finished_for": "Se da por finalizada la campaña de predicción del peligro de aludes en",
+      "however_if_weather": "No obstante, si las condiciones meteorológicas así lo determinaran, se emitiría una predicción especial.",
+      "reminder_no_zero_risk": "Se recuerda que, siempre que haya nieve, la ausencia total de peligro no existe.",
+      "note_small_medium_avalanches": "Hay que tener presente que en circunstancias desfavorables, con aludes de tamaño 1 (alud pequeño o colada) y tamaño 2 (alud mediano), se pueden sufrir severos daños personales."
+    },
+    "snow_regions": {
+      "pirineo_catalan": "Pirineo Catalán"
+    },
+    "beach_states": {
+      "wind": {
+        "calm": "Calma",
+        "light": "Débil",
+        "moderate": "Moderado",
+        "strong": "Fuerte",
+        "very_strong": "Muy fuerte",
+        "variable": "Variable",
+        "north": "Norte",
+        "south": "Sur",
+        "east": "Este",
+        "west": "Oeste"
+      },
+      "waves": {
+        "calm": "Calma",
+        "slight": "Marejadilla",
+        "moderate": "Marejada",
+        "rough": "Fuerte marejada",
+        "very_rough": "Mar gruesa",
+        "waves": "Olas"
+      },
+      "thermal": {
+        "cold": "Frío",
+        "cool": "Fresco",
+        "pleasant": "Agradable",
+        "warm": "Templado",
+        "hot": "Caluroso",
+        "very_hot": "Muy caluroso",
+        "muggy": "Bochorno"
+      }
+    },
+    "daily": {
+      "loading": "Cargando datos...",
+      "date": "Fecha",
+      "temp_max": "Temp. máx",
+      "temp_min": "Temp. mín",
+      "sky_state": "Estado del cielo",
+      "rain_prob": "Prob. lluvia",
+      "temp_trend": "Evolución temp."
+    },
+    "sky_states": {
+      "clear": "Despejado",
+      "mostly_clear": "Poco nuboso",
+      "partly_cloudy": "Intervalos nubosos",
+      "cloudy": "Nuboso",
+      "very_cloudy": "Muy nuboso",
+      "overcast": "Cubierto",
+      "haze": "Bruma",
+      "fog": "Niebla",
+      "light_rain": "Lluvia débil",
+      "rain": "Lluvia",
+      "showers": "Chubascos",
+      "storm": "Tormenta",
+      "snow": "Nieve",
+      "hail": "Granizo"
+    },
+    "alerts_page": {
+      "loading": "Cargando datos...",
+      "emitted_by": "Emitido por",
+      "valid_from": "Vigente desde",
+      "until": "Hasta",
+      "level": "Nivel:",
+      "probability": "Probabilidad:",
+      "more_info_aemet": "Más información en AEMET",
+      "error_prefix": "Error cargando aviso:",
+      "data_provider_prefix": "Datos proporcionados por",
+      "of_level": "de nivel"
+    },
+    "alerts_events": {
+      "max_temp": "Aviso de temperaturas máximas",
+      "min_temp": "Aviso de temperaturas mínimas",
+      "wind": "Aviso de viento",
+      "storm": "Aviso de tormenta",
+      "coastal": "Aviso costero",
+      "rain": "Aviso de lluvia",
+      "snow": "Aviso de nieve",
+      "fog": "Aviso de niebla"
+    },
+    "alerts_levels": {
+      "green": "verde",
+      "yellow": "amarillo",
+      "orange": "naranja",
+      "red": "rojo"
+    },
+    "alerts_senders": {
+      "aemet": "AEMET. Agencia Estatal de Meteorología"
+    },
+    "alerts_area": {
+      "littoral": "Litoral",
+      "north": "norte",
+      "of": "de",
+      "province_alicante": "Alacant/Alicante",
+      "province_castellon": "Castelló/Castellón",
+      "province_valencia": "València/Valencia"
+    },
+    "traffic_state_page": {
+      "title": "Estado del tráfico",
+      "loading": "Cargando tráfico...",
+      "error_prefix": "Error:",
+      "error_console": "Error al cargar tráfico:",
+      "error_loading": "No se pudieron cargar los datos de tráfico.",
+      "icon_fix_warning": "No se pudo aplicar la corrección de íconos de Leaflet. Verifique las rutas de los assets.",
+      "status_closed": "Cerrado",
+      "status_fluid": "Fluido",
+      "status_dense": "Denso",
+      "status_congestion": "Congestión",
+      "free_speed": "Libre:",
+      "frc": "FRC:",
+      "delay": "Retraso",
+      "confidence": "Confianza:",
+      "kpi_current_speed": "Velocidad actual",
+      "kpi_free_speed": "Velocidad libre",
+      "kpi_ratio": "Relación",
+      "kpi_confidence": "Confianza",
+      "source_prefix": "Fuente:"
+    },
+    "traffic_alerts_page": {
+      "title": "Incidencias de tráfico",
+      "loading": "Cargando incidentes...",
+      "error_prefix": "Error:",
+      "error_console": "Error al cargar incidentes de tráfico:",
+      "error_loading": "No se pudieron cargar las alertas de tráfico.",
+      "icon_fix_warning": "La corrección de iconos de Leaflet falló:",
+      "unknown_road": "Vía desconocida",
+      "active_alerts": "Alertas activas",
+      "nearby": "en los alrededores",
+      "top_categories": "Principales categorías",
+      "list_title": "Listado de incidencias",
+      "start": "Inicio:",
+      "end": "Fin:",
+      "categories": {
+        "accident": "Accidente",
+        "roadworks": "Obras",
+        "lane_closure": "Cierre de carril",
+        "congestion": "Congestión",
+        "weather": "Clima adverso",
+        "stopped_vehicle": "Vehículo detenido",
+        "event": "Evento",
+        "other_incidents": "Otros incidentes",
+        "other_uncategorized": "Otros (no clasificado)",
+        "unknown": "Desconocido"
+      }
+    }
+  },
   "settings": {
     "language": "Idioma",
     "change_language": "Cambiar idioma"
@@ -112,8 +340,7 @@
       "modal_edit": "Editar usuario",
       "password": "Contraseña (min 8)",
       "close": "Cerrar"
-    }
-    ,
+    },
     "metrics": {
       "section_title": "Métricas y logs",
       "open_logins": "Ver historial de logins",

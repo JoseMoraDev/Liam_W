@@ -3,6 +3,7 @@ import { ref, onMounted, nextTick, computed } from "vue";
 import { axiosClient } from "~/axiosConfig";
 import { userData } from "~/store/auth";
 import "leaflet/dist/leaflet.css";
+import { useI18n } from 'vue-i18n';
 
 const incidentes = ref([]);
 const cargando = ref(true);
@@ -11,6 +12,7 @@ let map = null;
 const center = ref([40.4168, -3.7038]); // fallback Madrid
 const selectedIdx = ref(null);
 let highlightLayer = null;
+const { t } = useI18n();
 
 // Helper para leer variables CSS del tema
 function css(name) {
@@ -23,7 +25,7 @@ function nombreVia(props = {}) {
   const rn = Array.isArray(props.roadNumbers) && props.roadNumbers.length ? props.roadNumbers[0] : null
   const from = props.from && typeof props.from === 'string' ? props.from : (props.from?.name || null)
   const to = props.to && typeof props.to === 'string' ? props.to : (props.to?.name || null)
-  return rn || from || to || 'Vía desconocida'
+  return rn || from || to || t('forecasts.traffic_alerts_page.unknown_road')
 }
 
 // Extraer coordenadas [lat, lon] desde la geometría
@@ -82,18 +84,19 @@ async function focusIncidente(incidente, idx) {
 
 // Función para obtener descripción de la categoría
 function descripcionCategoria(iconCategory) {
-  const categorias = {
-    1: "Accidente",
-    2: "Obras",
-    3: "Cierre de carril",
-    4: "Congestión",
-    5: "Clima adverso",
-    6: "Vehículo detenido",
-    7: "Evento",
-    8: "Otros incidentes",
-    14: "Otros (no clasificado)",
+  const keyMap = {
+    1: 'accident',
+    2: 'roadworks',
+    3: 'lane_closure',
+    4: 'congestion',
+    5: 'weather',
+    6: 'stopped_vehicle',
+    7: 'event',
+    8: 'other_incidents',
+    14: 'other_uncategorized'
   };
-  return categorias[iconCategory] || "Desconocido";
+  const k = keyMap[iconCategory];
+  return k ? t(`forecasts.traffic_alerts_page.categories.${k}`) : t('forecasts.traffic_alerts_page.categories.unknown');
 }
 
 // Función para asignar color según categoría usando el tema
@@ -135,7 +138,7 @@ async function initMap() {
       });
     }
   } catch (e) {
-    console.warn("Leaflet Icon Fix falló:", e);
+    console.warn(t('forecasts.traffic_alerts_page.icon_fix_warning'), e);
   }
 
   const mapElement = document.getElementById("mapa");
@@ -224,9 +227,9 @@ onMounted(async () => {
     await nextTick();
     initMap();
   } catch (err) {
-    console.error("Error al cargar incidentes de tráfico:", err);
+    console.error(t('forecasts.traffic_alerts_page.error_console'), err);
     const details = err?.response?.data?.details || err?.message;
-    error.value = details ? `No se pudieron cargar las alertas de tráfico. ${details}` : 'No se pudieron cargar las alertas de tráfico.';
+    error.value = details ? `${t('forecasts.traffic_alerts_page.error_loading')} ${details}` : t('forecasts.traffic_alerts_page.error_loading');
   } finally {
     cargando.value = false;
   }
@@ -250,17 +253,17 @@ const categoriasContadas = computed(() => {
     <div class="absolute inset-0 bg-black/40"></div>
 
     <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)] pt-10">
-      <h1 class="pt-10 mb-6 text-3xl font-bold tracking-tight text-center page-title">Incidencias de tráfico</h1>
+      <h1 class="pt-10 mb-6 text-3xl font-bold tracking-tight text-center page-title">{{ t('forecasts.traffic_alerts_page.title') }}</h1>
 
       <div v-if="cargando" class="flex items-center justify-center min-h-[30vh]">
         <div class="flex flex-col items-center gap-3">
-          <div class="spinner" aria-label="Cargando"></div>
-          <div class="loader-text">Cargando incidentes...</div>
+          <div class="spinner" :aria-label="t('forecasts.traffic_alerts_page.loading')"></div>
+          <div class="loader-text">{{ t('forecasts.traffic_alerts_page.loading') }}</div>
         </div>
       </div>
 
       <div v-else-if="error" class="max-w-md p-4 mx-auto text-center border rounded-xl border-white/20 frost-card">
-        {{ error }}
+        {{ t('forecasts.traffic_alerts_page.error_prefix') }} {{ error }}
       </div>
 
       <div v-else class="flex flex-col gap-6">
@@ -269,13 +272,13 @@ const categoriasContadas = computed(() => {
           <div class="flex items-center justify-between gap-3">
             <div>
               <div class="inline-flex items-center px-3 py-1 text-xs font-semibold text-black bg-yellow-500 rounded-lg">
-                Alertas activas
+                {{ t('forecasts.traffic_alerts_page.active_alerts') }}
               </div>
               <div class="mt-3 text-4xl font-extrabold leading-tight">{{ totalIncidentes }}</div>
-              <div class="mt-1 text-sm text-white/70">en los alrededores</div>
+              <div class="mt-1 text-sm text-white/70">{{ t('forecasts.traffic_alerts_page.nearby') }}</div>
             </div>
             <div class="text-right">
-              <div class="text-sm text-white/70">Principales categorías</div>
+              <div class="text-sm text-white/70">{{ t('forecasts.traffic_alerts_page.top_categories') }}</div>
               <div class="mt-1 text-sm text-white/80">
                 <template v-for="([cat, count], i) in categoriasContadas" :key="cat">
                   <span v-if="i > 0" class="text-white/50"> · </span>
@@ -294,7 +297,7 @@ const categoriasContadas = computed(() => {
         </div>
 
         <!-- Lista de incidentes -->
-        <h2 class="text-xl font-semibold">Listado de incidencias</h2>
+        <h2 class="text-xl font-semibold">{{ t('forecasts.traffic_alerts_page.list_title') }}</h2>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div v-for="(incidente, index) in incidentes" :key="index" @click="focusIncidente(incidente, index)"
             @keydown.enter.prevent.stop="focusIncidente(incidente, index)"
@@ -313,11 +316,11 @@ const categoriasContadas = computed(() => {
               {{ descripcionCategoria(incidente.properties.iconCategory) }}
             </div>
             <div class="text-sm text-white/80">
-              <strong>Inicio:</strong>
+              <strong>{{ t('forecasts.traffic_alerts_page.start') }}</strong>
               {{ incidente.geometry.coordinates[0][1].toFixed(6) }}, {{ incidente.geometry.coordinates[0][0].toFixed(6)
               }}
               <span class="mx-2 text-white/50">·</span>
-              <strong>Fin:</strong>
+              <strong>{{ t('forecasts.traffic_alerts_page.end') }}</strong>
               {{ incidente.geometry.coordinates.slice(-1)[0][1].toFixed(6) }}, {{
                 incidente.geometry.coordinates.slice(-1)[0][0].toFixed(6) }}
             </div>

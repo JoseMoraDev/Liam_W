@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import axios from "axios";
+import { useI18n } from 'vue-i18n'
 
 const dias = ref([]);
 
@@ -16,7 +17,8 @@ function formatFechaLarga(input) {
         const s = typeof input === "string" ? input : String(input);
         const d = new Date(s.includes("T") ? s : `${s}T00:00:00`);
         if (isNaN(d)) return "—";
-        const partes = new Intl.DateTimeFormat("es-ES", {
+        const tag = localeTag.value;
+        const partes = new Intl.DateTimeFormat([tag, locale?.value || 'es-ES', 'es-ES'], {
             weekday: "long",
             day: "2-digit",
             month: "long",
@@ -70,6 +72,22 @@ onMounted(async () => {
         console.error("Error al cargar predicción:", err);
     }
 });
+
+const { t, locale } = useI18n()
+
+// Map i18n locale keys to BCP-47 tags understood by Intl
+const localeTag = computed(() => {
+    const l = (locale?.value || 'es').toLowerCase();
+    const map = {
+        'es': 'es-ES',
+        'ca': 'ca-ES',
+        'val': 'ca-ES-valencia',
+        'gl': 'gl-ES',
+        'eu': 'eu-ES',
+        'ary': 'ar-MA'
+    };
+    return map[l] || l;
+})
 </script>
 
 <template>
@@ -78,8 +96,7 @@ onMounted(async () => {
         <div class="absolute inset-0 bg-black/40"></div>
 
         <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)]">
-            <h1 class="mb-6 text-3xl font-bold tracking-tight text-center page-title">Pronóstico
-                horario</h1>
+            <h1 class="mb-6 text-3xl font-bold tracking-tight text-center page-title">{{ t('forecasts.municipal_hourly') }}</h1>
 
             <div v-if="!dias.length" class="flex items-center justify-center min-h-[50vh]">
                 <div class="flex flex-col items-center gap-3 loader">

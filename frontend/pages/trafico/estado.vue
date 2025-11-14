@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from "vue";
 import { axiosClient } from "~/axiosConfig";
 import { userData } from "~/store/auth";
+import { useI18n } from 'vue-i18n';
 
 // Vue Leaflet
 import { LMap, LTileLayer, LMarker, LPolyline, LCircle } from "@vue-leaflet/vue-leaflet";
@@ -34,6 +35,7 @@ const datos = ref(null);
 const coords = ref([]);
 const loading = ref(true);
 const error = ref(null);
+const { t } = useI18n();
 
 let leafletMap = null; // guardamos el objeto real del mapa
 
@@ -106,7 +108,7 @@ onMounted(async () => {
       });
     } catch (e) {
       console.warn(
-        "No se pudo aplicar la corrección de íconos de Leaflet. Verifique las rutas de los assets.",
+        t('forecasts.traffic_state_page.icon_fix_warning'),
         e
       );
     }
@@ -138,8 +140,8 @@ onMounted(async () => {
     }
     loading.value = false;
   } catch (err) {
-    console.error("Error al cargar tráfico:", err);
-    error.value = 'No se pudieron cargar los datos de tráfico.';
+    console.error(t('forecasts.traffic_state_page.error_console'), err);
+    error.value = t('forecasts.traffic_state_page.error_loading');
     loading.value = false;
   }
 });
@@ -178,11 +180,11 @@ const reliability = computed(() => {
 
 const status = computed(() => {
   if (!datos.value) return { label: '—', color: css('--color-border'), badge: 'bg-gray-500 text-white' };
-  if (datos.value.roadClosure) return { label: 'Cerrado', color: css('--color-danger'), badge: 'bg-red-600 text-white' };
+  if (datos.value.roadClosure) return { label: t('forecasts.traffic_state_page.status_closed'), color: css('--color-danger'), badge: 'bg-red-600 text-white' };
   const r = speedRatio.value;
-  if (r >= 0.8) return { label: 'Fluido', color: css('--color-success'), badge: 'bg-green-600 text-white' };
-  if (r >= 0.6) return { label: 'Denso', color: css('--color-warning'), badge: 'bg-yellow-500 text-black' };
-  return { label: 'Congestión', color: css('--color-danger'), badge: 'bg-red-600 text-white' };
+  if (r >= 0.8) return { label: t('forecasts.traffic_state_page.status_fluid'), color: css('--color-success'), badge: 'bg-green-600 text-white' };
+  if (r >= 0.6) return { label: t('forecasts.traffic_state_page.status_dense'), color: css('--color-warning'), badge: 'bg-yellow-500 text-black' };
+  return { label: t('forecasts.traffic_state_page.status_congestion'), color: css('--color-danger'), badge: 'bg-red-600 text-white' };
 });
 
 // Centro aproximado del segmento para centrar el área
@@ -203,17 +205,17 @@ const cityRadius = 5000;
     <div class="absolute inset-0 bg-black/40"></div>
 
     <div class="relative z-10 min-h-screen p-4 text-[color:var(--color-text)] pt-10 px-10">
-      <h1 class="mt-6 text-3xl font-bold tracking-tight text-center page-title">Estado del tráfico</h1>
+      <h1 class="mt-6 text-3xl font-bold tracking-tight text-center page-title">{{ t('forecasts.traffic_state_page.title') }}</h1>
 
       <div v-if="loading" class="flex items-center justify-center min-h-[30vh]">
         <div class="flex flex-col items-center gap-3">
-          <div class="spinner" aria-label="Cargando"></div>
-          <div class="loader-text">Cargando tráfico...</div>
+          <div class="spinner" :aria-label="t('forecasts.traffic_state_page.loading')"></div>
+          <div class="loader-text">{{ t('forecasts.traffic_state_page.loading') }}</div>
         </div>
       </div>
 
       <div v-else-if="error" class="max-w-md p-4 mx-auto text-center border rounded-xl border-white/20 frost-card">
-        {{ error }}
+        {{ t('forecasts.traffic_state_page.error_prefix') }} {{ error }}
       </div>
 
       <div v-else-if="datos" class="flex flex-col gap-6 mt-10">
@@ -226,12 +228,12 @@ const cityRadius = 5000;
               </div>
               <div class="mt-3 text-4xl font-extrabold leading-tight">{{ datos.currentSpeed }}<span
                   class="text-2xl font-bold"> km/h</span></div>
-              <div class="mt-1 text-sm text-white/70">Libre: {{ datos.freeFlowSpeed }} km/h · FRC: {{ datos.frc }}</div>
+              <div class="mt-1 text-sm text-white/70">{{ t('forecasts.traffic_state_page.free_speed') }} {{ datos.freeFlowSpeed }} km/h · {{ t('forecasts.traffic_state_page.frc') }} {{ datos.frc }}</div>
             </div>
             <div class="text-right">
-              <div class="text-sm text-white/70">Retraso</div>
+              <div class="text-sm text-white/70">{{ t('forecasts.traffic_state_page.delay') }}</div>
               <div class="text-3xl font-extrabold">{{ delayMin }}<span class="text-xl font-bold"> min</span></div>
-              <div class="mt-1 text-sm text-white/70">Confianza: {{ reliability }}%</div>
+              <div class="mt-1 text-sm text-white/70">{{ t('forecasts.traffic_state_page.confidence') }} {{ reliability }}%</div>
             </div>
           </div>
         </div>
@@ -239,19 +241,19 @@ const cityRadius = 5000;
         <!-- KPIs -->
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
           <div class="p-4 border frost-card border-white/15 rounded-2xl">
-            <div class="text-sm text-white/70">Velocidad actual</div>
+            <div class="text-sm text-white/70">{{ t('forecasts.traffic_state_page.kpi_current_speed') }}</div>
             <div class="mt-1 text-2xl font-bold">{{ datos.currentSpeed }} km/h</div>
           </div>
           <div class="p-4 border frost-card border-white/15 rounded-2xl">
-            <div class="text-sm text-white/70">Velocidad libre</div>
+            <div class="text-sm text-white/70">{{ t('forecasts.traffic_state_page.kpi_free_speed') }}</div>
             <div class="mt-1 text-2xl font-bold">{{ datos.freeFlowSpeed }} km/h</div>
           </div>
           <div class="p-4 border frost-card border-white/15 rounded-2xl">
-            <div class="text-sm text-white/70">Relación</div>
+            <div class="text-sm text-white/70">{{ t('forecasts.traffic_state_page.kpi_ratio') }}</div>
             <div class="mt-1 text-2xl font-bold">{{ Math.round(speedRatio * 100) }}%</div>
           </div>
           <div class="p-4 border frost-card border-white/15 rounded-2xl">
-            <div class="text-sm text-white/70">Confianza</div>
+            <div class="text-sm text-white/70">{{ t('forecasts.traffic_state_page.kpi_confidence') }}</div>
             <div class="mt-1 text-2xl font-bold">{{ reliability }}%</div>
           </div>
         </div>
@@ -273,7 +275,7 @@ const cityRadius = 5000;
         </div>
 
         <!-- Nota fuente -->
-        <div class="text-sm text-center text-white/60">Fuente: TomTom Traffic Flow API</div>
+        <div class="text-sm text-center text-white/60">{{ t('forecasts.traffic_state_page.source_prefix') }} TomTom Traffic Flow API</div>
       </div>
     </div>
   </div>
