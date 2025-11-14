@@ -1,138 +1,96 @@
 <template>
-  <div
-    class="absolute inset-0 w-full h-screen bg-center bg-cover"
-    style="background-image: url('/img/menu.jpg')"
-  >
+  <div class="absolute inset-0 w-full h-screen bg-center bg-cover" style="background-image: url('/img/menu.jpg')">
     <div class="absolute inset-0 bg-black/40"></div>
 
     <!-- Contenido principal -->
-    <div
-      :class="mounted ? 'opacity-100' : 'opacity-0'"
-      class="relative z-10 flex flex-col items-center w-full min-h-screen p-4 transition-opacity duration-300 sm:p-6 md:p-8"
-    >
+    <div :class="mounted ? 'opacity-100' : 'opacity-0'"
+      class="relative z-10 flex flex-col items-center w-full h-screen p-4 transition-opacity duration-300 sm:p-6 md:p-8">
       <!-- Titulo -->
-      <div class="flex items-end justify-center w-full max-w-xl px-2">
-        <h1
-          class="text-2xl font-bold leading-snug text-center text-white sm:text-3xl md:text-4xl"
-        >
+      <div class="flex items-end justify-center w-3/4 h-2/10">
+        <h1 class="text-3xl font-bold leading-snug text-center text-white md:text-4xl">
           Live Ambience <br />Weather & Traffic
         </h1>
       </div>
 
-      <!-- sección -->
-      <div
-        class="flex flex-col items-center justify-center w-full max-w-xl mt-6 space-y-4 px-2"
-      >
-        <p class="mt-2 text-base text-center text-gray-200 sm:text-lg md:text-xl">
-          {{ t('login.subtitle') }}
-        </p>
+      <!-- sección (subtítulo dentro de box glass) -->
+      <div class="w-full flex justify-center mt-10">
+        <div class="w-full max-w-sm px-6 py-5 border border-white/15 rounded-2xl frost-card">
+          <p class="mb-0 text-xl text-left text-gray-200 md:text-2xl">
+            {{ t('login.subtitle') }}
+          </p>
+        </div>
       </div>
 
       <!-- formulario -->
-      <div class="flex items-start justify-center w-full max-w-md mt-4 px-2">
-        <form
-          @submit.prevent="submitLogin"
-          class="flex flex-col w-full space-y-4"
-        >
+      <div class="w-full flex justify-center mt-6">
+        <div class="w-full max-w-sm px-6 py-4 border border-white/15 rounded-2xl frost-card">
+          <form @submit.prevent="submitLogin" class="flex flex-col w-full space-y-4">
           <!-- div correo -->
           <div class="relative w-full">
             <!-- Icono -->
-            <font-awesome-icon
-              icon="fa-solid fa-envelope"
-              class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none"
-            />
+            <font-awesome-icon icon="fa-solid fa-envelope"
+              class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none" />
 
             <!-- Input -->
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              required
-              :placeholder="t('login.email')"
-              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
-            />
+            <input id="email" v-model="email" type="email" required :placeholder="t('login.email')"
+              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border rounded-md bg-transparent focus:outline-none focus:ring-2 frost-field" />
           </div>
 
           <!-- div contraseña -->
           <div class="relative w-full">
             <!-- Icono -->
-            <font-awesome-icon
-              icon="fa-solid fa-key"
-              class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none"
-            />
+            <font-awesome-icon icon="fa-solid fa-key"
+              class="absolute left-3 top-1/2 -translate-y-[6px] text-gray-200 pointer-events-none" />
 
             <!-- Input -->
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              :placeholder="t('login.password')"
-              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border border-gray-400 rounded-md bg-white/10 focus:outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-400"
-            />
+            <input id="password" v-model="password" type="password" required :placeholder="t('login.password')"
+              class="w-full h-12 pl-10 pr-3 text-gray-200 placeholder-gray-300 border rounded-md bg-transparent focus:outline-none focus:ring-2 frost-field" />
           </div>
 
           <div class="flex justify-center !mt-6">
-            <button
-              type="submit"
-              class="w-full sm:w-2/3 py-3 font-bold text-gray-200 transition-colors border border-gray-400 rounded-md bg-white/30 hover:bg-gray-400 hover:text-white"
-            >
+            <button type="submit"
+              class="w-full sm:w-2/3 py-3 font-bold text-gray-200 transition-colors rounded-md frost-field border border-white/40 hover:brightness-110">
               {{ t('login.submit') }}
             </button>
           </div>
 
-          <p
-            v-if="errorMessage"
-            class="mt-2 font-semibold text-center text-red-500"
-          >
+          <p v-if="errorMessage" class="mt-2 font-semibold text-center text-red-500">
             {{ errorMessage }}
           </p>
-        </form>
+          </form>
+        </div>
       </div>
 
-      <div class="grid w-full max-w-md grid-cols-1 gap-3 px-2 sm:grid-cols-2">
+      <div class="w-full flex justify-center mt-6">
+        <div class="w-full max-w-sm px-6 py-4 border border-white/15 rounded-2xl frost-card grid grid-cols-1 sm:grid-cols-2 gap-3">
         <!-- Botón 1 -->
-        <NuxtLink
-          to="/password"
-          class="w-full py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
-        >
+        <NuxtLink to="/password"
+          class="w-full px-4 py-2 text-sm italic text-center text-gray-200 transition-colors rounded-md frost-field hover:brightness-110">
           {{ t('login.forgot_password') }}
         </NuxtLink>
 
         <!-- Botón 2 -->
-        <NuxtLink
-          to="/register"
-          class="w-full py-2 text-sm italic text-center text-gray-200 transition-colors border border-gray-400 rounded-md bg-gray-500/40 hover:bg-gray-400 hover:text-white"
-        >
+        <NuxtLink to="/register"
+          class="w-full px-4 py-2 text-sm italic text-center text-gray-200 transition-colors rounded-md frost-field hover:brightness-110">
           {{ t('login.signup_cta') }}
         </NuxtLink>
+        </div>
       </div>
 
       <!-- Spacer flexible -->
       <div class="flex-grow w-full"></div>
 
       <!-- Footer con atribución -->
-      <footer
-        class="w-full px-2 pb-2 text-[11px] text-center text-gray-300 sm:text-xs"
-      >
+      <footer class="w-full px-2 pb-2 text-[11px] text-center text-gray-300 sm:text-xs">
         Foto por Danieljschwarz alojada en
-        <a
-          href="https://www.freepik.com/author/danieljschwarz"
-          target="_blank"
-          class="underline hover:text-white"
-          >www.freepik.com</a
-        >
+        <a href="https://www.freepik.com/author/danieljschwarz" target="_blank"
+          class="underline hover:text-white">www.freepik.com</a>
       </footer>
     </div>
   </div>
   <!-- Spinner de carga -->
-  <div
-    v-if="loading"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
-  >
-    <div
-      class="w-16 h-16 border-4 border-gray-200 rounded-full border-t-transparent animate-spin"
-    ></div>
+  <div v-if="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div class="w-16 h-16 border-4 border-gray-200 rounded-full border-t-transparent animate-spin"></div>
   </div>
 </template>
 
@@ -213,7 +171,58 @@ textarea:-webkit-autofill,
 textarea:-webkit-autofill:hover,
 textarea:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
-  -webkit-text-fill-color: #e5e7eb !important; /* Gris claro como el texto */
+  -webkit-text-fill-color: #e5e7eb !important;
+  /* Gris claro como el texto */
   transition: background-color 5000s ease-in-out 0s !important;
+}
+</style>
+
+<style scoped>
+.frost-card {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 3%, transparent),
+      color-mix(in srgb, var(--color-primary) 3%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: light) {
+  .frost-card {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 3%, transparent),
+        color-mix(in srgb, var(--color-primary) 3%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 12%, transparent),
+        color-mix(in srgb, var(--color-bg) 12%, transparent));
+  }
+}
+
+:deep(.frost-card),
+:deep(.frost-card *),
+:deep(.frost-card th),
+:deep(.frost-card td) {
+  color: #ffffff !important;
+}
+
+.frost-field {
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 4%, transparent),
+      color-mix(in srgb, var(--color-primary) 4%, transparent));
+  background-color: color-mix(in srgb, var(--color-bg) 8%, transparent);
+  border-color: color-mix(in srgb, white 35%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 </style>

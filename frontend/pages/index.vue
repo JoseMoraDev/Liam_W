@@ -14,7 +14,7 @@
       <div class="mt-20"></div>
       <!-- Título con vidrio sutil y compacto -->
       <div
-        class="px-6 py-3 mt-16 shadow-inner rounded-2xl bg-white/5 backdrop-blur-sm"
+        class="px-6 py-3 mt-16 shadow-inner rounded-2xl border border-white/15 frost-card home-card"
       >
         <h1
           class="text-3xl font-bold leading-snug text-center text-white md:text-4xl"
@@ -25,11 +25,10 @@
 
       <!-- Slogan con vidrio sutil y compacto -->
       <div
-        class="px-6 py-3 space-y-4 text-center shadow-inner mt-28 rounded-2xl bg-white/5 backdrop-blur-sm"
+        class="px-6 py-3 space-y-4 text-center shadow-inner mt-28 rounded-2xl border border-white/15 frost-card home-card"
       >
         <p class="text-lg text-gray-200 md:text-base">
-          {{ t('home.slogan_line1') }} <br />
-          {{ t('home.slogan_line2') }}
+          {{ t('home.slogan_line1') }}
         </p>
 
         <p class="flex justify-center space-x-3 text-xl text-white">
@@ -44,7 +43,7 @@
 
       <!-- Pregunta + Botones en vidrio igual que los otros -->
       <div
-        class="px-6 py-4 space-y-4 text-center shadow-inner mt-28 rounded-2xl bg-white/5 backdrop-blur-sm"
+        class="px-6 py-4 space-y-4 text-center shadow-inner mt-28 rounded-2xl border border-white/15 frost-card home-card"
       >
         <p class="font-medium text-white">{{ t('home.have_account') }}</p>
 
@@ -101,3 +100,50 @@ onMounted(() => {
   mounted.value = true;
 });
 </script>
+
+<style scoped>
+/* Glass muy sutil como en diaria */
+.frost-card {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background-image:
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-primary) 3%, transparent),
+      color-mix(in srgb, var(--color-primary) 3%, transparent)),
+    linear-gradient(to bottom,
+      color-mix(in srgb, var(--color-bg) 12%, transparent),
+      color-mix(in srgb, var(--color-bg) 12%, transparent));
+  background-blend-mode: normal, normal;
+  background-color: transparent;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Velo blanquecino en tema claro */
+@media (prefers-color-scheme: light) {
+  .frost-card {
+    background-image:
+      linear-gradient(to bottom,
+        color-mix(in srgb, white 18%, transparent),
+        color-mix(in srgb, white 18%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-primary) 3%, transparent),
+        color-mix(in srgb, var(--color-primary) 3%, transparent)),
+      linear-gradient(to bottom,
+        color-mix(in srgb, var(--color-bg) 12%, transparent),
+        color-mix(in srgb, var(--color-bg) 12%, transparent));
+  }
+}
+
+/* Texto blanco dentro del panel para todos los temas */
+:deep(.frost-card),
+:deep(.frost-card *),
+:deep(.frost-card th),
+:deep(.frost-card td) {
+  color: #ffffff !important;
+}
+
+/* Ancho uniforme y ligeramente más amplio para las cards de la home */
+.home-card {
+  width: min(92vw, 720px);
+}
+</style>

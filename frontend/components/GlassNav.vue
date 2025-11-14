@@ -1,8 +1,8 @@
-<!-- TODO: cuando el usuario se loguea no se actualiza esto -->
 <template>
   <nav class="fixed inset-x-0 top-0 z-[9999] h-16 flex items-center nav-glass border-b border-white/15 shadow-sm">
     <div class="w-full px-3 mx-auto max-w-7xl sm:px-6">
       <div class="flex items-center gap-3 px-3 py-2 rounded-2xl">
+
         <!-- Botón menú -->
         <button v-if="isLoggedIn" ref="menuButtonRef" @click="open = !open"
           class="inline-flex items-center justify-center w-10 h-10 border frost-icon border-white/15"
@@ -12,51 +12,18 @@
         <div v-else class="w-10 h-10"></div>
 
         <!-- Marca -->
-        <NuxtLink to="/" class="hidden font-semibold tracking-wide text-[color:var(--color-text)] sm:block">
+        <NuxtLink v-if="isLoggedIn" to="/" class="hidden font-semibold tracking-wide text-[color:var(--color-text)] md:block">
           Previsiones
         </NuxtLink>
 
-        <NuxtLink to="/ubicacion"
+        <NuxtLink v-if="isLoggedIn" to="/ubicacion"
           class="items-center hidden gap-2 px-2 py-1 ml-2 text-sm border sm:inline-flex frost-card border-white/15">
           <client-only><font-awesome-icon icon="fa-solid fa-location-dot" class="w-4 h-4" /></client-only>
           <span>{{ municipioDisplay }}</span>
         </NuxtLink>
 
-        <!-- Buscador -->
-        <form v-if="isLoggedIn" @submit.prevent="onSearch" class="flex items-center justify-center flex-1">
-          <div
-            class="relative w-full max-w-xl overflow-hidden border rounded-full border-gray-300/50 bg-gray-50/50 focus-within:ring-2 focus-within:ring-gray-300/50">
-            <input v-model="q" type="search" :placeholder="t('nav.search_placeholder')"
-              class="w-full pl-4 text-gray-800 bg-transparent border-0 outline-none h-11 pr-11 placeholder:italic placeholder:text-gray-500"
-              @input="onInput" @focus="showSuggestions = true" @blur="onBlur" />
-            <button type="submit"
-              class="absolute inset-y-0 right-0 flex items-center justify-center text-gray-700 w-11 hover:bg-gray-200/20"
-              :aria-label="t('aria.search')">
-              <client-only><font-awesome-icon icon="fa-solid fa-magnifying-glass" /></client-only>
-            </button>
-
-            <div v-if="showSuggestions && q"
-              class="absolute z-50 w-full mt-1 overflow-hidden bg-white border rounded-lg shadow-lg">
-              <template v-if="filteredTerms.length">
-                <ul class="py-1 divide-y divide-gray-100">
-                  <li v-for="t in filteredTerms" :key="t" class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50"
-                    @mousedown.prevent="selectTerm(t)">
-                    {{ t }}
-                  </li>
-                </ul>
-              </template>
-              <div v-else class="px-3 py-2 text-sm text-gray-500">
-                {{ t('nav.search_no_results') }}
-              </div>
-            </div>
-          </div>
-        </form>
-        <div v-else class="flex-1">
-          <div class="w-full max-w-xl h-11"></div>
-        </div>
-
         <!-- Acciones -->
-        <div class="items-center hidden gap-2 ml-auto sm:flex">
+        <div class="flex items-center gap-2 ml-auto">
           <template v-if="!isLoggedIn">
             <NuxtLink to="/login" class="inline-flex items-center h-10 px-3 border frost-card border-white/15">
               {{ t('nav.login') }}
@@ -65,6 +32,7 @@
               {{ t('nav.register') }}
             </NuxtLink>
           </template>
+          <!-- usuario -->
           <template v-else>
             <span class="px-3 text-gray-700">
               {{ currentUser?.name || t('user.default_name') }}
@@ -73,7 +41,8 @@
               {{ t('nav.logout') }}
             </button>
           </template>
-          <div class="relative">
+          <!-- idioma -->
+          <div class="relative hidden lg:block">
             <button @click="langOpen = !langOpen"
               class="inline-flex items-center h-10 px-2 text-sm border frost-card border-white/15"
               aria-haspopup="listbox" :aria-expanded="langOpen ? 'true' : 'false'">
@@ -93,7 +62,7 @@
           </div>
 
           <!-- Tema -->
-          <div class="relative">
+          <div v-if="isLoggedIn" class="relative hidden md:block">
             <button @click="themeOpen = !themeOpen"
               class="inline-flex items-center h-10 px-2 text-sm border frost-card border-white/15"
               aria-haspopup="listbox" :aria-expanded="themeOpen ? 'true' : 'false'">
@@ -104,21 +73,13 @@
               role="listbox">
               <button v-for="t in themeList" :key="t.id"
                 class="flex items-center w-full px-3 py-2 text-left text-sm hover:bg-[color:var(--color-overlay-weak)]"
-                :class="{ 'opacity-60 cursor-not-allowed': t.id === activeId }"
-                :disabled="t.id === activeId"
+                :class="{ 'opacity-60 cursor-not-allowed': t.id === activeId }" :disabled="t.id === activeId"
                 @click="activateTheme(t.id); themeOpen = false" role="option">
                 <span class="truncate">{{ t.name }}</span>
               </button>
             </div>
           </div>
         </div>
-
-        <!-- Móvil -->
-        <NuxtLink to="/login"
-          class="inline-flex items-center justify-center w-10 h-10 border sm:hidden frost-card border-white/15"
-          :aria-label="t('nav.login')">
-          <client-only><font-awesome-icon icon="fa-regular fa-user" /></client-only>
-        </NuxtLink>
       </div>
     </div>
 
@@ -132,21 +93,21 @@
           <NuxtLink to="/previsiones" class="menu-pill" @click="open = false">
             <div class="flex items-center gap-2">
               <client-only><font-awesome-icon icon="fa-solid fa-cloud-sun" class="w-4 h-4" /></client-only>
-              <span class="font-semibold uppercase tracking-wide">{{ t('nav.forecasts') }}</span>
+              <span class="font-semibold tracking-wide uppercase">{{ t('nav.forecasts') }}</span>
             </div>
           </NuxtLink>
 
           <NuxtLink to="/ajustes" class="menu-pill" @click="open = false">
             <div class="flex items-center gap-2">
               <client-only><font-awesome-icon icon="fa-solid fa-sliders" class="w-4 h-4" /></client-only>
-              <span class="font-semibold uppercase tracking-wide">{{ t('nav.settings') }}</span>
+              <span class="font-semibold tracking-wide uppercase">{{ t('nav.settings') }}</span>
             </div>
           </NuxtLink>
 
           <NuxtLink v-if="currentUser?.role === 'admin'" to="/avanzado" class="menu-pill" @click="open = false">
             <div class="flex items-center gap-2">
               <client-only><font-awesome-icon icon="fa-solid fa-cogs" class="w-4 h-4" /></client-only>
-              <span class="font-semibold uppercase tracking-wide">{{ t('nav.advanced') }}</span>
+              <span class="font-semibold tracking-wide uppercase">{{ t('nav.advanced') }}</span>
             </div>
           </NuxtLink>
         </div>
@@ -208,7 +169,7 @@ const themeList = computed(() => {
   return list
 })
 const activeId = computed(() => activeThemeIdState().value)
-function activateTheme(id){
+function activateTheme(id) {
   if (!id || id === activeId.value) return
   setActiveTheme(id)
 }
@@ -365,7 +326,7 @@ watch(isLoggedIn, async () => {
       color-mix(in srgb, var(--color-bg) 18%, transparent),
       color-mix(in srgb, var(--color-bg) 18%, transparent));
   background-color: transparent;
-  box-shadow: 0 10px 25px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .06);
 }
 
 .menu-pill {
@@ -374,7 +335,7 @@ watch(isLoggedIn, async () => {
   justify-content: space-between;
   padding: 0.75rem 1rem;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.18);
+  border: 1px solid rgba(255, 255, 255, .18);
   color: #ffffff;
   background-image:
     linear-gradient(to bottom,
@@ -396,7 +357,7 @@ watch(isLoggedIn, async () => {
     linear-gradient(to bottom,
       color-mix(in srgb, var(--color-bg) 26%, transparent),
       color-mix(in srgb, var(--color-bg) 26%, transparent));
-  border-color: color-mix(in srgb, var(--color-primary) 35%, rgba(255,255,255,.18));
+  border-color: color-mix(in srgb, var(--color-primary) 35%, rgba(255, 255, 255, .18));
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 45%, transparent);
   transform: translateY(-1px);
 }
@@ -419,6 +380,7 @@ watch(isLoggedIn, async () => {
         color-mix(in srgb, var(--color-bg) 14%, transparent),
         color-mix(in srgb, var(--color-bg) 14%, transparent));
   }
+
   .menu-pill {
     background-image:
       linear-gradient(to bottom,
@@ -431,8 +393,9 @@ watch(isLoggedIn, async () => {
         color-mix(in srgb, var(--color-bg) 16%, transparent),
         color-mix(in srgb, var(--color-bg) 16%, transparent));
     color: #0b1220;
-    border-color: rgba(0,0,0,.12);
+    border-color: rgba(0, 0, 0, .12);
   }
+
   .menu-pill:hover,
   .menu-pill:focus-visible {
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 35%, transparent);
@@ -550,7 +513,8 @@ watch(isLoggedIn, async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.75rem; /* rounded-xl */
+  border-radius: 0.75rem;
+  /* rounded-xl */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   background-image:

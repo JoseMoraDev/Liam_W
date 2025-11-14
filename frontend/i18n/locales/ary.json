@@ -17,8 +17,7 @@
   "aria": { "open_menu": "فتح القائمة", "search": "بحث" },
   "user": { "default_name": "مستخدم" },
   "home": {
-    "slogan_line1": "نخليو نهارك أوضح",
-    "slogan_line2": "ونسهلّو سفارك",
+    "slogan_line1": "نخليو نهارك أوضح ونسهلّو سفارك",
     "have_account": "عندك حساب؟",
     "yes": "نعم",
     "no": "لا",

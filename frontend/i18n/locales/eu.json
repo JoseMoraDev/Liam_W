@@ -17,8 +17,7 @@
   "aria": { "open_menu": "Ireki menua", "search": "Bilatu" },
   "user": { "default_name": "Erabiltzailea" },
   "home": {
-    "slogan_line1": "Zure eguna argiago egiten dugu",
-    "slogan_line2": "eta zure bidaiak errazago",
+    "slogan_line1": "Zure eguna argiago egiten dugu eta zure bidaiak errazago",
     "have_account": "Kontua baduzu?",
     "yes": "Bai",
     "no": "Ez",
